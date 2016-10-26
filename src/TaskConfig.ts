@@ -756,6 +756,7 @@ export function currentOperation(env: EnvOption) {
  */
 export function toSequence(tasks: Array<TaskResult | TaskResult[] | void>, oper: Operation): Src[] {
     let seq: Src[] = [];
+    tasks = _.filter(tasks, it => it);
     let len = tasks.length;
     tasks = _.orderBy(tasks, t => {
         if (t) {
@@ -770,6 +771,7 @@ export function toSequence(tasks: Array<TaskResult | TaskResult[] | void>, oper:
         return len;
     });
 
+
     _.each(tasks, t => {
         if (!t) {
             return;
@@ -780,7 +782,11 @@ export function toSequence(tasks: Array<TaskResult | TaskResult[] | void>, oper:
             seq.push(_.flatten(toSequence(t, oper)));
         } else {
             if (t.name) {
-                if (t.oper && ((t.oper & oper) > 0)) {
+                if (t.oper) {
+                    if ((t.oper & oper) > 0) {
+                        seq.push(t.name);
+                    }
+                } else {
                     seq.push(t.name);
                 }
             }
@@ -959,11 +965,17 @@ function addTask(taskSequence: Src[], rst: TaskResult) {
  * @returns
  */
 function createTask(dt: DynamicTask) {
-    return (gulp: Gulp, cfg: TaskConfig) => {
+    return (gulp: Gulp, cfg: TaskConfig): TaskResult => {
         let tk = cfg.subTaskName(dt.name);
         gulp.task(tk, () => {
             return dt.task(cfg, dt, gulp);
         });
+        if (_.isNumber(dt.order)) {
+            return <ITaskResult>{
+                name: tk,
+                order: dt.order
+            };
+        }
         return tk
     };
 }
@@ -974,7 +986,7 @@ function createTask(dt: DynamicTask) {
  * @returns
  */
 function createWatchTask(dt: DynamicTask) {
-    return (gulp: Gulp, cfg: TaskConfig) => {
+    return (gulp: Gulp, cfg: TaskConfig): TaskResult => {
         let watchs = _.isFunction(dt.watch) ? dt.watch(cfg) : dt.watch;
         if (!_.isFunction(_.last(watchs))) {
             watchs.push(<WatchCallback>(event: WatchEvent) => {
@@ -987,16 +999,23 @@ function createWatchTask(dt: DynamicTask) {
             }
             return w;
         })
-        gulp.task(dt.name, () => {
+        let tk = cfg.subTaskName(dt.name);
+        gulp.task(tk, () => {
             console.log('watch, src:', chalk.cyan.call(chalk, cfg.option.src));
             gulp.watch(cfg.option.src, watchs)
         });
 
-        return dt.name;
+        if (_.isNumber(dt.order)) {
+            return <ITaskResult>{
+                name: tk,
+                order: dt.order
+            };
+        }
+        return tk;
     };
 }
 function createPipesTask(dt: DynamicTask) {
-    return (gulp: Gulp, cfg: TaskConfig) => {
+    return (gulp: Gulp, cfg: TaskConfig): TaskResult => {
 
         let tk = cfg.subTaskName(dt.name);
         gulp.task(tk, () => {
@@ -1043,6 +1062,12 @@ function createPipesTask(dt: DynamicTask) {
             });
         });
 
+        if (_.isNumber(dt.order)) {
+            return <ITaskResult>{
+                name: tk,
+                order: dt.order
+            };
+        }
         return tk;
     }
 }
