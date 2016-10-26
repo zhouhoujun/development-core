@@ -1,0 +1,64 @@
+{
+  "name": "development-core",
+  "version": "0.3.0",
+  "description": "development build tools.",
+  "main": "./lib/TaskConfig.js",
+  "typings": "./lib/TaskConfig",
+  "scripts": {
+    "gulp": "gulp",
+    "postinstall": "npm prune",
+    "reinstall": "npm cache clean && npm install",
+    "test": "gulp build test",
+    "prepublish": "gulp build --release",
+    "e2e": "protractor",
+    "e2e.live": "protractor --elementExplorer"
+  },
+  "keywords": [
+    "development",
+    "tool",
+    "typescript",
+    "node",
+    "babel"
+  ],
+  "author": "houjun",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zhouhoujun/development-core/issues"
+  },
+  "registry": "jspm",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhouhoujun/development-core.git"
+  },
+  "dependencies": {
+    "@types/chalk": "^0.4.31",
+    "@types/gulp": "^3.8.32",
+    "@types/lodash": "^4.14.37",
+    "@types/minimist": "^1.1.29",
+    "chalk": "^1.1.3",
+    "checksum": "^0.1.1",
+    "gulp": "^3.9.1",
+    "lodash": "^4.13.1"
+  },
+  "devDependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/gulp-mocha": "0.0.29",
+    "babel-preset-es2015": "^6.18.0",
+    "bluebird": "^3.4.1",
+    "chai": "^3.5.0",
+    "del": "^2.2.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-cached": "^1.1.0",
+    "gulp-mocha": "^3.0.1",
+    "gulp-sourcemaps": "^2.1.1",
+    "gulp-typescript": "^3.0.2",
+    "gulp-uglify": "^2.0.0",
+    "through2": "^2.0.1",
+    "ts-node": "^1.6.0",
+    "tslint": "^3.15.1",
+    "tslint-stylish": "^2.1.0-beta",
+    "typescript": "^2.0.3",
+    "zone.js": "^0.6.10"
+  },
+  "homepage": "https://github.com/zhouhoujun/development-core#readme"
+}

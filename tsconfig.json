@@ -1,0 +1,29 @@
+{
+  "name": "development-tool",
+  "compilerOptions": {
+    "module": "commonjs",
+    "target":"es2015",
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "removeComments": true,
+    "noLib": false,
+    "jsx":"preserve",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "pretty": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "noImplicitAny": false,
+    "noImplicitReturns": true,
+    "noImplicitUseStrict": false,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "suppressImplicitAnyIndexErrors": true
+  },
+  "exclude": [
+    "lib",
+    "node_modules"    
+  ],
+  "compileOnSave": false
+}
