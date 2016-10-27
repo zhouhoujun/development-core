@@ -27,7 +27,7 @@ You can `import` modules:
 
 ```ts
 import * as gulp from 'gulp';
-import  { generateTask, runSequence } from 'development-core';
+import  { generateTask, runTaskSequence, runSequence } from 'development-core';
 
 ```
 
@@ -42,9 +42,8 @@ import  { generateTask, runSequence } from 'development-core';
 ## Create development tool with dynamic tasks via Promise
 
 ```ts
-// DynamicTask 
 import * as gulp from 'gulp';
-import { bindingConfig, currentOperation, generateTask, runSequence, toSequence, EnvOption, TaskOption, Src, Operation, DynamicTask } from './src/TaskConfig';
+import { bindingConfig, currentOperation, generateTask, runTaskSequence, IEnvOption, Operation } from './src';
 import * as mocha from 'gulp-mocha';
 import * as minimist from 'minimist';
 import * as _ from 'lodash';
@@ -58,15 +57,11 @@ const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
 
 gulp.task('build', () => {
-    var options: EnvOption = minimist(process.argv.slice(2), {
+    var options: IEnvOption = minimist(process.argv.slice(2), {
         string: 'env',
         default: { env: process.env.NODE_ENV || 'development' }
     });
     return createTask(options);
-});
-
-gulp.task('default', () => {
-    gulp.start('build');
 });
 
 let createTask = (env) => {
@@ -77,8 +72,7 @@ let createTask = (env) => {
         option: { src: 'src', dist: 'lib', loader: [] }
     });
 
-    let taskseq = _.map(generateTask([
-        { name: 'clean', src: 'src', dist: 'lib', task: (config) => del(config.getDist()) },
+    let tasks = generateTask([
         {
             name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
             pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
@@ -86,7 +80,7 @@ let createTask = (env) => {
                 (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
                 (tsmap, config, dt) => {
                     if (config.oper === Operation.release || config.oper === Operation.deploy) {
-                        return tsmap.js.pipe(babel({presets: ['es2015']}))
+                        return tsmap.js.pipe(babel({ presets: ['es2015'] }))
                             .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
                             .pipe(gulp.dest(config.getDist(dt)));
                     } else {
@@ -96,7 +90,7 @@ let createTask = (env) => {
             ]
         },
         {
-            name: 'test', src: 'test/**/*spec.ts',
+            name: 'test', src: 'test/**/*spec.ts', order: 1,
             oper: Operation.test | Operation.release | Operation.deploy,
             pipe(src) {
                 return src.pipe(mocha())
@@ -105,12 +99,11 @@ let createTask = (env) => {
                     });
             }
         },
-        { src: 'src/**/*.ts', name: 'watch', watch: ['tscompile'] }
-    ], oper, env), tk => {
-        return tk(gulp, config);
-    });
+        { src: 'src/**/*.ts', name: 'watch', watch: ['tscompile'] },
+        { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
+    ], oper, env);
 
-    return runSequence(gulp, toSequence(taskseq, oper));
+    return runTaskSequence(gulp, tasks, config);
 }
 
 ```

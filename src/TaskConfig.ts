@@ -1,7 +1,4 @@
-import * as _ from 'lodash';
 import { Gulp, WatchEvent, WatchCallback } from 'gulp';
-import * as chalk from 'chalk';
-import { readdirSync, lstatSync } from 'fs';
 
 /**
  * project development build operation.
@@ -78,38 +75,32 @@ export interface ITaskResult {
     order?: number;
 }
 
-export type TaskResult = Src | ITaskResult;
-export type Task = (gulp: Gulp, config: TaskConfig) => TaskResult | TaskResult[] | void;
+export type TaskResult = Src | ITaskResult | void;
+export type TaskSequence = TaskResult[];
+export type Task = (gulp: Gulp, config: ITaskConfig) => TaskSequence;
 
-/**
- * task decorator annations.
- * 
- * @export
- * @param {Function} constructor
- */
-export function task(constructor: Function) {
-    Object.seal(constructor);
-    Object.seal(constructor.prototype);
-}
+export type TaskSource = Src | ((oper?: Operation) => Src);
+export type TaskString = string | ((oper?: Operation) => string);
+
 /**
  * task loader option.
  * 
  * @export
- * @interface LoaderOption
+ * @interface ILoaderOption
  */
-export interface LoaderOption {
+export interface ILoaderOption {
     /**
      * loader type, default module.
      * 
      * @type {string}
-     * @memberOf LoaderOption
+     * @memberOf ILoaderOption
      */
     type?: string;
     /**
      * module name or url
      * 
      * @type {string | Object}
-     * @memberOf LoaderOption
+     * @memberOf ILoaderOption
      */
     module?: string | Object;
 
@@ -117,7 +108,7 @@ export interface LoaderOption {
      * config module name or url.
      * 
      * @type {string | Object}
-     * @memberOf LoaderOption
+     * @memberOf ILoaderOption
      */
     configModule?: string | Object;
 
@@ -125,7 +116,7 @@ export interface LoaderOption {
      * config module name or url.
      * 
      * @type {string | Object}
-     * @memberOf LoaderOption
+     * @memberOf ILoaderOption
      */
     taskModule?: string | Object;
 
@@ -133,7 +124,7 @@ export interface LoaderOption {
      * task define.
      * 
      * @type {ITaskDefine}
-     * @memberOf LoaderOption
+     * @memberOf ILoaderOption
      */
     taskDefine?: ITaskDefine;
 
@@ -144,7 +135,7 @@ export interface LoaderOption {
      * @param {string} name
      * @returns {boolean}
      * 
-     * @memberOf LoaderOption
+     * @memberOf ILoaderOption
      */
     isTaskFunc?(mdl: any): boolean;
     /**
@@ -153,7 +144,7 @@ export interface LoaderOption {
      * @param {*} mdl
      * @returns {boolean}
      * 
-     * @memberOf LoaderOption
+     * @memberOf ILoaderOption
      */
     isTaskDefine?(mdl: any): boolean;
 }
@@ -163,16 +154,16 @@ export interface LoaderOption {
  * 
  * @export
  * @interface DirLoaderOption
- * @extends {LoaderOption}
+ * @extends {ILoaderOption}
  */
-export interface DirLoaderOption extends LoaderOption {
+export interface IDirLoaderOption extends ILoaderOption {
     /**
      * loader dir
      * 
-     * @type {Src}
-     * @memberOf LoaderOption
+     * @type {TaskSource}
+     * @memberOf ILoaderOption
      */
-    dir?: Src;
+    dir?: TaskSource
     /**
      * config in directory. 
      * 
@@ -206,31 +197,31 @@ export interface ITransform extends NodeJS.ReadWriteStream {
  * output transform. support typescript output.
  * 
  * @export
- * @interface Output
+ * @interface IOutput
  * @extends {ITransform}
  */
-export interface Output extends ITransform {
+export interface IOutput extends ITransform {
     dts?: ITransform;
     js?: ITransform
 }
 
-export type Pipe = (config?: TaskConfig, dt?: DynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
+export type Pipe = (config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
 
-export type OutputPipe = (map: Output, config?: TaskConfig, dt?: DynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
+export type OutputPipe = (map: IOutput, config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
 
-export interface OutputDist {
+export interface IOutputDist {
     /**
      * the src file filter string. default 'src'.
      * 
-     * @type {string}
-     * @memberOf OutputDist
+     * @type {TaskSource}
+     * @memberOf IOutputDist
      */
-    src?: Src;
+    src?: TaskSource
 
     /**
      * default output folder. if empty use parent setting, or ues 'dist'.
      */
-    dist?: string;
+    dist?: TaskString;
     /**
      * build output folder. if empty use parent setting, or ues 'dist'.
      * 
@@ -273,29 +264,29 @@ export interface OutputDist {
  * dynamic gulp task.
  * 
  * @export
- * @interface DynamicTask
- * @extends {OutputDist}
+ * @interface IDynamicTask
+ * @extends {IOutputDist}
  */
-export interface DynamicTask extends OutputDist {
+export interface IDynamicTask extends IOutputDist {
     /**
      * task name
      * 
-     * @type {string}
-     * @memberOf DynamicTask
+     * @type {TaskName}
+     * @memberOf IDynamicTask
      */
-    name: string;
+    name: TaskString;
     /**
      * task order.
      * 
      * @type {number}
-     * @memberOf DynamicTask
+     * @memberOf IDynamicTask
      */
     order?: number;
     /**
      * task type. default for all Operation.
      * 
      * @type {Operation}
-     * @memberOf DynamicTask
+     * @memberOf IDynamicTask
      */
     oper?: Operation;
 
@@ -303,56 +294,56 @@ export interface DynamicTask extends OutputDist {
      * watch tasks
      * 
      * 
-     * @memberOf DynamicTask
+     * @memberOf IDynamicTask
      */
-    watch?: Array<string | WatchCallback> | ((config?: TaskConfig, dt?: DynamicTask) => Array<string | WatchCallback>);
+    watch?: Array<string | WatchCallback> | ((config?: ITaskConfig, dt?: IDynamicTask) => Array<string | WatchCallback>);
     /**
      * watch changed.
      * 
      * @param {WatchEvent} event
-     * @param {TaskConfig} config
+     * @param {ITaskConfig} config
      * 
-     * @memberOf DynamicTask
+     * @memberOf IDynamicTask
      */
-    watchChanged?(event: WatchEvent, config: TaskConfig);
+    watchChanged?(event: WatchEvent, config: ITaskConfig);
     /**
      * stream pipe.
      * 
      * @param {ITransform} gulpsrc
-     * @param {TaskConfig} config
+     * @param {ITaskConfig} config
      * @returns {(ITransform | Promise<ITransform>)}
      * 
-     * @memberOf DynamicTask
+     * @memberOf IDynamicTask
      */
-    pipe?(gulpsrc: ITransform, config: TaskConfig, dt?: DynamicTask): ITransform | Promise<ITransform>;
+    pipe?(gulpsrc: ITransform, config: ITaskConfig, dt?: IDynamicTask): ITransform | Promise<ITransform>;
 
     /**
      * task pipe works.
      * 
      * 
-     * @memberOf DynamicTask
+     * @memberOf IDynamicTask
      */
-    pipes?: Pipe[] | ((config?: TaskConfig, dt?: DynamicTask) => Pipe[]);
+    pipes?: Pipe[] | ((config?: ITaskConfig, dt?: IDynamicTask) => Pipe[]);
 
     /**
      * output pipe task
      *
      * 
-     * @memberOf DynamicTask
+     * @memberOf IDynamicTask
      */
-    output?: OutputPipe[] | ((config?: TaskConfig, dt?: DynamicTask) => OutputPipe[]);
+    output?: OutputPipe[] | ((config?: ITaskConfig, dt?: IDynamicTask) => OutputPipe[]);
 
     /**
      * custom task.
      * 
-     * @param {TaskConfig} config
-     * @param {DynamicTask} [dt]
+     * @param {ITaskConfig} config
+     * @param {IDynamicTask} [dt]
      * @param {Gulp} [gulp]
      * @returns {(void | ITransform | Promise<any>)}
      * 
-     * @memberOf DynamicTask
+     * @memberOf IDynamicTask
      */
-    task?(config: TaskConfig, dt?: DynamicTask, gulp?: Gulp): void | ITransform | Promise<any>;
+    task?(config: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp): void | ITransform | Promise<any>;
 
 }
 
@@ -360,17 +351,17 @@ export interface DynamicTask extends OutputDist {
  * the option for loader dynamic build task.
  * 
  * @export
- * @interface DynamicLoaderOption
- * @extends {LoaderOption}
+ * @interface IDynamicLoaderOption
+ * @extends {ILoaderOption}
  */
-export interface DynamicLoaderOption extends LoaderOption {
+export interface IDynamicLoaderOption extends ILoaderOption {
     /**
      * dynamic task
      * 
-     * @type {(DynamicTask | DynamicTask[])}
-     * @memberOf DynamicLoaderOption
+     * @type {(IDynamicTask | IDynamicTask[])}
+     * @memberOf IDynamicLoaderOption
      */
-    dynamicTasks?: DynamicTask | DynamicTask[];
+    dynamicTasks?: IDynamicTask | IDynamicTask[];
 }
 
 
@@ -380,36 +371,36 @@ export interface DynamicLoaderOption extends LoaderOption {
  * @export
  * @interface TaskLoaderOption
  */
-export interface TaskLoaderOption {
+export interface ITaskLoaderOption {
     /**
      * task loader
      * 
-     * @type {(string | LoaderOption | DynamicTask | DynamicTask[])}
-     * @memberOf TaskOption
+     * @type {(string | ILoaderOption | IDynamicTask | IDynamicTask[])}
+     * @memberOf ITaskOption
      */
-    loader: string | LoaderOption | DynamicTask | DynamicTask[];
+    loader: string | ILoaderOption | IDynamicTask | IDynamicTask[];
 
     /**
      * external task for 
      * 
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
     externalTask?: Task;
     /**
      * custom set run tasks sequence.
      * 
      * 
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
     runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: TaskResult, assertsTask?: TaskResult) => Src[]);
 
     /**
      * sub tasks.
      * 
-     * @type {(TaskOption | TaskOption[])}
-     * @memberOf TaskOption
+     * @type {(ITaskOption | ITaskOption[])}
+     * @memberOf ITaskOption
      */
-    tasks?: TaskOption | TaskOption[];
+    tasks?: ITaskOption | ITaskOption[];
 
     /**
      * set sub task order in this task sequence.
@@ -422,33 +413,34 @@ export interface TaskLoaderOption {
 
 
 /**
- * asserts to be dealt with.
+ * IAsserts to be dealt with.
  * 
  * @export
- * @interface Asserts
+ * @interface IAsserts
+ * @extends {IOutputDist}
  */
-export interface Asserts extends OutputDist, TaskLoaderOption {
+export interface IAsserts extends IOutputDist {
     /**
-     * asserts extends name. for register dynamic task.
+     * IAsserts extends name. for register dynamic task.
      * 
-     * @type {string}
-     * @memberOf Asserts
+     * @type {TaskName}
+     * @memberOf IAsserts
      */
-    name?: string;
+    name?: TaskString;
 
     /**
-     * tasks to deal with asserts.
+     * tasks to deal with IAsserts.
      * 
-     * @type {IMap<Src | Asserts, DynamicTask[]>}
-     * @memberOf Asserts
+     * @type {IMap<Src | IAsserts, IDynamicTask[]>}
+     * @memberOf IAsserts
      */
-    asserts?: IMap<Src | Asserts | DynamicTask[]>;
+    IAsserts?: IMap<Src | IAsserts | IDynamicTask[]>;
 
     /**
-     * set asserts task order in this task sequence.
+     * set IAsserts task order in this task sequence.
      * 
      * @type {number}
-     * @memberOf Asserts
+     * @memberOf IAsserts
      */
     assertsOrder?: number;
 }
@@ -458,16 +450,18 @@ export interface Asserts extends OutputDist, TaskLoaderOption {
  * task option setting.
  * 
  * @export
- * @interface TaskOption
+ * @interface ITaskOption
+ * @extends {IAsserts}
+ * @extends {ITaskLoaderOption}
  */
-export interface TaskOption extends Asserts {
+export interface ITaskOption extends IAsserts, ITaskLoaderOption {
     /**
      * the src file filter string. default 'src'.
      * 
-     * @type {string}
-     * @memberOf TaskOption
+     * @type {TaskSource}
+     * @memberOf ITaskOption
      */
-    src: Src;
+    src: TaskSource;
 }
 
 /**
@@ -481,33 +475,33 @@ export interface ITaskDefine {
      * load config in modules
      * 
      * @param {Operation} oper
-     * @param {TaskOption} option
-     * @returns {TaskConfig}
+     * @param {ITaskOption} option
+     * @returns {ITaskConfig}
      * 
      * @memberOf ITaskDefine
      */
-    moduleTaskConfig(oper: Operation, option: TaskOption, env: EnvOption): TaskConfig
+    moduleTaskConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig
 
     /**
      * load task in modules.
      * 
-     * @param {TaskConfig} config
+     * @param {ITaskConfig} config
      * @param {tasksInModule} findInModule
      * @param {tasksInDir} findInDir
      * @returns {Task[]}
      * 
      * @memberOf ITaskDefine
      */
-    moduleTaskLoader?(config: TaskConfig): Promise<Task[]>;
+    moduleTaskLoader?(config: ITaskConfig): Promise<Task[]>;
 }
 
 /**
  * run time task config for setup task.
  * 
  * @export
- * @interface TaskConfig
+ * @interface ITaskConfig
  */
-export interface TaskConfig {
+export interface ITaskConfig {
     /**
      * custom global data cache.
      */
@@ -516,23 +510,23 @@ export interface TaskConfig {
      * env
      * 
      * @type {EnvOption}
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
-    env: EnvOption;
+    env: IEnvOption;
     /**
      * run operation
      * 
      * @type {Operation}
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
     oper: Operation;
     /**
      * task option setting.
      * 
-     * @type {TaskOption}
-     * @memberOf TaskConfig
+     * @type {IAsserts}
+     * @memberOf ITaskConfig
      */
-    option: TaskOption;
+    option: IAsserts | ITaskOption;
 
     /**
      * custom config run tasks sequence in.
@@ -542,7 +536,7 @@ export interface TaskConfig {
      * @param {TaskResult} [assertTasks]
      * @returns {Src[]}
      * 
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
     runTasks?(subGroupTask?: TaskResult, tasks?: Src[], assertTasks?: TaskResult): Src[];
     /**
@@ -550,7 +544,7 @@ export interface TaskConfig {
      * 
      * @param {string} lang
      * 
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
     printHelp?(lang: string): void;
 
@@ -560,7 +554,7 @@ export interface TaskConfig {
      * @param {string} module
      * @returns {Promise<Task[]>}
      * 
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
     findTasksInModule?(module: string): Promise<Task[]>;
     /**
@@ -569,19 +563,19 @@ export interface TaskConfig {
      * @param {Src} dirs
      * @returns {Promise<Task[]>}
      * 
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
     findTasksInDir?(dirs: Src): Promise<Task[]>;
 
     /**
      * get dist of current state.  default implement in bindingConfig.
      * 
-     * @param {OutputDist} dist
+     * @param {IOutputDist} dist
      * @returns {string}
      * 
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
-    getDist?(dist?: OutputDist): string;
+    getDist?(dist?: IOutputDist): string;
     /**
      * filter file in directory.  default implement in bindingConfig.
      * 
@@ -589,7 +583,7 @@ export interface TaskConfig {
      * @param {((fileName: string) => boolean)} [express]
      * @returns {string[]}
      * 
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
     fileFilter?(directory: string, express?: ((fileName: string) => boolean)): string[];
     /**
@@ -599,19 +593,19 @@ export interface TaskConfig {
      * @param {Src[]} tasks
      * @returns {Promise<any>}
      * 
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
     runSequence?(gulp: Gulp, tasks: Src[]): Promise<any>;
 
     /**
      * dynamic generate tasks.  default implement in bindingConfig.
      * 
-     * @param {(DynamicTask | DynamicTask[])} tasks
+     * @param {(IDynamicTask | IDynamicTask[])} tasks
      * @returns {Task[]}
      * 
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
-    generateTask?(tasks: DynamicTask | DynamicTask[]): Task[];
+    generateTask?(tasks: IDynamicTask | IDynamicTask[]): Task[];
 
     /**
      * add task result to task sequence.
@@ -620,7 +614,7 @@ export interface TaskConfig {
      * @param {TaskResult} taskResult
      * @returns {Src[]}
      * 
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
     addTask?(sequence: Src[], taskResult: TaskResult): Src[];
     /**
@@ -629,7 +623,7 @@ export interface TaskConfig {
      * @param {string} name
      * @param {string} [defaultName]
      * 
-     * @memberOf TaskConfig
+     * @memberOf ITaskConfig
      */
     subTaskName?(name: string, defaultName?: string);
 }
@@ -638,21 +632,21 @@ export interface TaskConfig {
  * event option
  * 
  * @export
- * @interface EnvOption
+ * @interface IEnvOption
  */
-export interface EnvOption {
+export interface IEnvOption {
     /**
      * project root.
      * 
      * @type {string}
-     * @memberOf EnvOption
+     * @memberOf IEnvOption
      */
     root?: string;
     /**
      * help doc
      * 
      * @type {(boolean | string)}
-     * @memberOf EnvOption
+     * @memberOf IEnvOption
      */
     help?: boolean | string;
     test?: boolean | string;
@@ -670,7 +664,7 @@ export interface EnvOption {
      * project config setting.
      * 
      * @type {string}
-     * @memberOf EnvOption
+     * @memberOf IEnvOption
      */
     config?: string;
 
@@ -686,388 +680,7 @@ export interface EnvOption {
      * group bundle.
      * 
      * @type {Src}
-     * @memberOf EnvOption
+     * @memberOf IEnvOption
      */
     grp?: Src;
-}
-
-/**
- * binding Config to implement default func.
- * 
- * @export
- * @param {TaskConfig} cfg
- * @returns {TaskConfig}
- */
-export function bindingConfig(cfg: TaskConfig): TaskConfig {
-    cfg.fileFilter = cfg.fileFilter || files;
-    cfg.runSequence = cfg.runSequence || runSequence;
-    cfg.addTask = cfg.addTask || addTask;
-    cfg.generateTask = cfg.generateTask || ((tasks: DynamicTask | DynamicTask[]) => {
-        return generateTask(tasks, cfg.oper, cfg.env);
-    });
-    cfg.subTaskName = cfg.subTaskName || ((name, deft = '') => {
-        return cfg.option.name ? `${cfg.option.name}-${name || deft}` : name;
-    });
-    cfg.getDist = cfg.getDist || ((ds?: OutputDist) => {
-        if (ds) {
-            let dist = getCurrentDist(ds, cfg.oper);
-            if (dist) {
-                return dist;
-            }
-        }
-        return getCurrentDist(cfg.option, cfg.oper);
-    });
-
-    return cfg;
-}
-
-/**
- * get current env Operation.
- * 
- * @export
- * @param {EnvOption} env
- * @returns
- */
-export function currentOperation(env: EnvOption) {
-    let oper: Operation;
-    if (env.deploy) {
-        oper = Operation.deploy;
-    } else if (env.release) {
-        oper = Operation.release;
-    } else if (env.e2e) {
-        oper = Operation.e2e;
-    } else if (env.test) {
-        oper = Operation.test;
-    } else {
-        oper = Operation.build;
-    }
-
-    return oper;
-}
-
-
-/**
- * convert setup task result to run sequence src.
- * 
- * @export
- * @param {(Array<TaskResult | TaskResult[] | void>)} tasks
- * @param {Operation} oper
- * @returns {Src[]}
- */
-export function toSequence(tasks: Array<TaskResult | TaskResult[] | void>, oper: Operation): Src[] {
-    let seq: Src[] = [];
-    tasks = _.filter(tasks, it => it);
-    let len = tasks.length;
-    tasks = _.orderBy(tasks, t => {
-        if (t) {
-            if (_.isString(t)) {
-                return len;
-            } else if (_.isArray(t)) {
-                return len;
-            } else {
-                return (<ITaskResult>t).order
-            }
-        }
-        return len;
-    });
-
-
-    _.each(tasks, t => {
-        if (!t) {
-            return;
-        }
-        if (_.isString(t)) {
-            seq.push(t);
-        } else if (_.isArray(t)) {
-            seq.push(_.flatten(toSequence(t, oper)));
-        } else {
-            if (t.name) {
-                if (t.oper) {
-                    if ((t.oper & oper) > 0) {
-                        seq.push(t.name);
-                    }
-                } else {
-                    seq.push(t.name);
-                }
-            }
-        }
-    });
-    return seq;
-}
-
-/**
- * run task sequence.
- * 
- * @protected
- * @param {Gulp} gulp
- * @param {Src[]} tasks
- * @returns {Promise<any>}
- * 
- * @memberOf Development
- */
-export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
-    let ps = Promise.resolve();
-    if (tasks && tasks.length > 0) {
-        _.each(tasks, task => {
-            ps = ps.then(() => {
-                let taskErr = null, taskStop = null;
-                return new Promise((reslove, reject) => {
-                    let tskmap: any = {};
-                    _.each(_.isArray(task) ? task : [task], t => {
-                        tskmap[t] = false;
-                    });
-                    taskErr = (err) => {
-                        reject(err);
-                    };
-                    taskStop = (e: any) => {
-                        tskmap[e.task] = true;
-                        if (!_.some(_.values(tskmap), it => !it)) {
-                            reslove();
-                        }
-                    }
-                    gulp.on('task_stop', taskStop)
-                        .on('task_err', taskErr);
-                    gulp.start(task);
-                })
-                    .then(() => {
-                        if (gulp['removeListener']) {
-                            gulp['removeListener']('task_stop', taskStop);
-                            gulp['removeListener']('task_err', taskErr);
-                        }
-                    }, err => {
-                        if (gulp['removeListener']) {
-                            gulp['removeListener']('task_stop', taskStop);
-                            gulp['removeListener']('task_err', taskErr);
-                        }
-                        console.error(err);
-                    });
-            });
-        });
-    }
-    return ps;
-}
-
-/**
- * filter fileName in directory.
- * 
- * @export
- * @param {string} directory
- * @param {((fileName: string) => boolean)} [express]
- * @returns {string[]}
- */
-export function files(directory: string, express?: ((fileName: string) => boolean)): string[] {
-    let res: string[] = [];
-    express = express || ((fn) => true);
-    _.each(readdirSync(directory), fname => {
-        let filePn = directory + '/' + fname;
-        var fst = lstatSync(filePn);
-        if (!fst.isDirectory()) {
-            if (express(filePn)) {
-                res.push(filePn)
-            }
-        } else {
-            res = res.concat(files(filePn, express))
-        }
-    });
-    return res;
-}
-
-
-
-/**
- * dynamic build tasks.
- * 
- * @export
- * @param {(DynamicTask | DynamicTask[])} tasks
- * @param {Operation} oper
- * @returns {Task[]}
- */
-export function generateTask(tasks: DynamicTask | DynamicTask[], oper: Operation, env: EnvOption): Task[] {
-    let taskseq: Task[] = [];
-    _.each(_.isArray(tasks) ? tasks : [tasks], dt => {
-        if (dt.oper && (dt.oper & oper) <= 0) {
-            return;
-        }
-        if (dt.watch) {
-            if (!env.watch) {
-                return;
-            }
-            console.log('register watch  dynamic task:', chalk.cyan(dt.name));
-            taskseq.push(createWatchTask(dt));
-        } else if (_.isFunction(dt.task)) { // custom task
-            console.log('register custom dynamic task:', chalk.cyan(dt.name));
-            taskseq.push(createTask(dt));
-        } else {
-            console.log('register pipes  dynamic task:', chalk.cyan(dt.name));
-            // pipe stream task.
-            taskseq.push(createPipesTask(dt));
-        }
-    });
-
-    return taskseq;
-}
-
-
-
-/**
- * get dist.
- * 
- * @param {OutputDist} ds
- * @param {Operation} oper
- * @returns
- */
-function getCurrentDist(ds: OutputDist, oper: Operation) {
-    let dist: string;
-    switch (oper) {
-        case Operation.build:
-            dist = ds.build || ds.dist;
-            break;
-        case Operation.test:
-            dist = ds.test || ds.build || ds.dist;
-            break;
-        case Operation.e2e:
-            dist = ds.e2e || ds.build || ds.dist;
-            break;
-        case Operation.release:
-            dist = ds.release || ds.dist;
-            break;
-        case Operation.deploy:
-            dist = ds.deploy || ds.dist;
-            break;
-        default:
-            dist = '';
-            break;
-    }
-    return dist;
-}
-
-function addTask(taskSequence: Src[], rst: TaskResult) {
-    if (!rst) {
-        return taskSequence;
-    }
-    if (_.isString(rst) || _.isArray(rst)) {
-        taskSequence.push(rst);
-    } else if (rst.name) {
-        if (_.isNumber(rst.order) && rst.order >= 0 && rst.order < taskSequence.length) {
-            taskSequence.splice(rst.order, 0, rst.name);
-            return taskSequence;
-        }
-        taskSequence.push(rst.name);
-    }
-    return taskSequence;
-}
-
-
-/**
- * promise task.
- * 
- * @param {DynamicTask} dt
- * @returns
- */
-function createTask(dt: DynamicTask) {
-    return (gulp: Gulp, cfg: TaskConfig): TaskResult => {
-        let tk = cfg.subTaskName(dt.name);
-        gulp.task(tk, () => {
-            return dt.task(cfg, dt, gulp);
-        });
-        if (_.isNumber(dt.order)) {
-            return <ITaskResult>{
-                name: tk,
-                order: dt.order
-            };
-        }
-        return tk
-    };
-}
-/**
- * create dynamic watch task.
- * 
- * @param {DynamicTask} dt
- * @returns
- */
-function createWatchTask(dt: DynamicTask) {
-    return (gulp: Gulp, cfg: TaskConfig): TaskResult => {
-        let watchs = _.isFunction(dt.watch) ? dt.watch(cfg) : dt.watch;
-        if (!_.isFunction(_.last(watchs))) {
-            watchs.push(<WatchCallback>(event: WatchEvent) => {
-                dt.watchChanged && dt.watchChanged(event, cfg);
-            });
-        }
-        watchs = _.map(watchs, w => {
-            if (_.isString(w)) {
-                return cfg.subTaskName(w);
-            }
-            return w;
-        })
-        let tk = cfg.subTaskName(dt.name);
-        gulp.task(tk, () => {
-            console.log('watch, src:', chalk.cyan.call(chalk, cfg.option.src));
-            gulp.watch(cfg.option.src, watchs)
-        });
-
-        if (_.isNumber(dt.order)) {
-            return <ITaskResult>{
-                name: tk,
-                order: dt.order
-            };
-        }
-        return tk;
-    };
-}
-function createPipesTask(dt: DynamicTask) {
-    return (gulp: Gulp, cfg: TaskConfig): TaskResult => {
-
-        let tk = cfg.subTaskName(dt.name);
-        gulp.task(tk, () => {
-            let src = Promise.resolve(gulp.src(dt.src || cfg.option.src));
-            if (dt.pipes) {
-                let pipes = _.isFunction(dt.pipes) ? dt.pipes(cfg, dt) : dt.pipes;
-                _.each(pipes, (p: Pipe) => {
-                    src = src.then(psrc => {
-                        return Promise.resolve((_.isFunction(p) ? p(cfg, dt, gulp) : p))
-                            .then(stram => {
-                                return psrc.pipe(stram)
-                            });
-                    });
-                })
-            } else if (dt.pipe) {
-                src = src.then((stream => {
-                    return dt.pipe(stream, cfg, dt);
-                }));
-            }
-            src.then(stream => {
-                if (dt.output) {
-                    let outputs = _.isFunction(dt.output) ? dt.output(cfg, dt) : dt.output;
-                    return Promise.all(_.map(outputs, output => {
-                        return new Promise((resolve, reject) => {
-                            Promise.resolve<NodeJS.ReadWriteStream>((_.isFunction(output) ? output(stream, cfg, dt, gulp) : output))
-                                .then(output => {
-                                    stream.pipe(output)
-                                        .once('end', resolve)
-                                        .once('error', reject);
-                                });
-
-                        });
-                    }));
-                } else {
-                    return new Promise((resolve, reject) => {
-                        stream.pipe(gulp.dest(cfg.getDist(dt)))
-                            .once('end', resolve)
-                            .once('error', reject);
-                    });
-                }
-            });
-            return src.catch(err => {
-                console.log(chalk.red(err));
-            });
-        });
-
-        if (_.isNumber(dt.order)) {
-            return <ITaskResult>{
-                name: tk,
-                order: dt.order
-            };
-        }
-        return tk;
-    }
 }

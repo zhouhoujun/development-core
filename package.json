@@ -2,8 +2,8 @@
   "name": "development-core",
   "version": "0.3.1",
   "description": "development build tools.",
-  "main": "./lib/TaskConfig.js",
-  "typings": "./lib/TaskConfig",
+  "main": "./lib/index.js",
+  "typings": "./lib/index",
   "scripts": {
     "gulp": "gulp",
     "postinstall": "npm prune",
@@ -38,7 +38,8 @@
     "chalk": "^1.1.3",
     "checksum": "^0.1.1",
     "gulp": "^3.9.1",
-    "lodash": "^4.13.1"
+    "lodash": "^4.13.1",
+    "reflect-metadata": "^0.1.8"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",

@@ -1,6 +1,6 @@
 // DynamicTask 
 import * as gulp from 'gulp';
-import { bindingConfig, currentOperation, generateTask, runSequence, toSequence, EnvOption, TaskOption, Src, Operation, DynamicTask } from './src/TaskConfig';
+import { bindingConfig, currentOperation, generateTask, runTaskSequence, IEnvOption, Operation } from './src';
 import * as mocha from 'gulp-mocha';
 import * as minimist from 'minimist';
 import * as _ from 'lodash';
@@ -14,15 +14,11 @@ const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
 
 gulp.task('build', () => {
-    var options: EnvOption = minimist(process.argv.slice(2), {
+    var options: IEnvOption = minimist(process.argv.slice(2), {
         string: 'env',
         default: { env: process.env.NODE_ENV || 'development' }
     });
     return createTask(options);
-});
-
-gulp.task('default', () => {
-    gulp.start('build');
 });
 
 let createTask = (env) => {
@@ -30,11 +26,10 @@ let createTask = (env) => {
     let config = bindingConfig({
         env: env,
         oper: oper,
-        option: { src: 'src', dist: 'lib', loader: [] }
+        option: { src: 'src', dist: 'lib' }
     });
 
-    let taskseq = _.map(generateTask([
-
+    let tasks = generateTask([
         {
             name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
             pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
@@ -52,7 +47,7 @@ let createTask = (env) => {
             ]
         },
         {
-            name: 'test', src: 'test/**/*spec.ts', order:1,
+            name: 'test', src: 'test/**/*spec.ts', order: 1,
             oper: Operation.test | Operation.release | Operation.deploy,
             pipe(src) {
                 return src.pipe(mocha())
@@ -63,10 +58,7 @@ let createTask = (env) => {
         },
         { src: 'src/**/*.ts', name: 'watch', watch: ['tscompile'] },
         { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
-    ], oper, env), tk => {
-        return tk(gulp, config);
-    });
-    let seqs = toSequence(taskseq, oper);
-    console.log(seqs)
-    return runSequence(gulp, seqs);
+    ], oper, env);
+
+    return runTaskSequence(gulp, tasks, config);
 }
