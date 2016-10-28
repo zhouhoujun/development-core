@@ -72,17 +72,19 @@ export interface IDynamicLoaderOption extends ILoaderOption {
     dynamicTasks?: IDynamicTask | IDynamicTask[];
 }
 export interface ITaskLoaderOption {
-    loader: string | ILoaderOption | IDynamicTask | IDynamicTask[];
-    runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: TaskResult, assertsTask?: TaskResult) => Src[]);
+    loader?: string | ILoaderOption | IDynamicTask | IDynamicTask[];
+}
+export interface ISubTaskOption {
     tasks?: ITaskOption | ITaskOption[];
     subTaskOrder?: number;
 }
-export interface IAsserts extends IOutputDist {
+export interface IAsserts extends IOutputDist, ITaskLoaderOption {
     name?: TaskString;
-    IAsserts?: IMap<Src | IAsserts | IDynamicTask[]>;
+    asserts?: IMap<Src | IAsserts | IDynamicTask[]>;
     assertsOrder?: number;
 }
-export interface ITaskOption extends IAsserts, ITaskLoaderOption {
+export interface ITaskOption extends IAsserts, ISubTaskOption {
+    loader: string | ILoaderOption | IDynamicTask | IDynamicTask[];
     src: TaskSource;
 }
 export interface ITaskDefine {
@@ -96,10 +98,12 @@ export interface ITaskConfig {
     option: IAsserts | ITaskOption;
     getSrc?(assert?: IAsserts): Src;
     getDist?(dist?: IOutputDist): string;
-    runTasks?(subGroupTask?: TaskResult, tasks?: Src[], assertTasks?: TaskResult): Src[];
+    runTasks?(tasks?: Src[], assertTasks?: ITaskInfo, subGroupTask?: ITaskInfo): Src[];
     printHelp?(lang: string): void;
-    findTasksInModule?(module: string): Promise<ITask[]>;
+    findTasks?(module: string | Object): Promise<ITask[]>;
     findTasksInDir?(dirs: Src): Promise<ITask[]>;
+    findTaskDefine?(module: string | Object): Promise<ITaskDefine>;
+    findTaskDefineInDir?(dirs: Src): Promise<ITaskDefine>;
     fileFilter?(directory: string, express?: ((fileName: string) => boolean)): string[];
     runSequence?(gulp: Gulp, tasks: Src[]): Promise<any>;
     generateTask?(tasks: IDynamicTask | IDynamicTask[]): ITask[];

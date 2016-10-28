@@ -413,21 +413,29 @@ export interface ITaskLoaderOption {
      * @type {(string | ILoaderOption | IDynamicTask | IDynamicTask[])}
      * @memberOf ITaskOption
      */
-    loader: string | ILoaderOption | IDynamicTask | IDynamicTask[];
+    loader?: string | ILoaderOption | IDynamicTask | IDynamicTask[];
 
-    /**
-     * custom set run tasks sequence.
-     * 
-     * 
-     * @memberOf ITaskConfig
-     */
-    runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: TaskResult, assertsTask?: TaskResult) => Src[]);
+    // /**
+    //  * custom set run tasks sequence.
+    //  * 
+    //  * @param {Src[]} tasks
+    //  * @param {ITaskInfo} [assertsTask]
+    //  * @param {ITaskInfo} [subGroupTask]
+    //  * @returns {Src[]}
+    //  * 
+    //  * @memberOf ITaskLoaderOption
+    //  */
+    // runTasks?(tasks: Src[], assertsTask?: ITaskInfo, subGroupTask?: ITaskInfo): Src[];
 
+}
+
+
+export interface ISubTaskOption {
     /**
      * sub tasks.
      * 
      * @type {(ITaskOption | ITaskOption[])}
-     * @memberOf ITaskOption
+     * @memberOf ISubTaskOption
      */
     tasks?: ITaskOption | ITaskOption[];
 
@@ -435,9 +443,10 @@ export interface ITaskLoaderOption {
      * set sub task order in this task sequence.
      * 
      * @type {number}
-     * @memberOf TaskLoaderOption
+     * @memberOf ISubTaskOption
      */
     subTaskOrder?: number;
+
 }
 
 
@@ -448,7 +457,7 @@ export interface ITaskLoaderOption {
  * @interface IAsserts
  * @extends {IOutputDist}
  */
-export interface IAsserts extends IOutputDist {
+export interface IAsserts extends IOutputDist, ITaskLoaderOption {
     /**
      * IAsserts extends name. for register dynamic task.
      * 
@@ -463,7 +472,7 @@ export interface IAsserts extends IOutputDist {
      * @type {IMap<Src | IAsserts, IDynamicTask[]>}
      * @memberOf IAsserts
      */
-    IAsserts?: IMap<Src | IAsserts | IDynamicTask[]>;
+    asserts?: IMap<Src | IAsserts | IDynamicTask[]>;
 
     /**
      * set IAsserts task order in this task sequence.
@@ -483,7 +492,15 @@ export interface IAsserts extends IOutputDist {
  * @extends {IAsserts}
  * @extends {ITaskLoaderOption}
  */
-export interface ITaskOption extends IAsserts, ITaskLoaderOption {
+export interface ITaskOption extends IAsserts, ISubTaskOption {
+    /**
+     * task loader must setting.
+     * 
+     * @type {(string | ILoaderOption | IDynamicTask | IDynamicTask[])}
+     * @memberOf ITaskOption
+     */
+    loader: string | ILoaderOption | IDynamicTask | IDynamicTask[];
+
     /**
      * the src file filter string. default 'src'.
      * 
@@ -580,14 +597,14 @@ export interface ITaskConfig {
     /**
      * custom config run tasks sequence in.
      * 
-     * @param {TaskResult} [subGroupTask]
      * @param {Src[]} [tasks]
-     * @param {TaskResult} [assertTasks]
+     * @param {ITaskInfo} [assertTasks]
+     * @param {ITaskInfo} [subGroupTask]
      * @returns {Src[]}
      * 
      * @memberOf ITaskConfig
      */
-    runTasks?(subGroupTask?: TaskResult, tasks?: Src[], assertTasks?: TaskResult): Src[];
+    runTasks?(tasks?: Src[], assertTasks?: ITaskInfo, subGroupTask?: ITaskInfo, ): Src[];
     /**
      * custom print help.
      * 
@@ -598,16 +615,16 @@ export interface ITaskConfig {
     printHelp?(lang: string): void;
 
     /**
-     * find  task in module. default implement by loader.
+     * find  task in module. default implement in bindingConfig.
      * 
-     * @param {string} module
+     * @param {string | Object} module
      * @returns {Promise<ITask[]>}
      * 
      * @memberOf ITaskConfig
      */
-    findTasksInModule?(module: string): Promise<ITask[]>;
+    findTasks?(module: string | Object): Promise<ITask[]>;
     /**
-     * find  task in directories. default implement by loader.
+     * find  task in directories. default implement in bindingConfig.
      * 
      * @param {Src} dirs
      * @returns {Promise<ITask[]>}
@@ -615,6 +632,25 @@ export interface ITaskConfig {
      * @memberOf ITaskConfig
      */
     findTasksInDir?(dirs: Src): Promise<ITask[]>;
+
+    /**
+     * find taskdefine in module. default implement in bindingConfig.
+     * 
+     * @param {(string | Object)} module
+     * @returns {Promise<ITaskDefine>}
+     * 
+     * @memberOf ITaskConfig
+     */
+    findTaskDefine?(module: string | Object): Promise<ITaskDefine>;
+    /**
+     * find taskdefine in directories.  default implement in bindingConfig.
+     * 
+     * @param {Src} dirs
+     * @returns {Promise<ITaskDefine>}
+     * 
+     * @memberOf ITaskConfig
+     */
+    findTaskDefineInDir?(dirs: Src): Promise<ITaskDefine>
 
     /**
      * filter file in directory.  default implement in bindingConfig.
@@ -648,7 +684,7 @@ export interface ITaskConfig {
     generateTask?(tasks: IDynamicTask | IDynamicTask[]): ITask[];
 
     /**
-     * add task result to task sequence.
+     * add task result to task sequence. default implement in bindingConfig.
      * 
      * @param {Src[]} sequence  task sequence.
      * @param {ITaskInfo} task
@@ -658,7 +694,7 @@ export interface ITaskConfig {
      */
     addToSequence?(sequence: Src[], task: ITaskInfo): Src[];
     /**
-     * generate sub task name
+     * generate sub task name. default implement in bindingConfig.
      * 
      * @param {IAsserts | string} assert
      * @param {string} [defaultName]

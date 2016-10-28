@@ -3,6 +3,10 @@ import { IDynamicTask, IOutputDist, IEnvOption, Operation, ITaskConfig, IAsserts
 import { generateTask } from './generateTask';
 import { runSequence, addToSequence } from './taskSequence';
 import { files, taskStringVal, taskSourceVal } from './utils';
+import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefineInDir } from './decorator';
+
+
+
 
 /**
  * binding Config to implement default func.
@@ -21,6 +25,12 @@ export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
     cfg.generateTask = cfg.generateTask || ((tasks: IDynamicTask | IDynamicTask[]) => {
         return generateTask(tasks, cfg.oper, cfg.env);
     });
+
+    cfg.findTasks = cfg.findTasks || findTasksInModule.bind(cfg);
+    cfg.findTasksInDir = cfg.findTasksInDir || findTasksInDir.bind(cfg);
+
+    cfg.findTaskDefine = cfg.findTaskDefine || findTaskDefineInModule.bind(cfg);
+    cfg.findTaskDefineInDir = cfg.findTaskDefineInDir || findTaskDefineInDir.bind(cfg);
 
     cfg.subTaskName = cfg.subTaskName || ((dt, deft = '') => {
         let name = '';
@@ -57,6 +67,8 @@ export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
 
     return cfg;
 }
+
+
 
 /**
  * get current env Operation.
