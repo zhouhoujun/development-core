@@ -1,66 +1,62 @@
 import 'reflect-metadata';
+import * as _ from 'lodash';
+import * as chalk from 'chalk';
+import { ITask, ITaskInfo, ITaskDefine } from './TaskConfig';
 
-import { Operation } from './TaskConfig';
 
-const taskMetadataKey = Symbol('task');
+
 /**
  * task decorator.
  * 
  * @export
- * @param {string} type
+ * @param {ITaskInfo} type
  * @returns
  */
-export function task(oper?: Operation, order?: number, name?: string) {
-    return Reflect.metadata(taskMetadataKey, { name: name, oper: oper, order: order });
+export function task(option?: ITaskInfo) {
+    return (target: any) => {
+        target['__task'] = option || {};
+        return target;
+    }
 }
 
-export function getTask(target: Object, type: string) {
-    return Reflect.getMetadata(taskMetadataKey, target, type);
+export function findTasks(target: any): ITask[] {
+    let tasks: ITask[] = [];
+    if (!target) {
+        return tasks;
+    }
+    if (_.isFunction(target)) {
+        if (target['__task']) {
+            let task: ITask = new target();
+            task.decorator = <ITaskInfo>target['__task'];
+            tasks.push(task);
+        }
+    } else if (_.isArray(target)) {
+        _.each(target, sm => {
+            tasks.concat(findTasks(sm));
+        });
+    } else {
+        _.each(_.keys(target), key => {
+            if (target[key]) {
+                console.log(chalk.grey('find task from :'), chalk.cyan(key));
+                tasks = tasks.concat(findTasks(target[key]));
+            }
+        });
+    }
+
+    return tasks;
 }
 
-
-const taskconfigrMetadataKey = Symbol('taskconfig');
-/**
- * task loader decorator.
- * 
- * @export
- * @param {string} type
- * @returns
- */
-export function taskconfig(oper?: Operation) {
-    return Reflect.metadata(taskconfigrMetadataKey, oper);
-}
-
-export function getTaskconfig(target: Object, oper?: Operation) {
-    return Reflect.getMetadata(taskconfigrMetadataKey, target);
-}
-
-
-const taskloaderMetadataKey = Symbol('taskloader');
-/**
- * task loader decorator.
- * 
- * @export
- * @param {string} type
- * @returns
- */
-export function taskloader(oper?: Operation) {
-    return Reflect.metadata(taskloaderMetadataKey, oper);
-}
-
-export function getTaskloader(target: Object, oper?: Operation) {
-    return Reflect.getMetadata(taskloaderMetadataKey, target);
-}
-
-const taskdefineMetadataKey = Symbol('taskdefine');
 /**
  * decorator task define implements ITaskDefine.
  * 
  * @export
  * @param {Function} constructor
  */
-export function taskdefine(constructor: Function) {
-    return Reflect.metadata(taskdefineMetadataKey, constructor);
+export function taskdefine() {
+    return (target: any) => {
+        target['__taskdefine'] = true;
+        return target;
+    }
 }
 
 /**
@@ -70,6 +66,27 @@ export function taskdefine(constructor: Function) {
  * @param {any} target
  * @returns
  */
-export function findTaskDefine(target) {
-    return Reflect.getMetadata(taskMetadataKey, target);
+export function findTaskDefine(target): ITaskDefine[] {
+    let defs: ITaskDefine[] = [];
+    if (!target) {
+        return defs;
+    }
+    if (_.isFunction(target)) {
+        if (target['__taskdefine']) {
+            defs.push(<ITaskDefine>new target());
+        }
+    } else if (_.isArray(target)) {
+        _.each(target, sm => {
+            defs.concat(findTaskDefine(sm));
+        });
+    } else {
+        _.each(_.keys(target), key => {
+            console.log(chalk.grey('find task define from :'), chalk.cyan(key));
+            if (target[key]) {
+                defs = defs.concat(findTaskDefine(target[key]));
+            }
+        });
+    }
+
+    return defs;
 }

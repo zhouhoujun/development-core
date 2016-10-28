@@ -39,11 +39,68 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
 
 ```
 
+## define task and taskdefine.
+ decorator not support function now, so refactor ITask interface.
+
+ ```ts
+
+ // module A
+import { taskdefine, bindingConfig, Operation, ITaskOption, IEnvOption, ITaskConfig, ITaskDefine, ITask, ITaskInfo, TaskResult, task } from 'development-core';
+
+@task({
+    oper: Operation.build | Operation.test
+})
+export class TestTaskC implements ITask {
+    public decorator: ITaskInfo = {};
+    constructor() {
+    }
+    setup(config: ITaskConfig, gulp): TaskResult {
+        // todo...
+
+        let taskname = config.subTaskName('TestTaskC');
+
+        gulp.task(taskname, ()=>{
+            gulp.src(config.getSrc())
+                .pipe(...)
+                ...
+                .pipe(gulp.dest(config.getDist()))
+        });
+
+        // return task name, enable this task to add in run sequence.
+        // or just set to decorator.
+        // this.decorator.name = taskname;
+        return taskname
+    }
+}
+
+@taskdefine()
+export class TaskDefine implements ITaskDefine {
+    loadConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig {
+        return bindingConfig({
+            oper: oper,
+            option: option,
+            env: env
+        });
+    }
+}
+
+
+// module B
+import { findTasks, Operation, runTaskSequence, findTaskDefine }  from 'development-core';
+let moduleA = require('module a');
+let tasks = findTasks(moduleA);
+let tdfs = findTaskDefine(moduleA);
+
+// run task;
+runTaskSequence(tasks, tdfs.loadConfig(Operation.build, {src:'src', dist:'lib'}, {watch:true}));
+
+ ```
+
 ## Create development tool with dynamic tasks via Promise
 
 ```ts
 import * as gulp from 'gulp';
-import { bindingConfig, currentOperation, generateTask, runTaskSequence, IEnvOption, Operation } from './src';
+import { bindingConfig, currentOperation, generateTask, runTaskSequence, IEnvOption, Operation } from 'development-core';
 import * as mocha from 'gulp-mocha';
 import * as minimist from 'minimist';
 import * as _ from 'lodash';
@@ -69,7 +126,7 @@ let createTask = (env) => {
     let config = bindingConfig({
         env: env,
         oper: oper,
-        option: { src: 'src', dist: 'lib', loader: [] }
+        option: { src: 'src', dist: 'lib' }
     });
 
     let tasks = generateTask([

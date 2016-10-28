@@ -46,41 +46,76 @@ export interface IMap<T> {
 export type Src = string | string[];
 
 /**
- * Task return type.
+ * task decorator data.
  * 
  * @export
- * @interface ITaskResult
+ * @interface ITaskInfo
  */
-export interface ITaskResult {
+export interface ITaskInfo {
     /**
-     * task name for task sequence.
+     * operation 
      * 
-     * @type {Src}
-     * @memberOf ITaskResult
-     */
-    name?: Src;
-    /**
-     * task Operation type. default all pperation.
-     * 
+     * enmu flags. 
      * @type {Operation}
-     * @memberOf ITaskResult
+     * @memberOf ITaskInfo
      */
     oper?: Operation;
     /**
-     * task sequence order.
+     * task sequence index.
      * 
      * @type {number}
-     * @memberOf ITaskResult
+     * @memberOf ITaskInfo
      */
     order?: number;
+    /**
+     * name.
+     * 
+     * @type {Src}
+     * @memberOf ITaskInfo
+     */
+    name?: Src;
+
+    /**
+     * is watch task or not.
+     * 
+     * @type {boolean}
+     * @memberOf ITaskInfo
+     */
+    watch?: boolean;
 }
 
-export type TaskResult = Src | ITaskResult | void;
-export type TaskSequence = TaskResult[];
-export type Task = (gulp: Gulp, config: ITaskConfig) => TaskSequence;
+export type TaskResult = Src | void;
 
 export type TaskSource = Src | ((oper?: Operation) => Src);
 export type TaskString = string | ((oper?: Operation) => string);
+
+// function not support deforator.
+// export type Task = (gulp: Gulp, config: ITaskConfig) => TaskSequence;
+/**
+ * task interface.
+ * 
+ * @export
+ * @interface ITask
+ */
+export interface ITask {
+    /**
+     * decorator of task.
+     * 
+     * @type {ITaskInfo}
+     * @memberOf ITask
+     */
+    decorator: ITaskInfo
+    /**
+     * setup task.
+     * 
+     * @param {ITaskConfig} config
+     * @param {Gulp} [gulp]
+     * @returns {TaskResult}
+     * 
+     * @memberOf ITask
+     */
+    setup(config: ITaskConfig, gulp?: Gulp): TaskResult;
+}
 
 /**
  * task loader option.
@@ -381,12 +416,6 @@ export interface ITaskLoaderOption {
     loader: string | ILoaderOption | IDynamicTask | IDynamicTask[];
 
     /**
-     * external task for 
-     * 
-     * @memberOf ITaskConfig
-     */
-    externalTask?: Task;
-    /**
      * custom set run tasks sequence.
      * 
      * 
@@ -480,7 +509,7 @@ export interface ITaskDefine {
      * 
      * @memberOf ITaskDefine
      */
-    moduleTaskConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig
+    loadConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig
 
     /**
      * load task in modules.
@@ -492,7 +521,7 @@ export interface ITaskDefine {
      * 
      * @memberOf ITaskDefine
      */
-    moduleTaskLoader?(config: ITaskConfig): Promise<Task[]>;
+    loadTasks?(config: ITaskConfig): Promise<ITask[]>;
 }
 
 /**
@@ -529,6 +558,26 @@ export interface ITaskConfig {
     option: IAsserts | ITaskOption;
 
     /**
+     * get Src of current state.   default implement in bindingConfig.
+     * 
+     * @param {IAsserts} [assert]
+     * @returns {Src}
+     * 
+     * @memberOf ITaskConfig
+     */
+    getSrc?(assert?: IAsserts): Src;
+
+    /**
+     * get dist of current state.  default implement in bindingConfig.
+     * 
+     * @param {IOutputDist} dist
+     * @returns {string}
+     * 
+     * @memberOf ITaskConfig
+     */
+    getDist?(dist?: IOutputDist): string;
+
+    /**
      * custom config run tasks sequence in.
      * 
      * @param {TaskResult} [subGroupTask]
@@ -552,30 +601,21 @@ export interface ITaskConfig {
      * find  task in module. default implement by loader.
      * 
      * @param {string} module
-     * @returns {Promise<Task[]>}
+     * @returns {Promise<ITask[]>}
      * 
      * @memberOf ITaskConfig
      */
-    findTasksInModule?(module: string): Promise<Task[]>;
+    findTasksInModule?(module: string): Promise<ITask[]>;
     /**
      * find  task in directories. default implement by loader.
      * 
      * @param {Src} dirs
-     * @returns {Promise<Task[]>}
+     * @returns {Promise<ITask[]>}
      * 
      * @memberOf ITaskConfig
      */
-    findTasksInDir?(dirs: Src): Promise<Task[]>;
+    findTasksInDir?(dirs: Src): Promise<ITask[]>;
 
-    /**
-     * get dist of current state.  default implement in bindingConfig.
-     * 
-     * @param {IOutputDist} dist
-     * @returns {string}
-     * 
-     * @memberOf ITaskConfig
-     */
-    getDist?(dist?: IOutputDist): string;
     /**
      * filter file in directory.  default implement in bindingConfig.
      * 
@@ -605,27 +645,27 @@ export interface ITaskConfig {
      * 
      * @memberOf ITaskConfig
      */
-    generateTask?(tasks: IDynamicTask | IDynamicTask[]): Task[];
+    generateTask?(tasks: IDynamicTask | IDynamicTask[]): ITask[];
 
     /**
      * add task result to task sequence.
      * 
      * @param {Src[]} sequence  task sequence.
-     * @param {TaskResult} taskResult
+     * @param {ITaskInfo} task
      * @returns {Src[]}
      * 
      * @memberOf ITaskConfig
      */
-    addTask?(sequence: Src[], taskResult: TaskResult): Src[];
+    addToSequence?(sequence: Src[], task: ITaskInfo): Src[];
     /**
      * generate sub task name
      * 
-     * @param {string} name
+     * @param {IAsserts | string} assert
      * @param {string} [defaultName]
      * 
      * @memberOf ITaskConfig
      */
-    subTaskName?(name: string, defaultName?: string);
+    subTaskName?(assert: string | IAsserts, defaultName?: string);
 }
 
 /**

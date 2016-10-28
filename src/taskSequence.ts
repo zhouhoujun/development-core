@@ -1,54 +1,72 @@
 import * as _ from 'lodash';
 import { Gulp } from 'gulp';
 import * as chalk from 'chalk';
-import { Src, Operation, ITaskResult, TaskSequence, ITaskConfig, Task } from './TaskConfig';
+import { Src, ITaskInfo, ITaskConfig, ITask } from './TaskConfig';
+
 /**
  * convert setup task result to run sequence src.
  * 
  * @export
- * @param {TaskSequence} tasks
- * @param {Operation} oper
+ * @param {Gulp} gulp
+ * @param {ITask[]} tasks
+ * @param {ITaskConfig} config
  * @returns {Src[]}
  */
-export function toSequence(tasks: TaskSequence, oper: Operation): Src[] {
+export function toSequence(gulp: Gulp, tasks: ITask[], config: ITaskConfig): Src[] {
     let seq: Src[] = [];
-    tasks = _.filter(tasks, it => it);
     let len = tasks.length;
-    tasks = _.orderBy(tasks, t => {
-        if (t) {
-            if (_.isString(t)) {
-                return len;
-            } else if (_.isArray(t)) {
-                return len;
-            } else {
-                return (<ITaskResult>t).order
-            }
-        }
-        return len;
-    });
+    if (len < 1) {
+        return seq;
+    }
 
+    tasks = _.orderBy(tasks, t => {
+        if (_.isArray(t)) {
+            return len;
+        } else {
+            if (_.isNumber(t.decorator.order)) {
+                return t.decorator.order;
+            }
+            return len;
+        }
+    });
 
     _.each(tasks, t => {
-        if (!t) {
+        if (t.decorator.watch && !config.env.watch) {
             return;
         }
-        if (_.isString(t)) {
-            seq.push(t);
-        } else if (_.isArray(t)) {
-            seq.push(_.flatten(toSequence(t, oper)));
-        } else {
-            if (t.name) {
-                if (t.oper) {
-                    if ((t.oper & oper) > 0) {
-                        seq.push(t.name);
-                    }
-                } else {
-                    seq.push(t.name);
-                }
-            }
+
+        if (!t.decorator.oper ||
+            (t.decorator.oper && (t.decorator.oper & config.oper) > 0)) {
+            let tname = t.setup(config, gulp);
+            tname && seq.push(tname);
         }
+
     });
+
     return seq;
+}
+
+
+/**
+ * add task to task sequence.
+ * 
+ * @export
+ * @param {Src[]} taskSequence
+ * @param {ITaskInfo} rst
+ * @returns
+ */
+export function addToSequence(taskSequence: Src[], rst: ITaskInfo) {
+    if (!rst) {
+        return taskSequence;
+    }
+    if (rst.name) {
+        if (_.isNumber(rst.order) && rst.order >= 0 && rst.order < taskSequence.length) {
+            taskSequence.splice(rst.order, 0, rst.name);
+            return taskSequence;
+        }
+        taskSequence.push(rst.name);
+    }
+    return taskSequence;
 }
 
 /**
@@ -112,13 +130,11 @@ export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
  * 
  * @export
  * @param {Gulp} gulp
- * @param {Task[]} tasks
+ * @param {ITask[]} tasks
  * @param {TaskConfig} config
  * @returns {Promise<any>}
  */
-export function runTaskSequence(gulp: Gulp, tasks: Task[], config: ITaskConfig): Promise<any> {
-    let taskseq = toSequence(_.map(tasks, tk => {
-        return tk(gulp, config);
-    }), config.oper);
+export function runTaskSequence(gulp: Gulp, tasks: ITask[], config: ITaskConfig): Promise<any> {
+    let taskseq = toSequence(gulp, tasks, config);
     return runSequence(gulp, taskseq);
 }

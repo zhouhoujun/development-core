@@ -1,9 +1,22 @@
 import * as _ from 'lodash';
 import { Gulp, WatchEvent } from 'gulp';
+import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
-import { ITaskResult, Pipe, IDynamicTask, IEnvOption, Operation, ITaskConfig, Task } from './TaskConfig';
-import { taskSourceVal, taskStringVal } from './utils';
+import { ITaskInfo, TaskResult, Pipe, IDynamicTask, IEnvOption, Operation, ITaskConfig, ITask } from './TaskConfig';
+
+type factory = (config: ITaskConfig, gulp: Gulp) => TaskResult;
+class DynamicTask implements ITask {
+    constructor(public decorator: ITaskInfo, private factory: factory) {
+    }
+    setup(config: ITaskConfig, gulp?: Gulp) {
+        let name = this.factory(config, gulp || coregulp);
+        if (name) {
+            this.decorator.name = name;
+        }
+        return name;
+    }
+}
 
 /**
  * dynamic build tasks.
@@ -11,10 +24,10 @@ import { taskSourceVal, taskStringVal } from './utils';
  * @export
  * @param {(DynamicTask | DynamicTask[])} tasks
  * @param {Operation} oper
- * @returns {Task[]}
+ * @returns {ITask[]}
  */
-export function generateTask(tasks: IDynamicTask | IDynamicTask[], oper: Operation, env: IEnvOption): Task[] {
-    let taskseq: Task[] = [];
+export function generateTask(tasks: IDynamicTask | IDynamicTask[], oper: Operation, env: IEnvOption): ITask[] {
+    let taskseq: ITask[] = [];
     _.each(_.isArray(tasks) ? tasks : [tasks], dt => {
         if (dt.oper && (dt.oper & oper) <= 0) {
             return;
@@ -45,20 +58,17 @@ export function generateTask(tasks: IDynamicTask | IDynamicTask[], oper: Operati
  * @returns
  */
 function createTask(dt: IDynamicTask) {
-    return (gulp: Gulp, cfg: ITaskConfig) => {
-        let tk = cfg.subTaskName(taskStringVal(dt.name, cfg.oper));
+    let factory = (cfg: ITaskConfig, gulp: Gulp) => {
+        let tk = cfg.subTaskName(dt.name);
         console.log('register custom dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
             return dt.task(cfg, dt, gulp);
         });
-        if (_.isNumber(dt.order)) {
-            return <ITaskResult>{
-                name: tk,
-                order: dt.order
-            };
-        }
+
         return tk
     };
+
+    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: !!dt.watch }, factory);
 }
 /**
  * create dynamic watch task.
@@ -67,7 +77,7 @@ function createTask(dt: IDynamicTask) {
  * @returns
  */
 function createWatchTask(dt: IDynamicTask) {
-    return (gulp: Gulp, cfg: ITaskConfig) => {
+    let factory = (cfg: ITaskConfig, gulp: Gulp) => {
         let watchs = _.isFunction(dt.watch) ? dt.watch(cfg) : dt.watch;
         if (!_.isFunction(_.last(watchs))) {
             watchs.push(<WatchCallback>(event: WatchEvent) => {
@@ -80,29 +90,25 @@ function createWatchTask(dt: IDynamicTask) {
             }
             return w;
         })
-        let tk = cfg.subTaskName(taskStringVal(dt.name, cfg.oper));
+        let tk = cfg.subTaskName(dt);
         console.log('register watch  dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
             console.log('watch, src:', chalk.cyan.call(chalk, cfg.option.src));
-            gulp.watch(taskSourceVal(cfg.option.src, cfg.oper), watchs)
+            gulp.watch(cfg.getSrc(dt), watchs)
         });
 
-        if (_.isNumber(dt.order)) {
-            return <ITaskResult>{
-                name: tk,
-                order: dt.order
-            };
-        }
         return tk;
     };
+
+    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: !!dt.watch }, factory);
 }
 function createPipesTask(dt: IDynamicTask) {
-    return (gulp: Gulp, cfg: ITaskConfig) => {
+    let factory = (cfg: ITaskConfig, gulp: Gulp) => {
 
-        let tk = cfg.subTaskName(taskStringVal(dt.name, cfg.oper));
+        let tk = cfg.subTaskName(dt);
         console.log('register pipes  dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
-            let src = Promise.resolve(gulp.src(taskSourceVal(dt.src, cfg.oper) || taskSourceVal(cfg.option.src, cfg.oper)));
+            let src = Promise.resolve(gulp.src(cfg.getSrc(dt)));
             if (dt.pipes) {
                 let pipes = _.isFunction(dt.pipes) ? dt.pipes(cfg, dt) : dt.pipes;
                 _.each(pipes, (p: Pipe) => {
@@ -145,12 +151,8 @@ function createPipesTask(dt: IDynamicTask) {
             });
         });
 
-        if (_.isNumber(dt.order)) {
-            return <ITaskResult>{
-                name: tk,
-                order: dt.order
-            };
-        }
         return tk;
     }
+
+    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: !!dt.watch }, factory);
 }

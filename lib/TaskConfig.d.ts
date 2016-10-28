@@ -13,16 +13,19 @@ export interface IMap<T> {
     [K: string]: T;
 }
 export declare type Src = string | string[];
-export interface ITaskResult {
-    name?: Src;
+export interface ITaskInfo {
     oper?: Operation;
     order?: number;
+    name?: Src;
+    watch?: boolean;
 }
-export declare type TaskResult = Src | ITaskResult | void;
-export declare type TaskSequence = TaskResult[];
-export declare type Task = (gulp: Gulp, config: ITaskConfig) => TaskSequence;
+export declare type TaskResult = Src | void;
 export declare type TaskSource = Src | ((oper?: Operation) => Src);
 export declare type TaskString = string | ((oper?: Operation) => string);
+export interface ITask {
+    decorator: ITaskInfo;
+    setup(config: ITaskConfig, gulp?: Gulp): TaskResult;
+}
 export interface ILoaderOption {
     type?: string;
     module?: string | Object;
@@ -70,7 +73,6 @@ export interface IDynamicLoaderOption extends ILoaderOption {
 }
 export interface ITaskLoaderOption {
     loader: string | ILoaderOption | IDynamicTask | IDynamicTask[];
-    externalTask?: Task;
     runTasks?: Src[] | ((oper: Operation, tasks: Src[], subGroupTask?: TaskResult, assertsTask?: TaskResult) => Src[]);
     tasks?: ITaskOption | ITaskOption[];
     subTaskOrder?: number;
@@ -84,24 +86,25 @@ export interface ITaskOption extends IAsserts, ITaskLoaderOption {
     src: TaskSource;
 }
 export interface ITaskDefine {
-    moduleTaskConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig;
-    moduleTaskLoader?(config: ITaskConfig): Promise<Task[]>;
+    loadConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig;
+    loadTasks?(config: ITaskConfig): Promise<ITask[]>;
 }
 export interface ITaskConfig {
     globals?: any;
     env: IEnvOption;
     oper: Operation;
     option: IAsserts | ITaskOption;
+    getSrc?(assert?: IAsserts): Src;
+    getDist?(dist?: IOutputDist): string;
     runTasks?(subGroupTask?: TaskResult, tasks?: Src[], assertTasks?: TaskResult): Src[];
     printHelp?(lang: string): void;
-    findTasksInModule?(module: string): Promise<Task[]>;
-    findTasksInDir?(dirs: Src): Promise<Task[]>;
-    getDist?(dist?: IOutputDist): string;
+    findTasksInModule?(module: string): Promise<ITask[]>;
+    findTasksInDir?(dirs: Src): Promise<ITask[]>;
     fileFilter?(directory: string, express?: ((fileName: string) => boolean)): string[];
     runSequence?(gulp: Gulp, tasks: Src[]): Promise<any>;
-    generateTask?(tasks: IDynamicTask | IDynamicTask[]): Task[];
-    addTask?(sequence: Src[], taskResult: TaskResult): Src[];
-    subTaskName?(name: string, defaultName?: string): any;
+    generateTask?(tasks: IDynamicTask | IDynamicTask[]): ITask[];
+    addToSequence?(sequence: Src[], task: ITaskInfo): Src[];
+    subTaskName?(assert: string | IAsserts, defaultName?: string): any;
 }
 export interface IEnvOption {
     root?: string;

@@ -1,9 +1,9 @@
 import 'mocha';
 import { expect, assert } from 'chai';
 
-import { IDynamicTask, Operation, Task, Src, IEnvOption } from '../src/TaskConfig';
+import { IDynamicTask, Operation, ITask, Src, IEnvOption } from '../src/TaskConfig';
 import { generateTask, } from '../src/generateTask';
-import { toSequence } from '../src/runSequence';
+import { toSequence } from '../src/taskSequence';
 import { bindingConfig } from '../src/bindingConfig';
 let root = __dirname;
 
@@ -23,7 +23,7 @@ import * as gulp from 'gulp';
 describe('generateTask', () => {
 
     let tasks: IDynamicTask[];
-    let registerTask: ((tks: Task[], oper: Operation, env: IEnvOption) => Src[]);
+    let registerTask: ((tks: ITask[], oper: Operation, env: IEnvOption) => Src[]);
 
     beforeEach(() => {
         registerTask = (tks, oper, env) => {
@@ -32,9 +32,7 @@ describe('generateTask', () => {
                 oper: oper,
                 option: { src: 'src', dist: 'lib' }
             });
-            let taskseq = toSequence(_.map(tks, tk => {
-                return tk(gulp, config);
-            }), config.oper);
+            let taskseq = toSequence(gulp, tks, config);
             return taskseq;
         }
         tasks = [
@@ -77,6 +75,7 @@ describe('generateTask', () => {
         expect(tks.length).to.equals(2);
 
         let tseq = registerTask(tks, Operation.build, {});
+        console.log(tseq);
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(2);
@@ -92,6 +91,7 @@ describe('generateTask', () => {
         expect(tks.length).to.equals(3);
 
         let tseq = registerTask(tks, Operation.build, { watch: true });
+        console.log(tseq);
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(3);
@@ -107,6 +107,7 @@ describe('generateTask', () => {
         expect(tks.length).to.equals(4);
 
         let tseq = registerTask(tks, Operation.test, { watch: true });
+        console.log(tseq);
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(4);
@@ -123,6 +124,7 @@ describe('generateTask', () => {
         expect(tks.length).to.equals(4);
 
         let tseq = registerTask(tks, Operation.release, { watch: true });
+        console.log(tseq);
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(4);

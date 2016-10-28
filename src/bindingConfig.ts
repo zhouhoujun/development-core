@@ -1,8 +1,8 @@
 import * as _ from 'lodash';
-import { IDynamicTask, IOutputDist, IEnvOption, Operation, ITaskConfig, TaskResult, Src } from './TaskConfig';
+import { IDynamicTask, IOutputDist, IEnvOption, Operation, ITaskConfig, IAsserts, Src } from './TaskConfig';
 import { generateTask } from './generateTask';
-import { runSequence } from './runSequence';
-import { files, taskStringVal } from './utils';
+import { runSequence, addToSequence } from './taskSequence';
+import { files, taskStringVal, taskSourceVal } from './utils';
 
 /**
  * binding Config to implement default func.
@@ -17,13 +17,34 @@ export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
     }
     cfg.fileFilter = cfg.fileFilter || files;
     cfg.runSequence = cfg.runSequence || runSequence;
-    cfg.addTask = cfg.addTask || addTask;
+    cfg.addToSequence = cfg.addToSequence || addToSequence;
     cfg.generateTask = cfg.generateTask || ((tasks: IDynamicTask | IDynamicTask[]) => {
         return generateTask(tasks, cfg.oper, cfg.env);
     });
-    cfg.subTaskName = cfg.subTaskName || ((name, deft = '') => {
-        return cfg.option.name ? `${cfg.option.name}-${name || deft}` : name;
+
+    cfg.subTaskName = cfg.subTaskName || ((dt, deft = '') => {
+        let name = '';
+        if (_.isString(dt)) {
+            name = dt;
+        } else if (dt) {
+            name = taskStringVal(dt.name, cfg.oper)
+        }
+        let parentName = taskStringVal(cfg.option.name, cfg.oper);
+
+        return parentName ? `${parentName}-${name || deft}` : name;
     });
+
+    cfg.getSrc = cfg.getSrc || ((assert?: IAsserts): Src => {
+        let src: Src;
+        if (assert) {
+            src = taskSourceVal(assert.src, cfg.oper)
+        }
+        if (!src) {
+            src = taskSourceVal(cfg.option.src, cfg.oper)
+        }
+        return src
+    });
+
     cfg.getDist = cfg.getDist || ((ds?: IOutputDist) => {
         if (ds) {
             let dist = getCurrentDist(ds, cfg.oper);
@@ -95,19 +116,3 @@ function getCurrentDist(ds: IOutputDist, oper: Operation) {
 }
 
 
-
-function addTask(taskSequence: Src[], rst: TaskResult) {
-    if (!rst) {
-        return taskSequence;
-    }
-    if (_.isString(rst) || _.isArray(rst)) {
-        taskSequence.push(rst);
-    } else if (rst.name) {
-        if (_.isNumber(rst.order) && rst.order >= 0 && rst.order < taskSequence.length) {
-            taskSequence.splice(rst.order, 0, rst.name);
-            return taskSequence;
-        }
-        taskSequence.push(rst.name);
-    }
-    return taskSequence;
-}
