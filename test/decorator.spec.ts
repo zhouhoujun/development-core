@@ -34,6 +34,22 @@ describe('decorator', () => {
 
     })
 
+    it('findTasks from module with Operation', () => {
+
+        let tasks = findTasks(model, Operation.build);
+
+        expect(tasks.length).eq(6);
+
+    })
+
+    it('findTasks from module with Operation and env', () => {
+
+        let tasks = findTasks(model, Operation.build, { watch: true });
+
+        expect(tasks.length).eq(8);
+
+    })
+
     it('find task define from module', () => {
 
         let tdfs = findTaskDefines(model);

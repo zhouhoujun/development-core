@@ -57,17 +57,27 @@ export function findTasks(target: any, oper?: Operation, env?: IEnvOption): ITas
     }
     if (_.isFunction(target)) {
         if (target['__task']) {
+            let tinfo: ITaskInfo = target['__task'];
+            if (oper && tinfo.oper && (tinfo.oper & oper) <= 0) {
+                return tasks;
+            }
+
+            if (tinfo.watch) {
+                if (!env || !env.watch) {
+                    return tasks;
+                }
+            }
+
             let task: ITask = new target();
-            task.decorator = <ITaskInfo>target['__task'];
+            task.decorator = tinfo;
             tasks.push(task);
-        }
-        if (target['__dynamictask']) {
+        } else if (target['__dynamictask']) {
             let dyts = (<IDynamicTasks>new target()).tasks()
             tasks = tasks.concat(generateTask(dyts, oper, env));
         }
     } else if (_.isArray(target)) {
         _.each(target, sm => {
-            tasks.concat(findTasks(sm));
+            tasks.concat(findTasks(sm, oper, env));
         });
     } else {
         _.each(_.keys(target), key => {
@@ -75,7 +85,7 @@ export function findTasks(target: any, oper?: Operation, env?: IEnvOption): ITas
                 return;
             }
             console.log(chalk.grey('find task from :'), chalk.cyan(key));
-            tasks = tasks.concat(findTasks(target[key]));
+            tasks = tasks.concat(findTasks(target[key], oper, env));
         });
     }
 

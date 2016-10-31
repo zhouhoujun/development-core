@@ -32,8 +32,8 @@ export function generateTask(tasks: IDynamicTask | IDynamicTask[], oper?: Operat
         if (oper && dt.oper && (dt.oper & oper) <= 0) {
             return;
         }
-        if (env && dt.watch) {
-            if (!env.watch) {
+        if (dt.watch) {
+            if (!env || !env.watch) {
                 return;
             }
             taskseq.push(createWatchTask(dt));
