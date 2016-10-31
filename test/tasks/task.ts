@@ -9,7 +9,7 @@ const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
 import { taskdefine, bindingConfig, IDynamicTask, Operation, ITaskOption, IEnvOption, ITaskConfig, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from '../../src';
 
-@task()
+@task
 export class TestTaskA implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
@@ -68,7 +68,7 @@ export class TestDynamicTask implements IDynamicTasks {
 }
 
 
-@taskdefine()
+@taskdefine
 export class TaskDefine implements ITaskDefine {
     public fags = 'define';
     loadConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig {

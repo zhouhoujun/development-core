@@ -6,6 +6,7 @@ import { generateTask } from './generateTask';
 import { existsSync } from 'fs';
 const requireDir = require('require-dir');
 
+
 /**
  * task decorator.
  * 
@@ -13,16 +14,30 @@ const requireDir = require('require-dir');
  * @param {ITaskInfo} type
  * @returns
  */
-export function task(option?: ITaskInfo) {
-    return (target: any) => {
-        target['__task'] = option || {};
+export function task<T extends Function>(target?: (new <T>() => T) | ITaskInfo): any {
+    if (_.isFunction(target)) {
+        target['__task'] = {};
         return target;
+    } else {
+        let tg = target;
+        return (target: any) => {
+            target['__task'] = tg || {};
+            return target;
+        }
     }
 }
 
-export function dynamicTask(target: any) {
-    target['__dynamictask'] = true;
-    return target;
+export function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITaskInfo): any {
+    if (target && _.isFunction(target)) {
+        target['__dynamictask'] = true;
+        return target;
+    } else {
+        let tg = target;
+        return (target: any) => {
+            target['__dynamictask'] = tg || true;
+            return target;
+        }
+    }
 }
 
 
@@ -73,10 +88,16 @@ export function findTasks(target: any, oper?: Operation, env?: IEnvOption): ITas
  * @export
  * @param {Function} constructor
  */
-export function taskdefine() {
-    return (target: any) => {
+export function taskdefine<T extends Function>(target?: (new <T>() => T)): any {
+    if (_.isFunction(target)) {
         target['__taskdefine'] = true;
         return target;
+    } else {
+        let tg = target;
+        return (target: any) => {
+            target['__taskdefine'] = tg || true;
+            return target;
+        }
     }
 }
 
