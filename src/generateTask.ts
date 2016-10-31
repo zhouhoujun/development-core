@@ -186,11 +186,11 @@ function createPipesTask(dt: IDynamicTask) {
                 });
             }
 
-            return taskPromise;
-            // return taskPromise.catch(err => {
-            //     console.log(chalk.red(err));
-            //     process.exit(0);
-            // });
+            // return taskPromise;
+            return taskPromise.catch(err => {
+                console.log(chalk.red(err));
+                process.exit(0);
+            });
         });
 
         return tk;
