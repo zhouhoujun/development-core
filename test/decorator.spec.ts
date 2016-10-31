@@ -27,7 +27,7 @@ describe('decorator', () => {
 
         console.log(seq);
 
-        expect(seq.length).eq(4);
+        expect(seq.length).eq(5);
         expect(seq[0]).eq('test-clean');
         expect(seq[1]).eq('TestTaskB');
 
