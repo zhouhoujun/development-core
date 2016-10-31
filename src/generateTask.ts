@@ -126,23 +126,13 @@ function createPipesTask(dt: IDynamicTask) {
             } else if (dt.pipe) {
                 taskPromise = taskPromise.then((stream => {
                     return new Promise((resolve, reject) => {
-                        let rt = dt.pipe(stream, cfg, dt, (err) => {
+                        return dt.pipe(stream, cfg, dt, (err) => {
                             if (err) {
                                 reject(err);
                             } else {
                                 resolve(stream);
                             }
                         });
-                        if (rt) {
-                            Promise.resolve(rt)
-                                .then(stream => {
-                                    stream
-                                        .once('end', () => {
-                                            resolve(stream);
-                                        })
-                                        .once('error', reject);
-                                });
-                        }
                     });
                 }));
             }
@@ -155,7 +145,7 @@ function createPipesTask(dt: IDynamicTask) {
                             return Promise.resolve<NodeJS.ReadWriteStream>((_.isFunction(output) ? output(stream, cfg, dt, gulp) : output))
                                 .then(output => {
                                     return new Promise((resolve, reject) => {
-                                        stream.pipe(output)
+                                        output
                                             .once('end', () => {
                                                 resolve(output);
                                             })

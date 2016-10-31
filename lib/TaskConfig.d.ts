@@ -50,7 +50,7 @@ export interface IOutput extends ITransform {
     js?: ITransform;
 }
 export declare type Pipe = (config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
-export declare type OutputPipe = (map: IOutput, config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
+export declare type OutputPipe = (stream: IOutput, config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
 export interface IOutputDist {
     src?: TaskSource;
     dist?: TaskString;
@@ -68,7 +68,7 @@ export interface IDynamicTask extends IOutputDist {
     watchChanged?(event: WatchEvent, config: ITaskConfig): any;
     pipe?(gulpsrc: ITransform, config: ITaskConfig, dt?: IDynamicTask, callback?: TaskCallback): ITransform | Promise<ITransform> | void;
     pipes?: Pipe[] | ((config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => Pipe[]);
-    output?: OutputPipe[] | ((config?: ITaskConfig, dt?: IDynamicTask) => OutputPipe[]);
+    output?: OutputPipe[] | ((config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => OutputPipe[]);
     task?(config: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp): void | ITransform | Promise<any>;
 }
 export interface IDynamicLoaderOption extends ILoaderOption {

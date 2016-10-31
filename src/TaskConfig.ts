@@ -252,7 +252,7 @@ export interface IOutput extends ITransform {
 
 export type Pipe = (config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
 
-export type OutputPipe = (map: IOutput, config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
+export type OutputPipe = (stream: IOutput, config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
 
 export interface IOutputDist {
     /**
@@ -378,7 +378,7 @@ export interface IDynamicTask extends IOutputDist {
      * 
      * @memberOf IDynamicTask
      */
-    output?: OutputPipe[] | ((config?: ITaskConfig, dt?: IDynamicTask) => OutputPipe[]);
+    output?: OutputPipe[] | ((config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => OutputPipe[]);
 
     /**
      * custom task.

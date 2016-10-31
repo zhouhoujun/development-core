@@ -1,6 +1,6 @@
 {
   "name": "development-core",
-  "version": "0.4.10",
+  "version": "0.4.12",
   "description": "development build tools.",
   "main": "./lib/index.js",
   "typings": "./lib/index",
