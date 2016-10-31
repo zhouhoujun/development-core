@@ -80,49 +80,64 @@ export function addToSequence(taskSequence: Src[], rst: ITaskInfo) {
  * @memberOf Development
  */
 export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
-    let ps = Promise.resolve();
-    if (tasks && tasks.length > 0) {
-        _.each(tasks, task => {
-            ps = ps.then(() => {
-                let taskErr = null, taskStop = null;
-                return new Promise((reslove, reject) => {
-                    let tskmap: any = {};
-                    _.each(_.isArray(task) ? task : [task], t => {
-                        tskmap[t] = false;
-                    });
-                    taskErr = (err) => {
-                        process.exit(err);
-                        console.error(chalk.red(err));
-                        reject(err);
-                    };
-                    taskStop = (e: any) => {
-                        tskmap[e.task] = true;
-                        if (!_.some(_.values(tskmap), it => !it)) {
-                            reslove();
-                        }
-                    }
-                    gulp.on('task_stop', taskStop)
-                        .on('task_err', taskErr);
-                    gulp.start(task);
-                })
-                    .then(() => {
-                        if (gulp['removeListener']) {
-                            gulp['removeListener']('task_stop', taskStop);
-                            gulp['removeListener']('task_err', taskErr);
-                        }
+    console.log('run tasks : ', chalk.cyan(<any>tasks));
+    let run = new Promise((resolve, reject) => {
+        let ps: Promise<any> = null;
+        if (tasks && tasks.length > 0) {
+            _.each(tasks, task => {
+                if (ps) {
+                    ps = ps.then(() => {
+                        return startTask(gulp, task);
                     })
-                    .catch(err => {
-                        if (gulp['removeListener']) {
-                            gulp['removeListener']('task_stop', taskStop);
-                            gulp['removeListener']('task_err', taskErr);
-                        }
-                    });
+                } else {
+                    ps = startTask(gulp, task);
+                }
             });
-        });
-    }
-    return ps.catch(err => {
-        console.error(chalk.red(err));
+        }
+        return ps
+            .then(resolve)
+            .catch(reject);
     });
+    return run.catch(err => {
+        console.error(chalk.red(err));
+        process.exit(0);
+    });
+}
+
+function startTask(gulp: Gulp, task: Src): Promise<any> {
+    let taskErr = null, taskStop = null;
+    return new Promise((reslove, reject) => {
+        let tskmap: any = {};
+        _.each(_.isArray(task) ? task : [task], t => {
+            tskmap[t] = false;
+        });
+        taskErr = (err) => {
+            process.exit(err);
+            console.error(chalk.red(err));
+            reject(err);
+        };
+        taskStop = (e: any) => {
+            tskmap[e.task] = true;
+            if (!_.some(_.values(tskmap), it => !it)) {
+                reslove();
+            }
+        }
+        gulp.on('task_stop', taskStop)
+            .on('task_err', taskErr);
+        gulp.start(task);
+    })
+        .then(() => {
+            if (gulp['removeListener']) {
+                gulp['removeListener']('task_stop', taskStop);
+                gulp['removeListener']('task_err', taskErr);
+            }
+        }, err => {
+            if (gulp['removeListener']) {
+                gulp['removeListener']('task_stop', taskStop);
+                gulp['removeListener']('task_err', taskErr);
+            }
+            // process.exit(0);
+        });
 }
 
 /**

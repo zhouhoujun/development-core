@@ -34,8 +34,8 @@ let createTask = (env) => {
             name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
             pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
             output: [
-                (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
-                (tsmap, config, dt) => {
+                (tsmap, config, dt, gulp) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
+                (tsmap, config, dt, gulp) => {
                     if (config.oper === Operation.release || config.oper === Operation.deploy) {
                         return tsmap.js.pipe(babel({ presets: ['es2015'] }))
                             .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
@@ -49,12 +49,17 @@ let createTask = (env) => {
         {
             name: 'test', src: 'test/**/*spec.ts', order: 1,
             oper: Operation.test | Operation.release | Operation.deploy,
-            pipe(src) {
-                return src.pipe(mocha())
-                    .once('error', () => {
-                        process.exit(1);
-                    });
-            }
+            pipes: [mocha],
+            output: null
+            // pipe(src, cfg, dt, callback) {
+            //     src.pipe(mocha())
+            //         .once('error', (err) => {
+            //             callback(err);
+            //         })
+            //         .once('end', () => {
+            //             callback();
+            //         });
+            // }
         },
         { src: 'src/**/*.ts', name: 'watch', watch: ['tscompile'] },
         { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }

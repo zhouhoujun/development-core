@@ -45,7 +45,43 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
  ```ts
 
  // module A
-import { taskdefine, bindingConfig, Operation, ITaskOption, IEnvOption, ITaskConfig, ITaskDefine, ITask, ITaskInfo, TaskResult, task } from 'development-core';
+import { taskdefine, bindingConfig, Operation, ITaskOption, IEnvOption, ITaskConfig, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from 'development-core';
+
+@dynamicTask
+export class TestTaskC implements IDynamicTasks {
+    tasks(): IDynamicTask[]{
+        return [
+            {
+                name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
+                pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
+                output: [
+                    (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
+                    (tsmap, config, dt) => {
+                        if (config.oper === Operation.release || config.oper === Operation.deploy) {
+                            return tsmap.js.pipe(babel({ presets: ['es2015'] }))
+                                .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
+                                .pipe(gulp.dest(config.getDist(dt)));
+                        } else {
+                            return tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist(dt)));
+                        }
+                    }
+                ]
+            },
+            {
+                name: 'test', src: 'test/**/*spec.ts', order: 1,
+                oper: Operation.test | Operation.release | Operation.deploy,
+                pipe(src) {
+                    return src.pipe(mocha())
+                        .once('error', () => {
+                            process.exit(1);
+                        });
+                }
+            },
+            { src: 'src/**/*.ts', name: 'watch', watch: ['tscompile'] },
+            { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
+        ];
+    }
+}
 
 @task({
     oper: Operation.build | Operation.test

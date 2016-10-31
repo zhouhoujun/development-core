@@ -37,7 +37,7 @@ describe('generateTask', () => {
         }
         tasks = [
             {
-                name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
+                name: 'test-tscompile', src: 'src/**/*.ts', dist: 'lib',
                 pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
                 output: [
                     (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
@@ -53,7 +53,7 @@ describe('generateTask', () => {
                 ]
             },
             {
-                name: 'test', src: 'test/**/*spec.ts', order: 1,
+                name: 'test-test', src: 'test/**/*spec.ts', order: 1,
                 oper: Operation.test | Operation.release | Operation.deploy,
                 pipe(src) {
                     return src.pipe(mocha())
@@ -62,8 +62,8 @@ describe('generateTask', () => {
                         });
                 }
             },
-            { src: 'src/**/*.ts', name: 'watch', watch: ['tscompile'] },
-            { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
+            { name: 'test-watch', src: 'src/**/*.ts',  watch: ['tscompile'] },
+            { name: 'test-clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
         ];
     })
 
@@ -79,7 +79,7 @@ describe('generateTask', () => {
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(2);
-        expect(tseq[0]).to.eq('clean');
+        expect(tseq[0]).to.eq('test-clean');
     });
 
 
@@ -95,8 +95,8 @@ describe('generateTask', () => {
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(3);
-        expect(tseq[0]).to.eq('clean');
-        expect(tseq[2]).to.eq('watch');
+        expect(tseq[0]).to.eq('test-clean');
+        expect(tseq[2]).to.eq('test-watch');
     });
 
     it('generate test tasks', () => {
@@ -111,9 +111,9 @@ describe('generateTask', () => {
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(4);
-        expect(tseq[0]).to.eq('clean');
-        expect(tseq[1]).to.eq('test');
-        expect(tseq[3]).to.eq('watch');
+        expect(tseq[0]).to.eq('test-clean');
+        expect(tseq[1]).to.eq('test-test');
+        expect(tseq[3]).to.eq('test-watch');
     });
 
     it('generate release tasks', () => {
@@ -128,9 +128,9 @@ describe('generateTask', () => {
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(4);
-        expect(tseq[0]).to.eq('clean');
-        expect(tseq[1]).to.eq('test');
-        expect(tseq[3]).to.eq('watch');
+        expect(tseq[0]).to.eq('test-clean');
+        expect(tseq[1]).to.eq('test-test');
+        expect(tseq[3]).to.eq('test-watch');
     });
 
 });

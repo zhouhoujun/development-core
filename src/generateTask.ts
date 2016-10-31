@@ -26,13 +26,13 @@ class DynamicTask implements ITask {
  * @param {Operation} oper
  * @returns {ITask[]}
  */
-export function generateTask(tasks: IDynamicTask | IDynamicTask[], oper: Operation, env: IEnvOption): ITask[] {
+export function generateTask(tasks: IDynamicTask | IDynamicTask[], oper?: Operation, env?: IEnvOption): ITask[] {
     let taskseq: ITask[] = [];
     _.each(_.isArray(tasks) ? tasks : [tasks], dt => {
-        if (dt.oper && (dt.oper & oper) <= 0) {
+        if (oper && dt.oper && (dt.oper & oper) <= 0) {
             return;
         }
-        if (dt.watch) {
+        if (env && dt.watch) {
             if (!env.watch) {
                 return;
             }
@@ -108,47 +108,89 @@ function createPipesTask(dt: IDynamicTask) {
         let tk = cfg.subTaskName(dt);
         console.log('register pipes  dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
-            let src = Promise.resolve(gulp.src(cfg.getSrc(dt)));
+            let taskPromise = Promise.resolve(gulp.src(cfg.getSrc(dt)));
             if (dt.pipes) {
-                let pipes = _.isFunction(dt.pipes) ? dt.pipes(cfg, dt) : dt.pipes;
-                _.each(pipes, (p: Pipe) => {
-                    src = src.then(psrc => {
-                        return Promise.resolve((_.isFunction(p) ? p(cfg, dt, gulp) : p))
-                            .then(stram => {
-                                return psrc.pipe(stram)
+                let pipes = _.isFunction(dt.pipes) ? dt.pipes(cfg, dt, gulp) : dt.pipes;
+                taskPromise = taskPromise.then(psrc => {
+                    return Promise.all(_.map(pipes, (p: Pipe) => {
+                        return _.isFunction(p) ? p(cfg, dt, gulp) : p;
+                    }))
+                        .then(streams => {
+                            _.each(streams, stream => {
+                                psrc = psrc.pipe(stream);
                             });
-                    });
-                })
+                            return psrc;
+                        })
+                });
+
             } else if (dt.pipe) {
-                src = src.then((stream => {
-                    return dt.pipe(stream, cfg, dt);
-                }));
-            }
-            src.then(stream => {
-                if (dt.output) {
-                    let outputs = _.isFunction(dt.output) ? dt.output(cfg, dt) : dt.output;
-                    return Promise.all(_.map(outputs, output => {
-                        return new Promise((resolve, reject) => {
-                            Promise.resolve<NodeJS.ReadWriteStream>((_.isFunction(output) ? output(stream, cfg, dt, gulp) : output))
-                                .then(output => {
-                                    stream.pipe(output)
-                                        .once('end', resolve)
+                taskPromise = taskPromise.then((stream => {
+                    return new Promise((resolve, reject) => {
+                        let rt = dt.pipe(stream, cfg, dt, (err) => {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve(stream);
+                            }
+                        });
+                        if (rt) {
+                            Promise.resolve(rt)
+                                .then(stream => {
+                                    stream
+                                        .once('end', () => {
+                                            resolve(stream);
+                                        })
                                         .once('error', reject);
                                 });
+                        }
+                    });
+                }));
+            }
 
+            if (dt.output !== null) {
+                taskPromise = taskPromise.then(stream => {
+                    if (dt.output) {
+                        let outputs = _.isFunction(dt.output) ? dt.output(cfg, dt) : dt.output;
+                        return Promise.all(_.map(outputs, output => {
+                            return Promise.resolve<NodeJS.ReadWriteStream>((_.isFunction(output) ? output(stream, cfg, dt, gulp) : output))
+                                .then(output => {
+                                    return new Promise((resolve, reject) => {
+                                        stream.pipe(output)
+                                            .once('end', () => {
+                                                resolve(output);
+                                            })
+                                            .once('error', reject);
+                                    });
+                                });
+                        }));
+                    } else {
+                        return new Promise((resolve, reject) => {
+                            let output = gulp.dest(cfg.getDist(dt));
+                            stream.pipe(output)
+                                .once('end', () => {
+                                    resolve(output)
+                                })
+                                .once('error', reject);
                         });
-                    }));
-                } else {
+                    }
+                });
+            } else {
+                taskPromise = taskPromise.then(stream => {
                     return new Promise((resolve, reject) => {
-                        stream.pipe(gulp.dest(cfg.getDist(dt)))
-                            .once('end', resolve)
+                        stream
+                            .once('end', () => {
+                                resolve(stream);
+                            })
                             .once('error', reject);
                     });
-                }
-            });
-            return src.catch(err => {
-                console.log(chalk.red(err));
-            });
+                });
+            }
+
+            return taskPromise;
+            // return taskPromise.catch(err => {
+            //     console.log(chalk.red(err));
+            //     process.exit(0);
+            // });
         });
 
         return tk;
@@ -156,3 +198,5 @@ function createPipesTask(dt: IDynamicTask) {
 
     return new DynamicTask({ order: dt.order, oper: dt.oper, watch: !!dt.watch }, factory);
 }
+
+

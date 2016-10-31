@@ -1,4 +1,4 @@
-import { Gulp, WatchEvent, WatchCallback } from 'gulp';
+import { Gulp, WatchEvent, WatchCallback, TaskCallback } from 'gulp';
 
 /**
  * project development build operation.
@@ -115,6 +115,16 @@ export interface ITask {
      * @memberOf ITask
      */
     setup(config: ITaskConfig, gulp?: Gulp): TaskResult;
+}
+
+/**
+ * 
+ * 
+ * @export
+ * @interface ITasks
+ */
+export interface IDynamicTasks {
+    tasks(): IDynamicTask[];
 }
 
 /**
@@ -342,15 +352,17 @@ export interface IDynamicTask extends IOutputDist {
      */
     watchChanged?(event: WatchEvent, config: ITaskConfig);
     /**
-     * stream pipe.
+     * custom stream pipe.
      * 
      * @param {ITransform} gulpsrc
      * @param {ITaskConfig} config
-     * @returns {(ITransform | Promise<ITransform>)}
+     * @param {IDynamicTask} [dt]
+     * @param {TaskCallback} [callback]
+     * @returns {(ITransform | Promise<ITransform> | void)}
      * 
      * @memberOf IDynamicTask
      */
-    pipe?(gulpsrc: ITransform, config: ITaskConfig, dt?: IDynamicTask): ITransform | Promise<ITransform>;
+    pipe?(gulpsrc: ITransform, config: ITaskConfig, dt?: IDynamicTask, callback?: TaskCallback): ITransform | Promise<ITransform> | void;
 
     /**
      * task pipe works.
@@ -358,7 +370,7 @@ export interface IDynamicTask extends IOutputDist {
      * 
      * @memberOf IDynamicTask
      */
-    pipes?: Pipe[] | ((config?: ITaskConfig, dt?: IDynamicTask) => Pipe[]);
+    pipes?: Pipe[] | ((config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => Pipe[]);
 
     /**
      * output pipe task
