@@ -192,7 +192,7 @@ let createTask = (env) => {
                     });
             }
         },
-        { src: 'src/**/*.ts', name: 'watch', watch: ['tscompile'] },
+        { src: 'src/**/*.ts', name: 'watch', watchTasks: ['tscompile'] },
         { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
     ], oper, env);
 

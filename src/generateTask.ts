@@ -12,7 +12,7 @@ class DynamicTask implements ITask {
     setup(config: ITaskConfig, gulp?: Gulp) {
         let name = this.factory(config, gulp || coregulp);
         if (name) {
-            this.decorator.name = name;
+            this.decorator.taskName = name;
         }
         return name;
     }
@@ -22,21 +22,33 @@ class DynamicTask implements ITask {
  * dynamic build tasks.
  * 
  * @export
- * @param {(DynamicTask | DynamicTask[])} tasks
- * @param {Operation} oper
+ * @param {(IDynamicTask | IDynamicTask[])} tasks
+ * @param {ITaskInfo} [match]
  * @returns {ITask[]}
  */
-export function generateTask(tasks: IDynamicTask | IDynamicTask[], oper?: Operation, env?: IEnvOption): ITask[] {
+export function generateTask(tasks: IDynamicTask | IDynamicTask[], match?: ITaskInfo): ITask[] {
     let taskseq: ITask[] = [];
     _.each(_.isArray(tasks) ? tasks : [tasks], dt => {
-        if (oper && dt.oper && (dt.oper & oper) <= 0) {
-            return;
-        }
-        if (dt.watch) {
-            if (!env || !env.watch) {
+        if (match) {
+            if (match.oper && dt.oper && (dt.oper & match.oper) <= 0) {
                 return;
             }
-            taskseq.push(createWatchTask(dt));
+
+            if (match.group && dt.group !== match.group) {
+                return;
+            }
+        }
+        if (dt.watchTasks) {
+            dt.watch = dt.watch || !!dt.watchTasks;
+        }
+
+        if (dt.watch) {
+            if (!match || !match.watch) {
+                return;
+            }
+            if (dt.watch === match.watch) {
+                taskseq.push(createWatchTask(dt));
+            }
         } else if (_.isFunction(dt.task)) {
             // custom task
             taskseq.push(createTask(dt));
@@ -68,7 +80,7 @@ function createTask(dt: IDynamicTask) {
         return tk
     };
 
-    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: !!dt.watch }, factory);
+    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: dt.watch }, factory);
 }
 /**
  * create dynamic watch task.
@@ -78,7 +90,7 @@ function createTask(dt: IDynamicTask) {
  */
 function createWatchTask(dt: IDynamicTask) {
     let factory = (cfg: ITaskConfig, gulp: Gulp) => {
-        let watchs = _.isFunction(dt.watch) ? dt.watch(cfg) : dt.watch;
+        let watchs = _.isFunction(dt.watchTasks) ? dt.watchTasks(cfg) : dt.watchTasks;
         if (!_.isFunction(_.last(watchs))) {
             watchs.push(<WatchCallback>(event: WatchEvent) => {
                 dt.watchChanged && dt.watchChanged(event, cfg);
@@ -100,7 +112,7 @@ function createWatchTask(dt: IDynamicTask) {
         return tk;
     };
 
-    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: !!dt.watch }, factory);
+    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: dt.watch }, factory);
 }
 function createPipesTask(dt: IDynamicTask) {
     let factory = (cfg: ITaskConfig, gulp: Gulp) => {

@@ -68,20 +68,28 @@ export interface ITaskInfo {
      */
     order?: number;
     /**
-     * name.
+     * dynamic generate task name.
      * 
      * @type {Src}
      * @memberOf ITaskInfo
      */
-    name?: Src;
+    taskName?: Src;
 
     /**
      * is watch task or not.
      * 
-     * @type {boolean}
+     * @type {boolean | string}
      * @memberOf ITaskInfo
      */
-    watch?: boolean;
+    watch?: boolean | string;
+
+    /**
+     * assert tasks. assert group name or extends name.
+     * 
+     * @type {string}
+     * @memberOf ITaskInfo
+     */
+    group?: string;
 }
 
 export type TaskResult = Src | void;
@@ -312,7 +320,7 @@ export interface IOutputDist {
  * @interface IDynamicTask
  * @extends {IOutputDist}
  */
-export interface IDynamicTask extends IOutputDist {
+export interface IDynamicTask extends IOutputDist, ITaskInfo {
     /**
      * task name
      * 
@@ -320,20 +328,20 @@ export interface IDynamicTask extends IOutputDist {
      * @memberOf IDynamicTask
      */
     name: TaskString;
-    /**
-     * task order.
-     * 
-     * @type {number}
-     * @memberOf IDynamicTask
-     */
-    order?: number;
-    /**
-     * task type. default for all Operation.
-     * 
-     * @type {Operation}
-     * @memberOf IDynamicTask
-     */
-    oper?: Operation;
+    // /**
+    //  * task order.
+    //  * 
+    //  * @type {number}
+    //  * @memberOf IDynamicTask
+    //  */
+    // order?: number;
+    // /**
+    //  * task type. default for all Operation.
+    //  * 
+    //  * @type {Operation}
+    //  * @memberOf IDynamicTask
+    //  */
+    // oper?: Operation;
 
     /**
      * watch tasks
@@ -341,7 +349,7 @@ export interface IDynamicTask extends IOutputDist {
      * 
      * @memberOf IDynamicTask
      */
-    watch?: Array<string | WatchCallback> | ((config?: ITaskConfig, dt?: IDynamicTask) => Array<string | WatchCallback>);
+    watchTasks?: Array<string | WatchCallback> | ((config?: ITaskConfig, dt?: IDynamicTask) => Array<string | WatchCallback>);
     /**
      * watch changed.
      * 

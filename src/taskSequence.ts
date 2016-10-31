@@ -59,12 +59,12 @@ export function addToSequence(taskSequence: Src[], rst: ITaskInfo) {
     if (!rst) {
         return taskSequence;
     }
-    if (rst.name) {
+    if (rst.taskName) {
         if (_.isNumber(rst.order) && rst.order >= 0 && rst.order < taskSequence.length) {
-            taskSequence.splice(rst.order, 0, rst.name);
+            taskSequence.splice(rst.order, 0, rst.taskName);
             return taskSequence;
         }
-        taskSequence.push(rst.name);
+        taskSequence.push(rst.taskName);
     }
     return taskSequence;
 }

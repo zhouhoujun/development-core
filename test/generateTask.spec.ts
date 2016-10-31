@@ -62,13 +62,13 @@ describe('generateTask', () => {
                         });
                 }
             },
-            { name: 'test-watch', src: 'src/**/*.ts',  watch: ['tscompile'] },
+            { name: 'test-watch', src: 'src/**/*.ts', watchTasks: ['tscompile'] },
             { name: 'test-clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
         ];
     })
 
     it('generate build tasks', () => {
-        let tks = generateTask(tasks, Operation.build, { });
+        let tks = generateTask(tasks, { oper: Operation.build });
 
         expect(tks).to.not.null;
         expect(tks).to.not.undefined;
@@ -84,7 +84,7 @@ describe('generateTask', () => {
 
 
     it('generate build tasks with watch', () => {
-        let tks = generateTask(tasks, Operation.build, { watch: true });
+        let tks = generateTask(tasks, { oper: Operation.build, watch: true });
 
         expect(tks).to.not.null;
         expect(tks).to.not.undefined;
@@ -100,7 +100,7 @@ describe('generateTask', () => {
     });
 
     it('generate test tasks', () => {
-        let tks = generateTask(tasks, Operation.test, { watch: true });
+        let tks = generateTask(tasks, { oper: Operation.test, watch: true });
 
         expect(tks).to.not.null;
         expect(tks).to.not.undefined;
@@ -117,7 +117,7 @@ describe('generateTask', () => {
     });
 
     it('generate release tasks', () => {
-        let tks = generateTask(tasks, Operation.release, { watch: true });
+        let tks = generateTask(tasks, { oper: Operation.release, watch: true });
 
         expect(tks).to.not.null;
         expect(tks).to.not.undefined;

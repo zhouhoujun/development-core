@@ -36,7 +36,7 @@ describe('decorator', () => {
 
     it('findTasks from module with Operation', () => {
 
-        let tasks = findTasks(model, Operation.build);
+        let tasks = findTasks(model, { oper: Operation.build });
 
         expect(tasks.length).eq(6);
 
@@ -44,7 +44,7 @@ describe('decorator', () => {
 
     it('findTasks from module with Operation and env', () => {
 
-        let tasks = findTasks(model, Operation.build, { watch: true });
+        let tasks = findTasks(model, { oper: Operation.build, watch: true });
 
         expect(tasks.length).eq(8);
 

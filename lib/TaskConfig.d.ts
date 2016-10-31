@@ -16,8 +16,9 @@ export declare type Src = string | string[];
 export interface ITaskInfo {
     oper?: Operation;
     order?: number;
-    name?: Src;
-    watch?: boolean;
+    taskName?: Src;
+    watch?: boolean | string;
+    group?: string;
 }
 export declare type TaskResult = Src | void;
 export declare type TaskSource = Src | ((oper?: Operation) => Src);
@@ -60,11 +61,9 @@ export interface IOutputDist {
     release?: string;
     deploy?: string;
 }
-export interface IDynamicTask extends IOutputDist {
+export interface IDynamicTask extends IOutputDist, ITaskInfo {
     name: TaskString;
-    order?: number;
-    oper?: Operation;
-    watch?: Array<string | WatchCallback> | ((config?: ITaskConfig, dt?: IDynamicTask) => Array<string | WatchCallback>);
+    watchTasks?: Array<string | WatchCallback> | ((config?: ITaskConfig, dt?: IDynamicTask) => Array<string | WatchCallback>);
     watchChanged?(event: WatchEvent, config: ITaskConfig): any;
     pipe?(gulpsrc: ITransform, config: ITaskConfig, dt?: IDynamicTask, callback?: TaskCallback): ITransform | Promise<ITransform> | void;
     pipes?: Pipe[] | ((config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => Pipe[]);

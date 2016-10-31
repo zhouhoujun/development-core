@@ -41,16 +41,16 @@ export function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITas
 }
 
 
+
 /**
  * find tasks in Object module.
  * 
  * @export
  * @param {*} target
- * @param {Operation} [oper]
- * @param {IEnvOption} [env]
+ * @param {ITaskInfo} [match]
  * @returns {ITask[]}
  */
-export function findTasks(target: any, oper?: Operation, env?: IEnvOption): ITask[] {
+export function findTasks(target: any, match?: ITaskInfo): ITask[] {
     let tasks: ITask[] = [];
     if (!target) {
         return tasks;
@@ -58,26 +58,55 @@ export function findTasks(target: any, oper?: Operation, env?: IEnvOption): ITas
     if (_.isFunction(target)) {
         if (target['__task']) {
             let tinfo: ITaskInfo = target['__task'];
-            if (oper && tinfo.oper && (tinfo.oper & oper) <= 0) {
-                return tasks;
-            }
 
-            if (tinfo.watch) {
-                if (!env || !env.watch) {
+            if (match) {
+                if (match.oper && tinfo.oper && (tinfo.oper & match.oper) <= 0) {
+                    return tasks;
+                }
+
+                if (match.group && tinfo.group !== match.group) {
                     return tasks;
                 }
             }
+
+            if (tinfo.watch) {
+                if (!match || !match.watch) {
+                    return tasks;
+                } else if (tinfo.watch !== match.watch) {
+                    return tasks;
+                }
+            }
+
 
             let task: ITask = new target();
             task.decorator = tinfo;
             tasks.push(task);
         } else if (target['__dynamictask']) {
+            let tinfo: ITaskInfo = target['__dynamictask'];
+            if (match) {
+                if (match.oper && tinfo.oper && (tinfo.oper & match.oper) <= 0) {
+                    return tasks;
+                }
+
+                if (match.group && tinfo.group !== match.group) {
+                    return tasks;
+                }
+            }
+
+            if (tinfo.watch) {
+                if (!match || !match.watch) {
+                    return tasks;
+                } else if (tinfo.watch !== match.watch) {
+                    return tasks;
+                }
+            }
+
             let dyts = (<IDynamicTasks>new target()).tasks()
-            tasks = tasks.concat(generateTask(dyts, oper, env));
+            tasks = tasks.concat(generateTask(dyts, match));
         }
     } else if (_.isArray(target)) {
         _.each(target, sm => {
-            tasks.concat(findTasks(sm, oper, env));
+            tasks.concat(findTasks(sm, match));
         });
     } else {
         _.each(_.keys(target), key => {
@@ -85,7 +114,7 @@ export function findTasks(target: any, oper?: Operation, env?: IEnvOption): ITas
                 return;
             }
             console.log(chalk.grey('find task from :'), chalk.cyan(key));
-            tasks = tasks.concat(findTasks(target[key], oper, env));
+            tasks = tasks.concat(findTasks(target[key], match));
         });
     }
 
@@ -214,13 +243,13 @@ export function findTaskDefineInModule(md: string | Object): Promise<ITaskDefine
 }
 
 
-export function findTasksInModule(md: string | Object, oper?: Operation, env?: IEnvOption): Promise<ITask[]> {
+export function findTasksInModule(md: string | Object, match?: ITaskInfo): Promise<ITask[]> {
     let mdls;
     try {
         if (_.isString(md)) {
-            mdls = findTasks(require(md), oper, env);
+            mdls = findTasks(require(md), match);
         } else {
-            mdls = findTasks(md, oper, env);
+            mdls = findTasks(md, match);
         }
     } catch (err) {
         return Promise.reject(err);
@@ -258,14 +287,15 @@ export function findTaskDefineInDir(dirs: Src): Promise<ITaskDefine> {
  * 
  * @export
  * @param {Src} dirs
+ * @param {ITaskInfo} [match]
  * @returns {Promise<ITask[]>}
  */
-export function findTasksInDir(dirs: Src, oper?: Operation, env?: IEnvOption): Promise<ITask[]> {
+export function findTasksInDir(dirs: Src, match?: ITaskInfo): Promise<ITask[]> {
     return Promise.all(_.map(_.isArray(dirs) ? dirs : [dirs], dir => {
         console.log(chalk.grey('begin load task from dir'), chalk.cyan(dir));
         try {
             let mdl = requireDir(dir, { recurse: true });
-            return Promise.resolve(findTasks(mdl, oper, env));
+            return Promise.resolve(findTasks(mdl, match));
         } catch (err) {
             return Promise.reject(err);
         }

@@ -23,7 +23,7 @@ export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
     cfg.runSequence = cfg.runSequence || runSequence;
     cfg.addToSequence = cfg.addToSequence || addToSequence;
     cfg.generateTask = cfg.generateTask || ((tasks: IDynamicTask | IDynamicTask[]) => {
-        return generateTask(tasks, cfg.oper, cfg.env);
+        return generateTask(tasks, { oper: cfg.oper, watch: cfg.env.watch });
     });
 
     cfg.findTasks = cfg.findTasks || findTasksInModule.bind(cfg);

@@ -1,2 +1,2 @@
-import { IDynamicTask, IEnvOption, Operation, ITask } from './TaskConfig';
-export declare function generateTask(tasks: IDynamicTask | IDynamicTask[], oper?: Operation, env?: IEnvOption): ITask[];
+import { ITaskInfo, IDynamicTask, ITask } from './TaskConfig';
+export declare function generateTask(tasks: IDynamicTask | IDynamicTask[], match?: ITaskInfo): ITask[];

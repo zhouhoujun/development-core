@@ -61,7 +61,7 @@ export class TestDynamicTask implements IDynamicTasks {
                         });
                 }
             },
-            { name: 'test-watch', src: 'src/**/*.ts',  watch: ['tscompile'] },
+            { name: 'test-watch', src: 'src/**/*.ts',  watchTasks: ['tscompile'] },
             { name: 'test-clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
         ];
     }
