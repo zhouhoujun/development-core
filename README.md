@@ -1,7 +1,7 @@
 # packaged development-core
 
 This repo is for distribution on `npm`. The source for this module is in the
-[main repo](https://github.com/zhouhoujun/development-core/src/mastert).
+[main repo](https://github.com/zhouhoujun/development-core).
 Please file issues and pull requests against that repo.
 This package use to develop kit for project development via gulp tasks.
 
