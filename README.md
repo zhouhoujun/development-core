@@ -120,8 +120,59 @@ export class TaskDefine implements ITaskDefine {
     }
 }
 
+```
 
-// module B
+## define task by group.
+
+```ts
+
+
+@task({
+    group: ['test', 'node']
+})
+export class TestTaskGA implements ITask {
+    public decorator: ITaskInfo = {};
+    constructor() {
+    }
+    setup(config: ITaskConfig, gulp): TaskResult {
+        // todo...
+        return 'TestTaskGA';
+    }
+}
+@task({
+    group: 'node'
+})
+export class TestTaskGB implements ITask {
+    public decorator: ITaskInfo = {};
+    constructor() {
+    }
+    setup(config: ITaskConfig, gulp): TaskResult {
+        // todo...
+        return 'TestTaskGB';
+    }
+}
+
+
+@task({
+    group: ['test', 'node']
+})
+export class TestTaskGC implements ITask {
+    public decorator: ITaskInfo = {};
+    constructor() {
+    }
+    setup(config: ITaskConfig, gulp): TaskResult {
+        // todo...
+        return 'TestTaskGC';
+    }
+}
+
+```
+
+## user task
+
+```ts
+
+// module use.
 import { findTasks, Operation, runTaskSequence, findTaskDefine }  from 'development-core';
 let moduleA = require('module a');
 let tasks = findTasks(moduleA);
