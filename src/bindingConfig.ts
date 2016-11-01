@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { IDynamicTask, IOutputDist, IEnvOption, Operation, ITaskConfig, IAsserts, Src } from './TaskConfig';
+import { IOutputDist, IEnvOption, Operation, ITaskConfig, IAsserts, Src } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { runSequence, addToSequence } from './taskSequence';
 import { files, taskStringVal, taskSourceVal } from './utils';
@@ -22,12 +22,16 @@ export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
     cfg.fileFilter = cfg.fileFilter || files;
     cfg.runSequence = cfg.runSequence || runSequence;
     cfg.addToSequence = cfg.addToSequence || addToSequence;
-    cfg.generateTask = cfg.generateTask || ((tasks: IDynamicTask | IDynamicTask[]) => {
-        return generateTask(tasks, { oper: cfg.oper, watch: cfg.env.watch });
+    cfg.generateTask = cfg.generateTask || ((tasks, match?) => {
+        return generateTask(tasks, _.extend({ oper: cfg.oper, watch: cfg.env.watch }, match || {}));
     });
 
-    cfg.findTasks = cfg.findTasks || findTasksInModule.bind(cfg);
-    cfg.findTasksInDir = cfg.findTasksInDir || findTasksInDir.bind(cfg);
+    cfg.findTasks = cfg.findTasks || ((mdl, match?) => {
+        return findTasksInModule(mdl, _.extend({ oper: cfg.oper, watch: cfg.env.watch }, match || {}));
+    });
+    cfg.findTasksInDir = cfg.findTasksInDir || ((dirs, match?) => {
+        return findTasksInDir(dirs, _.extend({ oper: cfg.oper, watch: cfg.env.watch }, match || {}));
+    });
 
     cfg.findTaskDefine = cfg.findTaskDefine || findTaskDefineInModule.bind(cfg);
     cfg.findTaskDefineInDir = cfg.findTaskDefineInDir || findTaskDefineInDir.bind(cfg);

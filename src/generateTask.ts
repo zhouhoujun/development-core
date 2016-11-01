@@ -3,7 +3,8 @@ import { Gulp, WatchEvent } from 'gulp';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
-import { ITaskInfo, TaskResult, Pipe, IDynamicTask, IEnvOption, Operation, ITaskConfig, ITask } from './TaskConfig';
+import { ITaskInfo, TaskResult, Pipe, IDynamicTask, ITaskConfig, ITask } from './TaskConfig';
+import { matchTaskGroup } from './utils';
 
 type factory = (config: ITaskConfig, gulp: Gulp) => TaskResult;
 class DynamicTask implements ITask {
@@ -29,15 +30,16 @@ class DynamicTask implements ITask {
 export function generateTask(tasks: IDynamicTask | IDynamicTask[], match?: ITaskInfo): ITask[] {
     let taskseq: ITask[] = [];
     _.each(_.isArray(tasks) ? tasks : [tasks], dt => {
-        if (match) {
-            if (match.oper && dt.oper && (dt.oper & match.oper) <= 0) {
-                return;
-            }
 
-            if (match.group && dt.group !== match.group) {
-                return;
-            }
+        if (match && match.oper && dt.oper && (dt.oper & match.oper) <= 0) {
+            return;
         }
+
+        if (!matchTaskGroup(dt, match)) {
+            return;
+        }
+
+
         if (dt.watchTasks) {
             dt.watch = dt.watch || !!dt.watchTasks;
         }
@@ -80,7 +82,7 @@ function createTask(dt: IDynamicTask) {
         return tk
     };
 
-    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: dt.watch }, factory);
+    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: dt.watch, group: dt.group }, factory);
 }
 /**
  * create dynamic watch task.
@@ -112,7 +114,7 @@ function createWatchTask(dt: IDynamicTask) {
         return tk;
     };
 
-    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: dt.watch }, factory);
+    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: dt.watch, group: dt.group }, factory);
 }
 function createPipesTask(dt: IDynamicTask) {
     let factory = (cfg: ITaskConfig, gulp: Gulp) => {
@@ -198,7 +200,7 @@ function createPipesTask(dt: IDynamicTask) {
         return tk;
     }
 
-    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: !!dt.watch }, factory);
+    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: dt.watch, group: dt.group }, factory);
 }
 
 

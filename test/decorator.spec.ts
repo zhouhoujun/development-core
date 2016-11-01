@@ -1,7 +1,7 @@
 import 'mocha';
 import { expect } from 'chai';
 import * as gulp from 'gulp';
-import { findTasks, Operation, ITask, ITaskDefine, bindingConfig, toSequence, findTaskDefines } from '../src';
+import { findTasks, Operation, bindingConfig, toSequence, findTaskDefines } from '../src';
 
 
 describe('decorator', () => {
@@ -42,6 +42,7 @@ describe('decorator', () => {
 
     })
 
+
     it('findTasks from module with Operation and env', () => {
 
         let tasks = findTasks(model, { oper: Operation.build, watch: true });
@@ -57,7 +58,14 @@ describe('decorator', () => {
         expect(tdfs.length).eq(1);
         expect(tdfs[0]).not.null;
         expect(tdfs[0]['fags']).eq('define');
+    })
 
+
+    it('findTasks from module with group', () => {
+
+        let tasks = findTasks(model, { group: ['node', 'test'] });
+
+        expect(tasks.length).eq(3);
 
     })
 

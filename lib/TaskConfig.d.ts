@@ -18,7 +18,7 @@ export interface ITaskInfo {
     order?: number;
     taskName?: Src;
     watch?: boolean | string;
-    group?: string;
+    group?: Src;
 }
 export declare type TaskResult = Src | void;
 export declare type TaskSource = Src | ((oper?: Operation) => Src);
@@ -73,8 +73,9 @@ export interface IDynamicTask extends IOutputDist, ITaskInfo {
 export interface IDynamicLoaderOption extends ILoaderOption {
     dynamicTasks?: IDynamicTask | IDynamicTask[];
 }
+export declare type customLoader = (config: ITaskConfig) => ITask[] | Promise<ITask[]>;
 export interface ITaskLoaderOption {
-    loader?: string | ILoaderOption | IDynamicTask | IDynamicTask[];
+    loader?: string | customLoader | ILoaderOption | IDynamicTask | IDynamicTask[];
 }
 export interface ISubTaskOption {
     tasks?: ITaskOption | ITaskOption[];
@@ -86,7 +87,7 @@ export interface IAsserts extends IOutputDist, ITaskLoaderOption {
     assertsOrder?: number;
 }
 export interface ITaskOption extends IAsserts, ISubTaskOption {
-    loader: string | ILoaderOption | IDynamicTask | IDynamicTask[];
+    loader: string | customLoader | ILoaderOption | IDynamicTask | IDynamicTask[];
     src: TaskSource;
 }
 export interface ITaskDefine {
@@ -102,13 +103,13 @@ export interface ITaskConfig {
     getDist?(dist?: IOutputDist): string;
     runTasks?(tasks?: Src[], assertTasks?: ITaskInfo, subGroupTask?: ITaskInfo): Src[];
     printHelp?(lang: string): void;
-    findTasks?(module: string | Object): Promise<ITask[]>;
-    findTasksInDir?(dirs: Src): Promise<ITask[]>;
+    findTasks?(module: string | Object, match?: ITaskInfo): Promise<ITask[]>;
+    findTasksInDir?(dirs: Src, match?: ITaskInfo): Promise<ITask[]>;
     findTaskDefine?(module: string | Object): Promise<ITaskDefine>;
     findTaskDefineInDir?(dirs: Src): Promise<ITaskDefine>;
     fileFilter?(directory: string, express?: ((fileName: string) => boolean)): string[];
     runSequence?(gulp: Gulp, tasks: Src[]): Promise<any>;
-    generateTask?(tasks: IDynamicTask | IDynamicTask[]): ITask[];
+    generateTask?(tasks: IDynamicTask | IDynamicTask[], match?: ITaskInfo): ITask[];
     addToSequence?(sequence: Src[], task: ITaskInfo): Src[];
     subTaskName?(assert: string | IAsserts, defaultName?: string): any;
 }
@@ -124,5 +125,6 @@ export interface IEnvOption {
     task?: string;
     config?: string;
     publish?: boolean | string;
-    grp?: Src;
+    group?: Src;
+    gb?: Src;
 }

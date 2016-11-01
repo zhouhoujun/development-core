@@ -93,6 +93,8 @@ export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
                     ps = startTask(gulp, task);
                 }
             });
+        } else {
+            ps = Promise.resolve();
         }
         return ps
             .then(resolve)

@@ -1,8 +1,9 @@
 import 'reflect-metadata';
 import * as _ from 'lodash';
 import * as chalk from 'chalk';
-import { ITask, ITaskInfo, ITaskDefine, Src, IDynamicTasks, Operation, IEnvOption } from './TaskConfig';
+import { ITask, ITaskInfo, ITaskDefine, Src, IDynamicTasks } from './TaskConfig';
 import { generateTask } from './generateTask';
+import { matchTaskGroup } from './utils';
 import { existsSync } from 'fs';
 const requireDir = require('require-dir');
 
@@ -40,8 +41,6 @@ export function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITas
     }
 }
 
-
-
 /**
  * find tasks in Object module.
  * 
@@ -59,14 +58,12 @@ export function findTasks(target: any, match?: ITaskInfo): ITask[] {
         if (target['__task']) {
             let tinfo: ITaskInfo = target['__task'];
 
-            if (match) {
-                if (match.oper && tinfo.oper && (tinfo.oper & match.oper) <= 0) {
-                    return tasks;
-                }
+            if (match && match.oper && tinfo.oper && (tinfo.oper & match.oper) <= 0) {
+                return tasks;
+            }
 
-                if (match.group && tinfo.group !== match.group) {
-                    return tasks;
-                }
+            if (!matchTaskGroup(tinfo, match)) {
+                return tasks;
             }
 
             if (tinfo.watch) {
@@ -76,21 +73,19 @@ export function findTasks(target: any, match?: ITaskInfo): ITask[] {
                     return tasks;
                 }
             }
-
 
             let task: ITask = new target();
             task.decorator = tinfo;
             tasks.push(task);
         } else if (target['__dynamictask']) {
             let tinfo: ITaskInfo = target['__dynamictask'];
-            if (match) {
-                if (match.oper && tinfo.oper && (tinfo.oper & match.oper) <= 0) {
-                    return tasks;
-                }
 
-                if (match.group && tinfo.group !== match.group) {
-                    return tasks;
-                }
+            if (match && match.oper && tinfo.oper && (tinfo.oper & match.oper) <= 0) {
+                return tasks;
+            }
+
+            if (!matchTaskGroup(tinfo, match)) {
+                return tasks;
             }
 
             if (tinfo.watch) {
@@ -101,7 +96,10 @@ export function findTasks(target: any, match?: ITaskInfo): ITask[] {
                 }
             }
 
-            let dyts = (<IDynamicTasks>new target()).tasks()
+            let dyts = _.map((<IDynamicTasks>new target()).tasks(), tk => {
+                tk.group = tk.group || tinfo.group;
+                return tk;
+            });
             tasks = tasks.concat(generateTask(dyts, match));
         }
     } else if (_.isArray(target)) {

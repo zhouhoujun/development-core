@@ -9,6 +9,45 @@ const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
 import { taskdefine, bindingConfig, IDynamicTask, Operation, ITaskOption, IEnvOption, ITaskConfig, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from '../../src';
 
+
+@task({
+    group: ['test', 'node']
+})
+export class TestTaskGA implements ITask {
+    public decorator: ITaskInfo = {};
+    constructor() {
+    }
+    setup(config: ITaskConfig, gulp): TaskResult {
+        // todo...
+        return 'TestTaskGA';
+    }
+}
+@task({
+    group: ['node']
+})
+export class TestTaskGB implements ITask {
+    public decorator: ITaskInfo = {};
+    constructor() {
+    }
+    setup(config: ITaskConfig, gulp): TaskResult {
+        // todo...
+        return 'TestTaskGB';
+    }
+}
+
+
+@task({
+    group: ['test', 'node']
+})
+export class TestTaskGC implements ITask {
+    public decorator: ITaskInfo = {};
+    constructor() {
+    }
+    setup(config: ITaskConfig, gulp): TaskResult {
+        // todo...
+        return 'TestTaskGC';
+    }
+}
 @task
 export class TestTaskA implements ITask {
     public decorator: ITaskInfo = {};
