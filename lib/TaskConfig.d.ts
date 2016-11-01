@@ -18,6 +18,8 @@ export interface ITaskInfo {
     order?: number;
     taskName?: Src;
     watch?: boolean | string;
+    test?: boolean | string;
+    e2e?: boolean | string;
     group?: Src;
 }
 export declare type TaskResult = Src | void;
@@ -52,16 +54,19 @@ export interface IOutput extends ITransform {
 }
 export declare type Pipe = (config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
 export declare type OutputPipe = (stream: IOutput, config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
-export interface IOutputDist {
+export interface IAssertDist {
     src?: TaskSource;
+    e2eSrc?: TaskSource;
+    testSrc?: TaskSource;
+    watchSrc?: TaskSource;
     dist?: TaskString;
-    build?: string;
-    test?: string;
-    e2e?: string;
-    release?: string;
-    deploy?: string;
+    buildDist?: string;
+    testDist?: string;
+    e2eDist?: string;
+    releaseDist?: string;
+    deployDist?: string;
 }
-export interface IDynamicTask extends IOutputDist, ITaskInfo {
+export interface IDynamicTask extends IAssertDist, ITaskInfo {
     name: TaskString;
     watchTasks?: Array<string | WatchCallback> | ((config?: ITaskConfig, dt?: IDynamicTask) => Array<string | WatchCallback>);
     watchChanged?(event: WatchEvent, config: ITaskConfig): any;
@@ -81,7 +86,7 @@ export interface ISubTaskOption {
     tasks?: ITaskOption | ITaskOption[];
     subTaskOrder?: number;
 }
-export interface IAsserts extends IOutputDist, ITaskLoaderOption {
+export interface IAsserts extends IAssertDist, ITaskLoaderOption {
     name?: TaskString;
     asserts?: IMap<Src | IAsserts | IDynamicTask[]>;
     assertsOrder?: number;
@@ -99,8 +104,8 @@ export interface ITaskConfig {
     env: IEnvOption;
     oper: Operation;
     option: IAsserts | ITaskOption;
-    getSrc?(assert?: IAsserts): Src;
-    getDist?(dist?: IOutputDist): string;
+    getSrc?(assert?: IAssertDist, taskinfo?: ITaskInfo): Src;
+    getDist?(dist?: IAssertDist): string;
     runTasks?(tasks?: Src[], assertTasks?: ITaskInfo, subGroupTask?: ITaskInfo): Src[];
     printHelp?(lang: string): void;
     findTasks?(module: string | Object, match?: ITaskInfo): Promise<ITask[]>;

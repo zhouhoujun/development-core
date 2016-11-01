@@ -107,8 +107,9 @@ function createWatchTask(dt: IDynamicTask) {
         let tk = cfg.subTaskName(dt);
         console.log('register watch  dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
-            console.log('watch, src:', chalk.cyan.call(chalk, cfg.option.src));
-            gulp.watch(cfg.getSrc(dt), watchs)
+            let src = cfg.getSrc(dt, dt);
+            console.log('watch, src:', chalk.cyan.call(chalk, src));
+            gulp.watch(src, watchs)
         });
 
         return tk;
@@ -122,7 +123,7 @@ function createPipesTask(dt: IDynamicTask) {
         let tk = cfg.subTaskName(dt);
         console.log('register pipes  dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
-            let taskPromise = Promise.resolve(gulp.src(cfg.getSrc(dt)));
+            let taskPromise = Promise.resolve(gulp.src(cfg.getSrc(dt, dt)));
             if (dt.pipes) {
                 let pipes = _.isFunction(dt.pipes) ? dt.pipes(cfg, dt, gulp) : dt.pipes;
                 taskPromise = taskPromise.then(psrc => {

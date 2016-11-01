@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { IOutputDist, IEnvOption, Operation, ITaskConfig, IAsserts, Src } from './TaskConfig';
+import { IAssertDist, IEnvOption, Operation, ITaskConfig, ITaskInfo, Src } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { runSequence, addToSequence } from './taskSequence';
 import { files, taskStringVal, taskSourceVal } from './utils';
@@ -48,18 +48,18 @@ export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
         return parentName ? `${parentName}-${name || deft}` : name;
     });
 
-    cfg.getSrc = cfg.getSrc || ((assert?: IAsserts): Src => {
+    cfg.getSrc = cfg.getSrc || ((assert?: IAssertDist, taskinfo?: ITaskInfo): Src => {
         let src: Src;
         if (assert) {
-            src = taskSourceVal(assert.src, cfg.oper)
+            src = taskSourceVal(getAssertSrc(assert, taskinfo), cfg.oper)
         }
         if (!src) {
-            src = taskSourceVal(cfg.option.src, cfg.oper)
+            src = taskSourceVal(getAssertSrc(cfg.option, taskinfo), cfg.oper)
         }
         return src
     });
 
-    cfg.getDist = cfg.getDist || ((ds?: IOutputDist) => {
+    cfg.getDist = cfg.getDist || ((ds?: IAssertDist) => {
         if (ds) {
             let dist = getCurrentDist(ds, cfg.oper);
             if (dist) {
@@ -99,6 +99,20 @@ export function currentOperation(env: IEnvOption) {
 }
 
 
+function getAssertSrc(assert: IAssertDist, taskinfo?: ITaskInfo) {
+    let src = null;
+    if (taskinfo) {
+        if (taskinfo.test) {
+            src = assert.testSrc;
+        } else if (taskinfo.e2e) {
+            src = assert.e2eSrc;
+        } else if (taskinfo.watch) {
+            src = assert.watchSrc;
+        }
+    }
+    return src || assert.src;
+}
+
 /**
  * get dist.
  * 
@@ -106,23 +120,23 @@ export function currentOperation(env: IEnvOption) {
  * @param {Operation} oper
  * @returns
  */
-function getCurrentDist(ds: IOutputDist, oper: Operation) {
+function getCurrentDist(ds: IAssertDist, oper: Operation) {
     let dist: string;
     switch (oper) {
         case Operation.build:
-            dist = ds.build || taskStringVal(ds.dist, oper);
+            dist = ds.buildDist || taskStringVal(ds.dist, oper);
             break;
         case Operation.test:
-            dist = ds.test || ds.build || taskStringVal(ds.dist, oper);
+            dist = ds.testDist || ds.buildDist || taskStringVal(ds.dist, oper);
             break;
         case Operation.e2e:
-            dist = ds.e2e || ds.build || taskStringVal(ds.dist, oper);
+            dist = ds.e2eDist || ds.buildDist || taskStringVal(ds.dist, oper);
             break;
         case Operation.release:
-            dist = ds.release || taskStringVal(ds.dist, oper);
+            dist = ds.releaseDist || taskStringVal(ds.dist, oper);
             break;
         case Operation.deploy:
-            dist = ds.deploy || taskStringVal(ds.dist, oper);
+            dist = ds.deployDist || taskStringVal(ds.dist, oper);
             break;
         default:
             dist = '';

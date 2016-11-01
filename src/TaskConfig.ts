@@ -84,6 +84,22 @@ export interface ITaskInfo {
     watch?: boolean | string;
 
     /**
+     * is test or not.
+     * 
+     * @type {(boolean | string)}
+     * @memberOf ITaskInfo
+     */
+    test?: boolean | string;
+
+    /**
+     * is e2e test or not.
+     * 
+     * @type {(boolean | string)}
+     * @memberOf ITaskInfo
+     */
+    e2e?: boolean | string;
+
+    /**
      * assert tasks. assert group name or extends name.
      * 
      * @type {Src}
@@ -262,14 +278,45 @@ export type Pipe = (config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITr
 
 export type OutputPipe = (stream: IOutput, config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
 
-export interface IOutputDist {
+/**
+ * assert dist.
+ * 
+ * @export
+ * @interface IAssertDist
+ */
+export interface IAssertDist {
     /**
      * the src file filter string. default 'src'.
      * 
      * @type {TaskSource}
-     * @memberOf IOutputDist
+     * @memberOf IAssertDist
      */
-    src?: TaskSource
+    src?: TaskSource;
+
+    /**
+     * the e2e src file filter string. default 'src'.
+     * 
+     * @type {TaskSource}
+     * @memberOf IAssertDist
+     */
+    e2eSrc?: TaskSource;
+
+    /**
+     * the test src file filter string. default 'src'.
+     * 
+     * @type {TaskSource}
+     * @memberOf IAssertDist
+     */
+    testSrc?: TaskSource
+
+
+    /**
+     * the watch src file filter string. default 'src'.
+     * 
+     * @type {TaskSource}
+     * @memberOf IAssertDist
+     */
+    watchSrc?: TaskSource
 
     /**
      * default output folder. if empty use parent setting, or ues 'dist'.
@@ -281,35 +328,35 @@ export interface IOutputDist {
      * @type {string}
      * @memberOf Dist
      */
-    build?: string;
+    buildDist?: string;
     /**
      * test output folder. if empty use parent setting, or ues 'dist'.
      * 
      * @type {string}
      * @memberOf Dist
      */
-    test?: string;
+    testDist?: string;
     /**
      * e2e output folder. if empty use parent setting, or ues 'dist'.
      * 
      * @type {string}
      * @memberOf Dist
      */
-    e2e?: string;
+    e2eDist?: string;
     /**
      * release output folder. if empty use parent setting, or ues 'dist'.
      * 
      * @type {string}
      * @memberOf Dist
      */
-    release?: string;
+    releaseDist?: string;
     /**
      * deploy output folder. if empty use parent setting, or ues 'dist'.
      * 
      * @type {string}
      * @memberOf Dist
      */
-    deploy?: string;
+    deployDist?: string;
 }
 
 
@@ -318,9 +365,9 @@ export interface IOutputDist {
  * 
  * @export
  * @interface IDynamicTask
- * @extends {IOutputDist}
+ * @extends {IAssertDist}
  */
-export interface IDynamicTask extends IOutputDist, ITaskInfo {
+export interface IDynamicTask extends IAssertDist, ITaskInfo {
     /**
      * task name
      * 
@@ -477,9 +524,9 @@ export interface ISubTaskOption {
  * 
  * @export
  * @interface IAsserts
- * @extends {IOutputDist}
+ * @extends {IAssertDist}
  */
-export interface IAsserts extends IOutputDist, ITaskLoaderOption {
+export interface IAsserts extends IAssertDist, ITaskLoaderOption {
     /**
      * IAsserts extends name. for register dynamic task.
      * 
@@ -599,22 +646,23 @@ export interface ITaskConfig {
     /**
      * get Src of current state.   default implement in bindingConfig.
      * 
-     * @param {IAsserts} [assert]
+     * @param {IAssertDist} [assert]
+     * @param {ITaskInfo} [taskinfo]
      * @returns {Src}
      * 
      * @memberOf ITaskConfig
      */
-    getSrc?(assert?: IAsserts): Src;
+    getSrc?(assert?: IAssertDist, taskinfo?: ITaskInfo): Src;
 
     /**
      * get dist of current state.  default implement in bindingConfig.
      * 
-     * @param {IOutputDist} dist
+     * @param {IAssertDist} dist
      * @returns {string}
      * 
      * @memberOf ITaskConfig
      */
-    getDist?(dist?: IOutputDist): string;
+    getDist?(dist?: IAssertDist): string;
 
     /**
      * custom config run tasks sequence in.
