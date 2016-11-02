@@ -83,6 +83,17 @@ export class TestTaskC implements IDynamicTasks {
     }
 }
 
+@task
+export class TestTaskX implements ITask {
+    public decorator: ITaskInfo = {};
+    constructor() {
+    }
+    setup(config: ITaskConfig, gulp): TaskResult {
+        // todo...
+        return 'TestTaskX';
+    }
+}
+
 @task({
     oper: Operation.build | Operation.test
 })
@@ -129,6 +140,8 @@ export class TaskDefine implements ITaskDefine {
 
 @task({
     group: ['test', 'node']
+    oper: Operation.build | Operation.test
+    ...
 })
 export class TestTaskGA implements ITask {
     public decorator: ITaskInfo = {};
@@ -140,7 +153,9 @@ export class TestTaskGA implements ITask {
     }
 }
 @task({
-    group: 'node'
+    group: 'node',
+    oper: Operation.build | Operation.test
+    ...
 })
 export class TestTaskGB implements ITask {
     public decorator: ITaskInfo = {};
@@ -154,7 +169,9 @@ export class TestTaskGB implements ITask {
 
 
 @task({
-    group: ['test', 'node']
+    group: ['test', 'node'],
+    oper: Operation.build | Operation.test
+    ...
 })
 export class TestTaskGC implements ITask {
     public decorator: ITaskInfo = {};
@@ -163,6 +180,34 @@ export class TestTaskGC implements ITask {
     setup(config: ITaskConfig, gulp): TaskResult {
         // todo...
         return 'TestTaskGC';
+    }
+}
+
+@dynamicTask({
+    group: 'ts',
+    oper: Operation.build | Operation.test
+    ...
+})
+export class TestTaskC implements IDynamicTasks {
+    tasks(): IDynamicTask[]{
+        return [
+            {
+                name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
+                pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
+                output: [
+                    (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
+                    (tsmap, config, dt) => {
+                        if (config.oper === Operation.release || config.oper === Operation.deploy) {
+                            return tsmap.js.pipe(babel({ presets: ['es2015'] }))
+                                .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
+                                .pipe(gulp.dest(config.getDist(dt)));
+                        } else {
+                            return tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist(dt)));
+                        }
+                    }
+                ]
+            }
+        ]
     }
 }
 
