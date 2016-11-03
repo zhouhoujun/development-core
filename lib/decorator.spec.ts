@@ -17,7 +17,7 @@ describe('decorator:', () => {
         let tasks = findTasks(model);
 
         expect(tasks.length).gt(0);
-        console.log(tasks);
+        // console.log(tasks);
 
         let seq = toSequence(gulp, tasks, bindingConfig({
             oper: Operation.build,
@@ -25,7 +25,7 @@ describe('decorator:', () => {
             option: { src: 'src', dist: 'lib' }
         }));
 
-        console.log(seq);
+        // console.log(seq);
         expect(seq.length).eq(5);
         expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,TestTaskC')
         expect(seq[0]).eq('test-clean');

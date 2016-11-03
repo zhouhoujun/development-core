@@ -75,7 +75,7 @@ describe('generateTask', () => {
         expect(tks.length).to.equals(2);
 
         let tseq = registerTask(tks, Operation.build, {});
-        console.log(tseq);
+        // console.log(tseq);
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(2);
@@ -91,7 +91,7 @@ describe('generateTask', () => {
         expect(tks.length).to.equals(3);
 
         let tseq = registerTask(tks, Operation.build, { watch: true });
-        console.log(tseq);
+        // console.log(tseq);
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(3);
@@ -107,7 +107,7 @@ describe('generateTask', () => {
         expect(tks.length).to.equals(4);
 
         let tseq = registerTask(tks, Operation.test, { watch: true });
-        console.log(tseq);
+        // console.log(tseq);
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(4);
@@ -124,7 +124,7 @@ describe('generateTask', () => {
         expect(tks.length).to.equals(4);
 
         let tseq = registerTask(tks, Operation.release, { watch: true });
-        console.log(tseq);
+        // console.log(tseq);
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(4);

@@ -85,7 +85,7 @@ export abstract class PipeTask implements IPipeTask {
         let option = config.option;
         let loader = <ILoaderOption>option.loader;
         if (loader && _.isFunction(loader.pipes)) {
-            return _.isFunction(loader.pipes) ? loader.pipes(config, option, gulp) : _.filter(<Pipe[]>loader.pipes, p => _.isFunction(p) || !p.name || (p.name && p.name === dist.name));
+            return _.isFunction(loader.pipes) ? loader.pipes(config, option, gulp) : _.filter(<Pipe[]>loader.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
         } else {
             return [];
         }
@@ -124,11 +124,19 @@ export abstract class PipeTask implements IPipeTask {
             return Promise.resolve(this.sourceStream(config, option, gulp))
                 .then(psrc => {
                     return Promise.all(_.map(this.pipes(config, option, gulp), (p: Pipe) => {
-                        return _.isFunction(p) ? p(config, option, gulp) : p.toTransform(config, option, gulp);
+                        if (_.isFunction(p)) {
+                            return p(config, option, gulp);
+                        } else {
+                            return Promise.resolve(p.toTransform(config, option, gulp))
+                                .then(trs => {
+                                    trs.order = p.order;
+                                    return trs;
+                                });
+                        }
                     }))
                         .then(tans => {
                             let len = tans.length;
-                            tans = _.orderBy(tans, t => {
+                            tans = _.orderBy(_.filter(tans, t => t), t => {
                                 if (_.isArray(t)) {
                                     return len;
                                 } else {

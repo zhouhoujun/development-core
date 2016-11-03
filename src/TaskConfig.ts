@@ -167,6 +167,13 @@ export interface IPipe {
      */
     name?: string;
     /**
+     * transform order.
+     * 
+     * @type {number}
+     * @memberOf IPipe
+     */
+    order?: number;
+    /**
      * transform to pipe work
      * 
      * @param {ITaskConfig} config

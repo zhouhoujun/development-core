@@ -35,6 +35,7 @@ export interface IOutput extends ITransform {
 }
 export interface IPipe {
     name?: string;
+    order?: number;
     toTransform?(config: ITaskConfig, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
 }
 export declare type Pipe = IPipe | ((config?: ITaskConfig, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
