@@ -28,6 +28,14 @@ export function task<T extends Function>(target?: (new <T>() => T) | ITaskInfo):
     }
 }
 
+/**
+ * dynamic task decorator.
+ * 
+ * @export
+ * @template T
+ * @param {((new <T>() => T) | ITaskInfo)} [target]
+ * @returns {*}
+ */
 export function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITaskInfo): any {
     if (target && _.isFunction(target)) {
         target['__dynamictask'] = true;
