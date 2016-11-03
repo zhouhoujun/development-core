@@ -40,12 +40,14 @@ export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
         let name = '';
         if (_.isString(dt)) {
             name = dt;
-        } else if (dt) {
+        } else if (dt && cfg.option !== dt) {
             name = taskStringVal(dt.name, cfg.oper)
+        } else {
+            name = deft;
         }
         let parentName = taskStringVal(cfg.option.name, cfg.oper);
 
-        return parentName ? `${parentName}-${name || deft}` : name;
+        return parentName ? `${parentName}-${name}` : name;
     });
 
     cfg.getSrc = cfg.getSrc || ((assert?: IAssertDist, taskinfo?: ITaskInfo): Src => {

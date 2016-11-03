@@ -51,15 +51,6 @@ let createTask = (env) => {
             oper: Operation.test | Operation.release | Operation.deploy,
             pipes: [mocha],
             output: null
-            // pipe(src, cfg, dt, callback) {
-            //     src.pipe(mocha())
-            //         .once('error', (err) => {
-            //             callback(err);
-            //         })
-            //         .once('end', () => {
-            //             callback();
-            //         });
-            // }
         },
         { src: 'src/**/*.ts', name: 'watch', watchTasks: ['tscompile'] },
         { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }

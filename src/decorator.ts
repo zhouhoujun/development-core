@@ -82,8 +82,8 @@ export function findTasks(target: any, match?: ITaskInfo): ITask[] {
                 }
             }
 
-            let task: ITask = new target();
-            task.decorator = tinfo;
+            let task: ITask = new target(tinfo);
+            task.decorator = _.extend(task.decorator || {}, tinfo);
             tasks.push(task);
         } else if (target['__dynamictask']) {
             let tinfo: ITaskInfo = target['__dynamictask'];

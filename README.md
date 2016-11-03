@@ -45,7 +45,21 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
  ```ts
 
  // module A
-import { taskdefine, bindingConfig, Operation, ITaskOption, IEnvOption, ITaskConfig, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from 'development-core';
+import {PipeTask, Pipe, IAssertDist, taskdefine, bindingConfig, Operation, ITaskOption, IEnvOption, ITaskConfig, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from 'development-core';
+
+@task({
+    group: 'pipetask'
+})
+export class TestPipeTask extends PipeTask {
+    name = 'pipetask';
+    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): Pipe[] {
+        return [
+            () => cache('typescript'),
+            sourcemaps.init,
+            tsProject
+        ]
+    }
+}
 
 @dynamicTask
 export class TestTaskC implements IDynamicTasks {

@@ -1,5 +1,5 @@
 import * as mocha from 'gulp-mocha';
-
+import { Gulp } from 'gulp';
 const del = require('del');
 const cache = require('gulp-cached');
 const ts = require('gulp-typescript');
@@ -7,7 +7,7 @@ const sourcemaps = require('gulp-sourcemaps');
 let tsProject = ts.createProject('tsconfig.json');
 const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
-import { taskdefine, bindingConfig, IDynamicTask, Operation, ITaskOption, IEnvOption, ITaskConfig, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from '../../src';
+import { IPipe, PipeTask, IAssertDist, taskdefine, bindingConfig, IDynamicTaskOption, Operation, ITaskOption, IEnvOption, ITaskConfig, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from '../../src';
 
 
 @task({
@@ -70,9 +70,23 @@ export class TestTaskE implements ITask {
     }
 }
 
+@task({
+    group: 'pipetask'
+})
+export class TestPipeTask extends PipeTask {
+    name = 'pipetask';
+    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): IPipe[] {
+        return [
+            () => cache('typescript'),
+            sourcemaps.init,
+            tsProject
+        ]
+    }
+}
+
 @dynamicTask
 export class TestDynamicTask implements IDynamicTasks {
-    tasks(): IDynamicTask[] {
+    tasks(): IDynamicTaskOption[] {
         return [
             {
                 name: 'test-tscompile', src: 'src/**/*.ts', dist: 'lib',
@@ -100,7 +114,7 @@ export class TestDynamicTask implements IDynamicTasks {
                         });
                 }
             },
-            { name: 'test-watch', src: 'src/**/*.ts',  watchTasks: ['tscompile'] },
+            { name: 'test-watch', src: 'src/**/*.ts', watchTasks: ['tscompile'] },
             { name: 'test-clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
         ];
     }

@@ -113,135 +113,6 @@ export type TaskResult = Src | void;
 export type TaskSource = Src | ((oper?: Operation) => Src);
 export type TaskString = string | ((oper?: Operation) => string);
 
-// function not support deforator.
-// export type Task = (gulp: Gulp, config: ITaskConfig) => TaskSequence;
-/**
- * task interface.
- * 
- * @export
- * @interface ITask
- */
-export interface ITask {
-    /**
-     * decorator of task.
-     * 
-     * @type {ITaskInfo}
-     * @memberOf ITask
-     */
-    decorator: ITaskInfo
-    /**
-     * setup task.
-     * 
-     * @param {ITaskConfig} config
-     * @param {Gulp} [gulp]
-     * @returns {TaskResult}
-     * 
-     * @memberOf ITask
-     */
-    setup(config: ITaskConfig, gulp?: Gulp): TaskResult;
-}
-
-/**
- * 
- * 
- * @export
- * @interface ITasks
- */
-export interface IDynamicTasks {
-    tasks(): IDynamicTask[];
-}
-
-/**
- * task loader option.
- * 
- * @export
- * @interface ILoaderOption
- */
-export interface ILoaderOption {
-    /**
-     * loader type, default module.
-     * 
-     * @type {string}
-     * @memberOf ILoaderOption
-     */
-    type?: string;
-    /**
-     * module name or url
-     * 
-     * @type {string | Object}
-     * @memberOf ILoaderOption
-     */
-    module?: string | Object;
-
-    /**
-     * config module name or url.
-     * 
-     * @type {string | Object}
-     * @memberOf ILoaderOption
-     */
-    configModule?: string | Object;
-
-    /**
-     * config module name or url.
-     * 
-     * @type {string | Object}
-     * @memberOf ILoaderOption
-     */
-    taskModule?: string | Object;
-
-    /**
-     * task define.
-     * 
-     * @type {ITaskDefine}
-     * @memberOf ILoaderOption
-     */
-    taskDefine?: ITaskDefine;
-
-    /**
-     * custom external judage the object is right task func.
-     * 
-     * @param {*} mdl
-     * @param {string} name
-     * @returns {boolean}
-     * 
-     * @memberOf ILoaderOption
-     */
-    isTaskFunc?(mdl: any): boolean;
-    /**
-     * custom external judage the object is right task define.
-     * 
-     * @param {*} mdl
-     * @returns {boolean}
-     * 
-     * @memberOf ILoaderOption
-     */
-    isTaskDefine?(mdl: any): boolean;
-}
-
-/**
- * loader to load tasks from directory.
- * 
- * @export
- * @interface DirLoaderOption
- * @extends {ILoaderOption}
- */
-export interface IDirLoaderOption extends ILoaderOption {
-    /**
-     * loader dir
-     * 
-     * @type {TaskSource}
-     * @memberOf ILoaderOption
-     */
-    dir?: TaskSource
-    /**
-     * config in directory. 
-     * 
-     * @type {string}
-     * @memberOf DirLoaderOption
-     */
-    dirConfigFile?: string;
-}
-
 
 /**
  * transform interface.
@@ -251,6 +122,13 @@ export interface IDirLoaderOption extends ILoaderOption {
  * @extends {NodeJS.ReadWriteStream}
  */
 export interface ITransform extends NodeJS.ReadWriteStream {
+    /**
+     * transform order.
+     * 
+     * @type {number}
+     * @memberOf ITransform
+     */
+    order?: number;
     /**
      * transform pipe
      * 
@@ -274,9 +152,67 @@ export interface IOutput extends ITransform {
     js?: ITransform
 }
 
-export type Pipe = (config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
+/**
+ * pipe work
+ * 
+ * @export
+ * @interface IPipe
+ */
+export interface IPipe {
+    /**
+     * pipe work group name.
+     * 
+     * @type {string}
+     * @memberOf IPipe
+     */
+    name?: string;
+    /**
+     * transform to pipe work
+     * 
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} [dist]
+     * @param {Gulp} [gulp]
+     * @returns {(ITransform | Promise<ITransform>)}
+     * 
+     * @memberOf IPipe
+     */
+    toTransform?(config: ITaskConfig, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
+}
 
-export type OutputPipe = (stream: IOutput, config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => ITransform | Promise<ITransform>;
+export type Pipe = IPipe | ((config?: ITaskConfig, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
+
+
+
+/**
+ * output pipe
+ * 
+ * @export
+ * @interface IOutputPipe
+ */
+export interface IOutputPipe {
+    /**
+     *  pipe work group name.
+     * 
+     * @type {string}
+     * @memberOf IOutputPipe
+     */
+    name?: string;
+    /**
+     * output pipes
+     * 
+     * @param {IOutput} stream
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} [dist]
+     * @param {Gulp} [gulp]
+     * @returns {(ITransform | Promise<ITransform>)}
+     * 
+     * @memberOf IOutputPipe
+     */
+    toTransform?(stream: IOutput, config: ITaskConfig, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
+}
+
+export type OutputPipe = IOutputPipe | ((stream: IOutput, config?: ITaskConfig, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
+
 
 /**
  * assert dist.
@@ -285,6 +221,14 @@ export type OutputPipe = (stream: IOutput, config?: ITaskConfig, dt?: IDynamicTa
  * @interface IAssertDist
  */
 export interface IAssertDist {
+    /**
+     * IAsserts extends name. for register dynamic task.
+     * 
+     * @type {TaskName}
+     * @memberOf IAsserts
+     */
+    name?: TaskString;
+
     /**
      * the src file filter string. default 'src'.
      * 
@@ -360,93 +304,203 @@ export interface IAssertDist {
 }
 
 
+
+// function not support deforator.
+// export type Task = (gulp: Gulp, config: ITaskConfig) => TaskSequence;
+
+/**
+ * task interface.
+ * 
+ * @export
+ * @interface ITask
+ */
+export interface ITask {
+    /**
+     * decorator of task.
+     * 
+     * @type {ITaskInfo}
+     * @memberOf ITask
+     */
+    decorator: ITaskInfo
+    /**
+     * setup task.
+     * 
+     * @param {ITaskConfig} config
+     * @param {Gulp} [gulp]
+     * @returns {TaskResult}
+     * 
+     * @memberOf ITask
+     */
+    setup(config: ITaskConfig, gulp?: Gulp): TaskResult;
+}
+
+
+/**
+ * pipe works.
+ * 
+ * @export
+ * @interface IPipeOption
+ */
+export interface IPipeOption {
+    /**
+     * custom stream pipe.
+     * 
+     * @param {ITransform} gulpsrc
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} [dist]
+     * @param {TaskCallback} [callback]
+     * @returns {(ITransform | Promise<ITransform> | void)}
+     * 
+     * @memberOf IPipeOption
+     */
+    pipe?(gulpsrc: ITransform, config: ITaskConfig, dist?: IAssertDist, callback?: TaskCallback): ITransform | Promise<ITransform> | void;
+
+    /**
+     * task pipe works.
+     * 
+     * 
+     * @memberOf IDynamicTaskOption
+     */
+    pipes?: Pipe[] | ((config?: ITaskConfig, dist?: IAssertDist, gulp?: Gulp) => Pipe[]);
+
+    /**
+     * output pipe task
+     *
+     * 
+     * @memberOf IPipeOption
+     */
+    output?: IOutputPipe[] | ((config?: ITaskConfig, dist?: IAssertDist, gulp?: Gulp) => IOutputPipe[]);
+}
+
+
 /**
  * dynamic gulp task.
  * 
  * @export
- * @interface IDynamicTask
+ * @interface IDynamicTaskOption
  * @extends {IAssertDist}
  */
-export interface IDynamicTask extends IAssertDist, ITaskInfo {
+export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ITaskInfo {
     /**
      * task name
      * 
      * @type {TaskName}
-     * @memberOf IDynamicTask
+     * @memberOf IDynamicTaskOption
      */
     name: TaskString;
-    // /**
-    //  * task order.
-    //  * 
-    //  * @type {number}
-    //  * @memberOf IDynamicTask
-    //  */
-    // order?: number;
-    // /**
-    //  * task type. default for all Operation.
-    //  * 
-    //  * @type {Operation}
-    //  * @memberOf IDynamicTask
-    //  */
-    // oper?: Operation;
 
     /**
      * watch tasks
      * 
      * 
-     * @memberOf IDynamicTask
+     * @memberOf IDynamicTaskOption
      */
-    watchTasks?: Array<string | WatchCallback> | ((config?: ITaskConfig, dt?: IDynamicTask) => Array<string | WatchCallback>);
+    watchTasks?: Array<string | WatchCallback> | ((config?: ITaskConfig, dt?: IDynamicTaskOption) => Array<string | WatchCallback>);
     /**
      * watch changed.
      * 
      * @param {WatchEvent} event
      * @param {ITaskConfig} config
      * 
-     * @memberOf IDynamicTask
+     * @memberOf IDynamicTaskOption
      */
     watchChanged?(event: WatchEvent, config: ITaskConfig);
-    /**
-     * custom stream pipe.
-     * 
-     * @param {ITransform} gulpsrc
-     * @param {ITaskConfig} config
-     * @param {IDynamicTask} [dt]
-     * @param {TaskCallback} [callback]
-     * @returns {(ITransform | Promise<ITransform> | void)}
-     * 
-     * @memberOf IDynamicTask
-     */
-    pipe?(gulpsrc: ITransform, config: ITaskConfig, dt?: IDynamicTask, callback?: TaskCallback): ITransform | Promise<ITransform> | void;
-
-    /**
-     * task pipe works.
-     * 
-     * 
-     * @memberOf IDynamicTask
-     */
-    pipes?: Pipe[] | ((config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => Pipe[]);
-
-    /**
-     * output pipe task
-     *
-     * 
-     * @memberOf IDynamicTask
-     */
-    output?: OutputPipe[] | ((config?: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp) => OutputPipe[]);
 
     /**
      * custom task.
      * 
      * @param {ITaskConfig} config
-     * @param {IDynamicTask} [dt]
+     * @param {IDynamicTaskOption} [dt]
      * @param {Gulp} [gulp]
      * @returns {(void | ITransform | Promise<any>)}
      * 
-     * @memberOf IDynamicTask
+     * @memberOf IDynamicTaskOption
      */
-    task?(config: ITaskConfig, dt?: IDynamicTask, gulp?: Gulp): void | ITransform | Promise<any>;
+    task?(config: ITaskConfig, dt?: IDynamicTaskOption, gulp?: Gulp): void | ITransform | Promise<any>;
 
+}
+
+/**
+ * dynamic tasks
+ * 
+ * @export
+ * @interface ITasks
+ */
+export interface IDynamicTasks {
+    tasks(): IDynamicTaskOption[];
+}
+
+/**
+ * task loader option.
+ * 
+ * @export
+ * @interface ILoaderOption
+ * @extends {IPipeOption}
+ */
+export interface ILoaderOption extends IPipeOption {
+    /**
+     * loader type, default module.
+     * 
+     * @type {string}
+     * @memberOf ILoaderOption
+     */
+    type?: string;
+    /**
+     * module name or url
+     * 
+     * @type {string | Object}
+     * @memberOf ILoaderOption
+     */
+    module?: string | Object;
+
+    /**
+     * config module name or url.
+     * 
+     * @type {string | Object}
+     * @memberOf ILoaderOption
+     */
+    configModule?: string | Object;
+
+    /**
+     * config module name or url.
+     * 
+     * @type {string | Object}
+     * @memberOf ILoaderOption
+     */
+    taskModule?: string | Object;
+
+    /**
+     * task define.
+     * 
+     * @type {ITaskDefine}
+     * @memberOf ILoaderOption
+     */
+    taskDefine?: ITaskDefine;
+
+}
+
+/**
+ * loader to load tasks from directory.
+ * 
+ * @export
+ * @interface DirLoaderOption
+ * @extends {ILoaderOption}
+ */
+export interface IDirLoaderOption extends ILoaderOption {
+    /**
+     * loader dir
+     * 
+     * @type {TaskSource}
+     * @memberOf ILoaderOption
+     */
+    dir?: TaskSource
+    /**
+     * config in directory. 
+     * 
+     * @type {string}
+     * @memberOf DirLoaderOption
+     */
+    dirConfigFile?: string;
 }
 
 /**
@@ -460,10 +514,10 @@ export interface IDynamicLoaderOption extends ILoaderOption {
     /**
      * dynamic task
      * 
-     * @type {(IDynamicTask | IDynamicTask[])}
+     * @type {(IDynamicTaskOption | IDynamicTaskOption[])}
      * @memberOf IDynamicLoaderOption
      */
-    dynamicTasks?: IDynamicTask | IDynamicTask[];
+    dynamicTasks?: IDynamicTaskOption | IDynamicTaskOption[];
 }
 
 
@@ -479,10 +533,10 @@ export interface ITaskLoaderOption {
     /**
      * task loader
      * 
-     * @type {(string | customLoader | ILoaderOption | IDynamicTask | IDynamicTask[])}
+     * @type {(string | customLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[])}
      * @memberOf ITaskLoaderOption
      */
-    loader?: string | customLoader | ILoaderOption | IDynamicTask | IDynamicTask[];
+    loader?: string | customLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[];
 
     // /**
     //  * custom set run tasks sequence.
@@ -527,21 +581,14 @@ export interface ISubTaskOption {
  * @extends {IAssertDist}
  */
 export interface IAsserts extends IAssertDist, ITaskLoaderOption {
-    /**
-     * IAsserts extends name. for register dynamic task.
-     * 
-     * @type {TaskName}
-     * @memberOf IAsserts
-     */
-    name?: TaskString;
 
     /**
      * tasks to deal with IAsserts.
      * 
-     * @type {IMap<Src | IAsserts, IDynamicTask[]>}
+     * @type {IMap<Src | IAsserts, IDynamicTaskOption[]>}
      * @memberOf IAsserts
      */
-    asserts?: IMap<Src | IAsserts | IDynamicTask[]>;
+    asserts?: IMap<Src | IAsserts | IDynamicTaskOption[]>;
 
     /**
      * set IAsserts task order in this task sequence.
@@ -565,10 +612,10 @@ export interface ITaskOption extends IAsserts, ISubTaskOption {
     /**
      * task loader must setting.
      * 
-     * @type {(string | customLoader | ILoaderOption | IDynamicTask | IDynamicTask[])}
+     * @type {(string | customLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[])}
      * @memberOf ITaskOption
      */
-    loader: string | customLoader | ILoaderOption | IDynamicTask | IDynamicTask[];
+    loader: string | customLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[];
 
     /**
      * the src file filter string. default 'src'.
@@ -749,13 +796,13 @@ export interface ITaskConfig {
     /**
      * dynamic generate tasks.  default implement in bindingConfig.
      * 
-     * @param {(IDynamicTask | IDynamicTask[])} tasks
+     * @param {(IDynamicTaskOption | IDynamicTaskOption[])} tasks
      * @param {ITaskInfo} [match]
      * @returns {ITask[]}
      * 
      * @memberOf ITaskConfig
      */
-    generateTask?(tasks: IDynamicTask | IDynamicTask[], match?: ITaskInfo): ITask[];
+    generateTask?(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[];
 
     /**
      * add task result to task sequence. default implement in bindingConfig.
