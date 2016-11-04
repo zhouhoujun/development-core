@@ -5,7 +5,7 @@
     "target":"es2015",
     "declaration": true,
     "allowSyntheticDefaultImports": true,
-    "removeComments": true,
+    "removeComments": false,
     "noLib": false,
     "jsx":"preserve",
     "emitDecoratorMetadata": true,
