@@ -1,5 +1,5 @@
 import { Gulp } from 'gulp';
-import { IAssertDist, ITaskInfo, TaskResult, ITaskConfig, Pipe, IOutputPipe, ITask, ITransform, ILoaderOption } from './TaskConfig';
+import { IAssertDist, ITaskInfo, TaskResult, ITaskConfig, Pipe, OutputPipe, ITask, ITransform, ILoaderOption } from './TaskConfig';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 import * as _ from 'lodash';
@@ -52,7 +52,7 @@ export interface IPipeTask extends ITask {
      * 
      * @memberOf IPipeTask
      */
-    output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): IOutputPipe[]
+    output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): OutputPipe[]
 }
 
 /**
@@ -91,12 +91,12 @@ export abstract class PipeTask implements IPipeTask {
         }
     }
 
-    output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): IOutputPipe[] {
+    output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): OutputPipe[] {
         let option = config.option;
         let loader = <ILoaderOption>option.loader;
         if (loader && !_.isString(loader) && !_.isArray(loader)) {
             if (loader.output) {
-                return _.isFunction(loader.output) ? loader.output(config, option, gulp) : loader.output;
+                return _.isFunction(loader.output) ? loader.output(config, option, gulp) : _.filter(<OutputPipe[]>loader.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
             } else if (loader.output === null) {
                 return [(stream) => stream];
             }
@@ -156,16 +156,21 @@ export abstract class PipeTask implements IPipeTask {
                 .then(stream => {
                     let outputs = this.output(config, option, gulp);
                     return Promise.all(_.map(outputs, output => {
-                        return Promise.resolve<NodeJS.ReadWriteStream>((_.isFunction(output) ? output(stream, config, option, gulp) : output))
-                            .then(output => {
-                                return new Promise((resolve, reject) => {
-                                    output
-                                        .once('end', () => {
-                                            resolve(output);
-                                        })
-                                        .once('error', reject);
-                                });
-                            });
+                        if (_.isFunction(output)) {
+                            return output(stream, config, option, gulp);
+                        } else {
+                            return output.toTransform(stream, config, option, gulp);
+                        }
+                    }))
+                }).then(outputs => {
+                    return Promise.all(_.map(outputs, output => {
+                        return new Promise((resolve, reject) => {
+                            output
+                                .once('end', () => {
+                                    resolve(output);
+                                })
+                                .once('error', reject);
+                        });
                     }));
                 })
                 .catch(err => {
