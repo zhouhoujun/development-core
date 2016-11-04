@@ -63,7 +63,7 @@ export class TestPipeTask extends PipeTask {
 
 @dynamicTask
 export class TestTaskC implements IDynamicTasks {
-    tasks(): IDynamicTask[]{
+    tasks(): IDynamicTaskOption[]{
         return [
             {
                 name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
@@ -203,7 +203,7 @@ export class TestTaskGC implements ITask {
     ...
 })
 export class TestTaskC implements IDynamicTasks {
-    tasks(): IDynamicTask[]{
+    tasks(): IDynamicTaskOption[]{
         return [
             {
                 name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
