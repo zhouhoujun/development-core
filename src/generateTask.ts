@@ -23,7 +23,7 @@ class DynamicTask implements ITask {
 class DynamicPipeTask extends PipeTask {
     constructor(private dt: IDynamicTaskOption, info?: ITaskInfo) {
         super(info);
-        this.decorator = info || { order: dt.order, oper: dt.oper, watch: dt.watch, group: dt.group };
+        this.decorator = info || dt;
     }
 
     protected getOption(config: ITaskConfig) {
