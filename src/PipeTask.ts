@@ -148,7 +148,11 @@ export abstract class PipeTask implements IPipeTask {
                             });
 
                             _.each(tans, stream => {
-                                psrc = psrc.pipe(stream);
+                                if (_.isFunction(psrc.transformPipe)) {
+                                    psrc = psrc.transformPipe(stream);
+                                } else {
+                                    psrc = psrc.pipe(stream);
+                                }
                             });
                             return psrc;
                         })
