@@ -8,7 +8,7 @@
     "gulp": "gulp",
     "postinstall": "npm prune",
     "reinstall": "npm cache clean && npm install",
-    "test": "gulp build test",
+    "test": "gulp build --test",
     "prepublish": "gulp build --release",
     "e2e": "protractor",
     "e2e.live": "protractor --elementExplorer"
