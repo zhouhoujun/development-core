@@ -36,8 +36,8 @@ export declare function runSequence(gulp: Gulp, tasks: Src[]): Promise<any>;
  *
  * @export
  * @param {Gulp} gulp
- * @param {ITask[]} tasks
+ * @param {ITask[] | Promise<ITask[]>} tasks
  * @param {TaskConfig} config
  * @returns {Promise<any>}
  */
-export declare function runTaskSequence(gulp: Gulp, tasks: ITask[], config: ITaskConfig): Promise<any>;
+export declare function runTaskSequence(gulp: Gulp, tasks: ITask[] | Promise<ITask[]>, config: ITaskConfig): Promise<any>;

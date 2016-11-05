@@ -147,11 +147,14 @@ function startTask(gulp: Gulp, task: Src): Promise<any> {
  * 
  * @export
  * @param {Gulp} gulp
- * @param {ITask[]} tasks
+ * @param {ITask[] | Promise<ITask[]>} tasks
  * @param {TaskConfig} config
  * @returns {Promise<any>}
  */
-export function runTaskSequence(gulp: Gulp, tasks: ITask[], config: ITaskConfig): Promise<any> {
-    let taskseq = toSequence(gulp, tasks, config);
-    return runSequence(gulp, taskseq);
+export function runTaskSequence(gulp: Gulp, tasks: ITask[] | Promise<ITask[]>, config: ITaskConfig): Promise<any> {
+    return Promise.resolve(tasks)
+        .then(tasks => {
+            let taskseq = toSequence(gulp, tasks, config);
+            return runSequence(gulp, taskseq);
+        });
 }

@@ -61,6 +61,22 @@ export class TestPipeTask extends PipeTask {
     }
 }
 
+
+@task
+export class TestPipeTask extends PipeTask {
+    name = 'pipetask1';
+    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): Pipe[] {
+        return [
+            () => cache('typescript'),
+            {
+                oper: Operation.build,
+                toTransform: ()=> sourcemaps.init(),
+            },
+            tsProject
+        ]
+    }
+}
+
 @dynamicTask
 export class TestTaskC implements IDynamicTasks {
     tasks(): IDynamicTaskOption[]{
@@ -227,7 +243,40 @@ export class TestTaskC implements IDynamicTasks {
 
 ```
 
-## user task
+## user task, add special pipe work or add special output
+
+```ts
+
+// module use.
+import { findTasks, bindingConfig, Operation, runTaskSequence, findTaskDefine }  from 'development-core';
+
+let config = bindingConfig({
+    env: env, oper: oper,
+    option: {
+        src: 'src',dist: 'lib',
+        loader:{
+            module:'module a',
+            pipes:[
+                {
+                    name: 'tscompile'
+                    oper: Operation.build,
+                    order: 1,
+                    toTransform: ()=> tslint(),
+                },
+            ]
+        }
+    }
+});
+config.findTasks('module a')
+    .then(task =>{
+        // run task;
+        return runTaskSequence(gulp, tasks, tasks);
+    });
+
+
+ ```
+
+## user task by task define
 
 ```ts
 
@@ -238,7 +287,7 @@ let tasks = findTasks(moduleA);
 let tdfs = findTaskDefine(moduleA);
 
 // run task;
-runTaskSequence(tasks, tdfs.loadConfig(Operation.build, {src:'src', dist:'lib'}, {watch:true}));
+runTaskSequence(gulp, tasks, tdfs.loadConfig(Operation.build, {src:'src', dist:'lib'}, {watch:true}));
 
  ```
 

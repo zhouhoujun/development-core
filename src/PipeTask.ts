@@ -127,7 +127,7 @@ export abstract class PipeTask implements IPipeTask {
         if (!p) {
             return false;
         }
-        if (p.name && config.subTaskName(p.name !== name)) {
+        if (p.name && !name.endsWith(name)) {
             return false;
         }
 
