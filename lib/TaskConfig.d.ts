@@ -45,27 +45,36 @@ export interface IMap<T> {
  */
 export declare type Src = string | string[];
 /**
- * task decorator data.
+ * operate.
  *
  * @export
- * @interface ITaskInfo
+ * @interface IOperate
  */
-export interface ITaskInfo {
+export interface IOperate {
     /**
      * operation
      *
      * enmu flags.
      * @type {Operation}
-     * @memberOf ITaskInfo
+     * @memberOf IOperate
      */
     oper?: Operation;
     /**
-     * task sequence index.
+     * order index.
      *
      * @type {number}
-     * @memberOf ITaskInfo
+     * @memberOf IOperate
      */
     order?: number;
+}
+/**
+ * task decorator data.
+ *
+ * @export
+ * @interface ITaskInfo
+ * @extends {IOperate}
+ */
+export interface ITaskInfo extends IOperate {
     /**
      * dynamic generate task name.
      *
@@ -112,14 +121,7 @@ export declare type TaskString = string | ((oper?: Operation) => string);
  * @interface ITransform
  * @extends {NodeJS.ReadWriteStream}
  */
-export interface ITransform extends NodeJS.ReadWriteStream {
-    /**
-     * transform order.
-     *
-     * @type {number}
-     * @memberOf ITransform
-     */
-    order?: number;
+export interface ITransform extends IOperate, NodeJS.ReadWriteStream {
     /**
      * custom set ITransform after pipe out.
      *
@@ -160,12 +162,13 @@ export interface IOutput extends ITransform {
     js?: ITransform;
 }
 /**
- * pipe work
+ * pipe operate
  *
  * @export
- * @interface IPipe
+ * @interface IPipeOperate
+ * @extends {IOperate}
  */
-export interface IPipe {
+export interface IPipeOperate extends IOperate {
     /**
      * pipe work group name.
      *
@@ -173,13 +176,14 @@ export interface IPipe {
      * @memberOf IPipe
      */
     name?: string;
-    /**
-     * transform order.
-     *
-     * @type {number}
-     * @memberOf IPipe
-     */
-    order?: number;
+}
+/**
+ * pipe work
+ *
+ * @export
+ * @interface IPipe
+ */
+export interface IPipe extends IPipeOperate {
     /**
      * transform to pipe work
      *
@@ -199,14 +203,7 @@ export declare type Pipe = IPipe | ((config?: ITaskConfig, dist?: IAssertDist, g
  * @export
  * @interface IOutputPipe
  */
-export interface IOutputPipe {
-    /**
-     *  pipe work group name.
-     *
-     * @type {string}
-     * @memberOf IOutputPipe
-     */
-    name?: string;
+export interface IOutputPipe extends IPipeOperate {
     /**
      * output pipes
      *

@@ -1,5 +1,5 @@
 import { Gulp } from 'gulp';
-import { IAssertDist, ITaskInfo, TaskResult, ITaskConfig, Pipe, OutputPipe, ITask, ITransform, ILoaderOption } from './TaskConfig';
+import { IAssertDist, ITaskInfo, TaskResult, ITaskConfig, IPipeOperate, Pipe, OutputPipe, ITask, ITransform, ILoaderOption } from './TaskConfig';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 import * as _ from 'lodash';
@@ -113,6 +113,31 @@ export abstract class PipeTask implements IPipeTask {
         return gulp.src(config.getSrc(option, this.decorator));
     }
 
+    /**
+     * match pipe Operate
+     * 
+     * @param {IPipeOperate} p
+     * @param {string} name
+     * @param {ITaskConfig} config
+     * @returns
+     * 
+     * @memberOf PipeTask
+     */
+    protected match(p: IPipeOperate, name: string, config: ITaskConfig) {
+        if (!p) {
+            return false;
+        }
+        if (p.name && config.subTaskName(p.name !== name)) {
+            return false;
+        }
+
+        if (p.oper && (p.oper & config.oper) <= 0) {
+            return false;
+        }
+
+        return true;
+    }
+
     setup(config: ITaskConfig, gulp?: Gulp): TaskResult {
         gulp = gulp || coregulp;
         let option = this.getOption(config);
@@ -127,11 +152,16 @@ export abstract class PipeTask implements IPipeTask {
                         if (_.isFunction(p)) {
                             return p(config, option, gulp);
                         } else {
-                            return Promise.resolve(p.toTransform(config, option, gulp))
-                                .then(trs => {
-                                    trs.order = p.order;
-                                    return trs;
-                                });
+                            if (!this.match(p, tk, config)) {
+                                return null;
+                            } else {
+                                return Promise.resolve(p.toTransform(config, option, gulp))
+                                    .then(trs => {
+                                        trs.order = p.order;
+                                        // trs.oper = p.order;
+                                        return trs;
+                                    });
+                            }
                         }
                     }))
                         .then(tans => {
@@ -148,6 +178,10 @@ export abstract class PipeTask implements IPipeTask {
                             });
 
                             _.each(tans, stream => {
+                                if (!this.match(stream, tk, config)) {
+                                    return;
+                                }
+
                                 if (_.isFunction(stream.transformSourcePipe)) {
                                     psrc = stream.transformSourcePipe(psrc);
                                 } else if (_.isFunction(psrc.transformPipe)) {
@@ -165,17 +199,25 @@ export abstract class PipeTask implements IPipeTask {
                         if (_.isFunction(output)) {
                             return output(stream, config, option, gulp);
                         } else {
-                            return output.toTransform(stream, config, option, gulp);
+                            if (!this.match(output, tk, config)) {
+                                return null;
+                            } else {
+                                return output.toTransform(stream, config, option, gulp);
+                            }
                         }
                     }))
                 }).then(outputs => {
                     return Promise.all(_.map(outputs, output => {
                         return new Promise((resolve, reject) => {
-                            output
-                                .once('end', () => {
-                                    resolve(output);
-                                })
-                                .once('error', reject);
+                            if (output) {
+                                output
+                                    .once('end', () => {
+                                        resolve(output);
+                                    })
+                                    .once('error', reject);
+                            } else {
+                                resolve();
+                            }
                         });
                     }));
                 })

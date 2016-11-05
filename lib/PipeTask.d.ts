@@ -1,6 +1,6 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { IAssertDist, ITaskInfo, TaskResult, ITaskConfig, Pipe, OutputPipe, ITask, ITransform } from './TaskConfig';
+import { IAssertDist, ITaskInfo, TaskResult, ITaskConfig, IPipeOperate, Pipe, OutputPipe, ITask, ITransform } from './TaskConfig';
 /**
  * pipe task.
  *
@@ -75,5 +75,16 @@ export declare abstract class PipeTask implements IPipeTask {
     output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): OutputPipe[];
     protected getOption(config: ITaskConfig): IAssertDist;
     sourceStream(config: ITaskConfig, option: IAssertDist, gulp: Gulp): ITransform | Promise<ITransform>;
+    /**
+     * match pipe Operate
+     *
+     * @param {IPipeOperate} p
+     * @param {string} name
+     * @param {ITaskConfig} config
+     * @returns
+     *
+     * @memberOf PipeTask
+     */
+    protected match(p: IPipeOperate, name: string, config: ITaskConfig): boolean;
     setup(config: ITaskConfig, gulp?: Gulp): TaskResult;
 }
