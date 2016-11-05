@@ -132,12 +132,22 @@ export interface ITransform extends NodeJS.ReadWriteStream {
     /**
      * custom set ITransform after pipe out.
      * 
-     * @param {ITransform} stream
+     * @param {ITransform} ouputStream
      * @returns {ITransform}
      * 
      * @memberOf ITransform
      */
-    transformPipe?(stream: ITransform): ITransform;
+    transformPipe?(ouputStream: ITransform): ITransform;
+
+    /**
+     * custom set ITransform befor pipe in.
+     * 
+     * @param {ITransform} sourceStream
+     * @returns {ITransform}
+     * 
+     * @memberOf ITransform
+     */
+    transformSourcePipe?(sourceStream: ITransform): ITransform;
     /**
      * transform pipe
      * 
