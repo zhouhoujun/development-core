@@ -56,6 +56,9 @@ class DynamicPipeTask extends PipeTask {
     }
 
     output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): IOutputPipe[] {
+        if (this.dt.output === null) {
+            return [stream => stream];
+        }
         let outputs = _.isFunction(this.dt.output) ? this.dt.output(config, dist, gulp) : this.dt.output;
         outputs = outputs || [];
         return outputs.concat(super.output(config, dist, gulp));
