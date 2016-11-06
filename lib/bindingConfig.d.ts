@@ -14,4 +14,4 @@ export declare function bindingConfig(cfg: ITaskConfig): ITaskConfig;
  * @param {EnvOption} env
  * @returns
  */
-export declare function currentOperation(env: IEnvOption): Operation;
+export declare function currentOperation(env: IEnvOption, cfg?: ITaskConfig): Operation;

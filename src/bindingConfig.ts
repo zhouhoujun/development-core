@@ -16,9 +16,11 @@ import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefi
  * @returns {TaskConfig}
  */
 export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
-    if (!cfg.oper) {
-        cfg.oper = currentOperation(cfg.env);
-    }
+    // if (!cfg.oper) {
+    //     cfg.oper = currentOperation(cfg.env);
+    // }
+    currentOperation(cfg.env, cfg);
+
     cfg.fileFilter = cfg.fileFilter || files;
     cfg.runSequence = cfg.runSequence || runSequence;
     cfg.addToSequence = cfg.addToSequence || addToSequence;
@@ -83,7 +85,7 @@ export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
  * @param {EnvOption} env
  * @returns
  */
-export function currentOperation(env: IEnvOption) {
+export function currentOperation(env: IEnvOption, cfg?: ITaskConfig) {
     let oper: Operation;
     if (env.deploy) {
         oper = Operation.deploy;
@@ -97,21 +99,44 @@ export function currentOperation(env: IEnvOption) {
         oper = Operation.build;
     }
 
-    return oper;
+    if (env.watch) {
+        oper = oper | Operation.watch;
+    }
+    if (env.test) {
+        oper = oper | Operation.test;
+    }
+    if (env.serve) {
+        oper = oper | Operation.serve;
+    }
+    if (env.e2e) {
+        oper = oper | Operation.e2e;
+    }
+
+
+    if (cfg) {
+        cfg.oper = (cfg.oper || 0) | oper;
+        return cfg.oper;
+    } else {
+        return oper;
+    }
 }
 
 
 function getAssertSrc(assert: IAssertDist, taskinfo?: ITaskInfo) {
     let src = null;
     if (taskinfo) {
-        if (taskinfo.test) {
+        taskinfo.oper = taskinfo.oper || Operation.default;
+        if ((taskinfo.oper & Operation.test) > 0) {
             src = assert.testSrc;
-        } else if (taskinfo.e2e) {
+        } else if ((taskinfo.oper & Operation.e2e) > 0) {
             src = assert.e2eSrc;
-        } else if (taskinfo.watch) {
+        } else if ((taskinfo.oper & Operation.watch) > 0) {
             src = assert.watchSrc;
+        } else if ((taskinfo.oper & Operation.clean) > 0) {
+            src = assert.cleanSrc || assert.dist;
         }
     }
+
     return src || assert.src;
 }
 

@@ -26,7 +26,26 @@ export enum Operation {
     /**
      * release and deploy project.
      */
-    deploy = 1 << 4
+    deploy = 1 << 4,
+
+    /**
+     * default operation.
+     */
+    default = Operation.build | Operation.release | Operation.deploy,
+
+    /**
+     * clean task
+     */
+    clean = 1 << 5,
+    /**
+     * serve task
+     */
+    serve = 1 << 6,
+
+    /**
+     * watch task.
+     */
+    watch = 1 << 7
 }
 
 /**
@@ -87,7 +106,16 @@ export interface ITaskInfo extends IOperate {
     taskName?: Src;
 
     /**
-     * is watch task or not.
+     * assert tasks. assert group name or extends name.
+     * 
+     * @type {Src}
+     * @memberOf ITaskInfo
+     */
+    group?: Src;
+
+
+    /**
+     * well be remove, please use Operation.watch instead. is watch task or not. 
      * 
      * @type {boolean | string}
      * @memberOf ITaskInfo
@@ -95,7 +123,7 @@ export interface ITaskInfo extends IOperate {
     watch?: boolean | string;
 
     /**
-     * is test or not.
+     * well be remove, please use Operation.test instead. is test or not.
      * 
      * @type {(boolean | string)}
      * @memberOf ITaskInfo
@@ -103,20 +131,12 @@ export interface ITaskInfo extends IOperate {
     test?: boolean | string;
 
     /**
-     * is e2e test or not.
+     * well be remove, please use Operation.e2e instead. is e2e test or not.
      * 
      * @type {(boolean | string)}
      * @memberOf ITaskInfo
      */
     e2e?: boolean | string;
-
-    /**
-     * assert tasks. assert group name or extends name.
-     * 
-     * @type {Src}
-     * @memberOf ITaskInfo
-     */
-    group?: Src;
 }
 
 export type TaskResult = Src | void;
@@ -280,6 +300,14 @@ export interface IAssertDist {
      */
     testSrc?: TaskSource
 
+    /**
+     * clean special source in 'dist'. if not setting, default clean 'dist' folder.
+     * 
+     * @type {TaskSource}
+     * @memberOf IAssertDist
+     */
+    cleanSrc?: TaskSource;
+
 
     /**
      * the watch src file filter string. default 'src'.
@@ -287,8 +315,7 @@ export interface IAssertDist {
      * @type {TaskSource}
      * @memberOf IAssertDist
      */
-    watchSrc?: TaskSource
-
+    watchSrc?: TaskSource;
     /**
      * default output folder. if empty use parent setting, or ues 'dist'.
      */

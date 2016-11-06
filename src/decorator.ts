@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import * as chalk from 'chalk';
 import { ITask, ITaskInfo, ITaskDefine, Src, IDynamicTasks } from './TaskConfig';
 import { generateTask } from './generateTask';
-import { matchTaskGroup } from './utils';
+import { matchTaskGroup, matchOper } from './utils';
 import { existsSync } from 'fs';
 const requireDir = require('require-dir');
 
@@ -38,12 +38,12 @@ export function task<T extends Function>(target?: (new <T>() => T) | ITaskInfo):
  */
 export function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITaskInfo): any {
     if (target && _.isFunction(target)) {
-        target['__dynamictask'] = true;
+        target['__dynamictask'] = {};
         return target;
     } else {
         let tg = target;
         return (target: any) => {
-            target['__dynamictask'] = tg || true;
+            target['__dynamictask'] = tg || {};
             return target;
         }
     }
@@ -66,20 +66,12 @@ export function findTasks(target: any, match?: ITaskInfo): ITask[] {
         if (target['__task']) {
             let tinfo: ITaskInfo = target['__task'];
 
-            if (match && match.oper && tinfo.oper && (tinfo.oper & match.oper) <= 0) {
+            if (!matchOper(tinfo, match)) {
                 return tasks;
             }
 
             if (!matchTaskGroup(tinfo, match)) {
                 return tasks;
-            }
-
-            if (tinfo.watch) {
-                if (!match || !match.watch) {
-                    return tasks;
-                } else if (tinfo.watch !== match.watch) {
-                    return tasks;
-                }
             }
 
             let task: ITask = new target(tinfo);
@@ -88,20 +80,12 @@ export function findTasks(target: any, match?: ITaskInfo): ITask[] {
         } else if (target['__dynamictask']) {
             let tinfo: ITaskInfo = target['__dynamictask'];
 
-            if (match && match.oper && tinfo.oper && (tinfo.oper & match.oper) <= 0) {
+            if (!matchOper(tinfo, match)) {
                 return tasks;
             }
 
             if (!matchTaskGroup(tinfo, match)) {
                 return tasks;
-            }
-
-            if (tinfo.watch) {
-                if (!match || !match.watch) {
-                    return tasks;
-                } else if (tinfo.watch !== match.watch) {
-                    return tasks;
-                }
             }
 
             let dyts = _.map((<IDynamicTasks>new target()).tasks(), tk => {

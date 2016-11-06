@@ -29,6 +29,22 @@ export declare enum Operation {
      * release and deploy project.
      */
     deploy = 16,
+    /**
+     * default operation.
+     */
+    default = 25,
+    /**
+     * clean task
+     */
+    clean = 32,
+    /**
+     * serve task
+     */
+    serve = 64,
+    /**
+     * watch task.
+     */
+    watch = 128,
 }
 /**
  * object map.
@@ -83,33 +99,33 @@ export interface ITaskInfo extends IOperate {
      */
     taskName?: Src;
     /**
-     * is watch task or not.
-     *
-     * @type {boolean | string}
-     * @memberOf ITaskInfo
-     */
-    watch?: boolean | string;
-    /**
-     * is test or not.
-     *
-     * @type {(boolean | string)}
-     * @memberOf ITaskInfo
-     */
-    test?: boolean | string;
-    /**
-     * is e2e test or not.
-     *
-     * @type {(boolean | string)}
-     * @memberOf ITaskInfo
-     */
-    e2e?: boolean | string;
-    /**
      * assert tasks. assert group name or extends name.
      *
      * @type {Src}
      * @memberOf ITaskInfo
      */
     group?: Src;
+    /**
+     * well be remove, please use Operation.watch instead. is watch task or not.
+     *
+     * @type {boolean | string}
+     * @memberOf ITaskInfo
+     */
+    watch?: boolean | string;
+    /**
+     * well be remove, please use Operation.test instead. is test or not.
+     *
+     * @type {(boolean | string)}
+     * @memberOf ITaskInfo
+     */
+    test?: boolean | string;
+    /**
+     * well be remove, please use Operation.e2e instead. is e2e test or not.
+     *
+     * @type {(boolean | string)}
+     * @memberOf ITaskInfo
+     */
+    e2e?: boolean | string;
 }
 export declare type TaskResult = Src | void;
 export declare type TaskSource = Src | ((oper?: Operation) => Src);
@@ -253,6 +269,13 @@ export interface IAssertDist {
      * @memberOf IAssertDist
      */
     testSrc?: TaskSource;
+    /**
+     * clean special source in 'dist'. if not setting, default clean 'dist' folder.
+     *
+     * @type {TaskSource}
+     * @memberOf IAssertDist
+     */
+    cleanSrc?: TaskSource;
     /**
      * the watch src file filter string. default 'src'.
      *

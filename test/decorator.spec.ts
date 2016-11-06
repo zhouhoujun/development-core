@@ -26,8 +26,8 @@ describe('decorator:', () => {
         }));
 
         // console.log(seq);
-        expect(seq.length).eq(5);
-        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,TestTaskC')
+        expect(seq.length).eq(4);
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile')
         expect(seq[0]).eq('test-clean');
         expect(seq[1]).eq('TestTaskB');
 
@@ -37,7 +37,16 @@ describe('decorator:', () => {
 
         let tasks = findTasks(model, { oper: Operation.build });
 
-        expect(tasks.length).eq(6);
+        expect(tasks.length).eq(5);
+        let seq = toSequence(gulp, tasks, bindingConfig({
+            oper: Operation.build,
+            env: {},
+            option: { src: 'src', dist: 'lib' }
+        }));
+
+        // console.log(seq);
+        expect(seq.length).eq(4);
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile')
 
     })
 
@@ -46,7 +55,14 @@ describe('decorator:', () => {
 
         let tasks = findTasks(model, { oper: Operation.build, watch: true });
 
-        expect(tasks.length).eq(8);
+        expect(tasks.length).eq(6);
+        let seq = toSequence(gulp, tasks, bindingConfig({
+            oper: Operation.build,
+            env: { watch: true },
+            option: { src: 'src', dist: 'lib' }
+        }));
+
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch')
 
     })
 
