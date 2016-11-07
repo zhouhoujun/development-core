@@ -124,9 +124,8 @@ export class TestDynamicTask implements IDynamicTasks {
 @taskdefine
 export class TaskDefine implements ITaskDefine {
     public fags = 'define';
-    loadConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig {
+    loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig {
         return bindingConfig({
-            oper: oper,
             option: option,
             env: env
         });

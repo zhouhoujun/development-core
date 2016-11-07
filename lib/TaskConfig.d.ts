@@ -605,7 +605,7 @@ export interface ITaskOption extends IAsserts, ISubTaskOption {
     src: TaskSource;
 }
 /**
- * modules task define
+ * custom modules task load define
  *
  * @export
  * @interface ITaskDefine
@@ -614,13 +614,12 @@ export interface ITaskDefine {
     /**
      * load config in modules
      *
-     * @param {Operation} oper
      * @param {ITaskOption} option
      * @returns {ITaskConfig}
      *
      * @memberOf ITaskDefine
      */
-    loadConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig;
+    loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig;
     /**
      * load task in modules.
      *
@@ -657,7 +656,7 @@ export interface ITaskConfig {
      * @type {Operation}
      * @memberOf ITaskConfig
      */
-    oper: Operation;
+    oper?: Operation;
     /**
      * task option setting.
      *

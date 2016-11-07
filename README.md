@@ -152,9 +152,8 @@ export class TestTaskC implements ITask {
 
 @taskdefine()
 export class TaskDefine implements ITaskDefine {
-    loadConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig {
+    loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig {
         return bindingConfig({
-            oper: oper,
             option: option,
             env: env
         });
@@ -294,6 +293,7 @@ runTaskSequence(gulp, tasks, tdfs.loadConfig(Operation.build, {src:'src', dist:'
 ## Create development tool with dynamic tasks via Promise
 
 ```ts
+
 import * as gulp from 'gulp';
 import { bindingConfig, currentOperation, generateTask, runTaskSequence, IEnvOption, Operation } from 'development-core';
 import * as mocha from 'gulp-mocha';
