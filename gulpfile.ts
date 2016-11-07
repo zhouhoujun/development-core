@@ -29,7 +29,7 @@ let createTask = (env) => {
         option: { src: 'src', dist: 'lib' }
     });
 
-    let tasks = generateTask([
+    let tasks = config.generateTask([
         {
             name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
             pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
@@ -48,13 +48,13 @@ let createTask = (env) => {
         },
         {
             name: 'test', src: 'test/**/*spec.ts', order: 1,
-            oper: Operation.test | Operation.release | Operation.deploy,
+            oper: Operation.test | Operation.default,
             pipes: [mocha],
             output: null
         },
         { src: 'src/**/*.ts', name: 'watch', watchTasks: ['tscompile'] },
         { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
-    ], { oper: config.oper, watch: env.watch });
+    ]);
 
     return runTaskSequence(gulp, tasks, config);
 }

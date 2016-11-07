@@ -27,12 +27,6 @@ export enum Operation {
      * release and deploy project.
      */
     deploy = 1 << 4,
-
-    /**
-     * default operation.
-     */
-    default = Operation.build | Operation.release | Operation.deploy,
-
     /**
      * clean task
      */
@@ -45,7 +39,12 @@ export enum Operation {
     /**
      * watch task.
      */
-    watch = 1 << 7
+    watch = 1 << 7,
+
+    /**
+     * default operation.
+     */
+    default = Operation.build | Operation.release | Operation.deploy
 }
 
 /**

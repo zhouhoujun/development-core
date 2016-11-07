@@ -51,13 +51,13 @@ function contains(arr1: string[], arr2: string[]) {
 export function convertOper(tinfo: ITaskInfo, def = Operation.default) {
     tinfo = tinfo || {};
     if (tinfo.watch) {
-        tinfo.oper = (tinfo.oper || 0) | Operation.watch;
+        tinfo.oper = (tinfo.oper || def) | Operation.watch;
     }
     if (tinfo.e2e) {
-        tinfo.oper = (tinfo.oper || 0) | Operation.e2e;
+        tinfo.oper = (tinfo.oper || def) | Operation.e2e;
     }
     if (tinfo.test) {
-        tinfo.oper = (tinfo.oper || 0) | Operation.test;
+        tinfo.oper = (tinfo.oper || def) | Operation.test;
     }
 
     tinfo.oper = tinfo.oper || def;
@@ -93,24 +93,53 @@ export function matchOper(tinfo: ITaskInfo, match: ITaskInfo) {
         match = convertMatchOper(match);
     }
 
-    if ((tinfo.oper & match.oper) <= 0) {
+    let eq = tinfo.oper & match.oper;
+    // console.log('eq------->:', eq);
+    if (eq <= 0) {
         return false;
     }
-    if ((match.oper & Operation.watch) <= 0 && (tinfo.oper & Operation.watch) > 0) {
-        return false;
+
+    if ((tinfo.oper & Operation.watch) > 0) {
+        if ((match.oper & Operation.watch) <= 0) {
+            return false;
+        } else {
+            if (eq <= Operation.watch) {
+                return false;
+            }
+        }
     }
-    if ((match.oper & Operation.serve) <= 0 && (tinfo.oper & Operation.serve) > 0) {
-        return false;
+
+    if ((tinfo.oper & Operation.serve) > 0) {
+        if ((match.oper & Operation.serve) <= 0) {
+            return false;
+        } else {
+            if (eq <= Operation.serve) {
+                return false;
+            }
+        }
     }
-    if ((match.oper & Operation.test) <= 0 && (tinfo.oper & Operation.test) > 0) {
-        return false;
+
+    if ((tinfo.oper & Operation.test) > 0) {
+        if ((match.oper & Operation.test) <= 0) {
+            return false;
+        } else {
+            if (eq <= Operation.test) {
+                return false;
+            }
+        }
     }
-    if ((match.oper & Operation.e2e) <= 0 && (tinfo.oper & Operation.e2e) > 0) {
-        return false;
+
+    if ((tinfo.oper & Operation.e2e) > 0) {
+        if ((match.oper & Operation.e2e) <= 0) {
+            return false;
+        } else {
+            if (eq <= Operation.e2e) {
+                return false;
+            }
+        }
     }
 
     return true;
-
 }
 
 export function matchTaskGroup(tinfo: ITaskInfo, match: ITaskInfo): boolean {

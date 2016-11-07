@@ -79,7 +79,7 @@ export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], m
     _.each(_.isArray(tasks) ? tasks : [tasks], dt => {
 
         if (dt.watchTasks) {
-            dt.oper = (dt.oper || 0) | Operation.watch;
+            dt.oper = (dt.oper || Operation.default) | Operation.watch;
         }
         if (!matchOper(dt, match)) {
             return;

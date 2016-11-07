@@ -102,12 +102,12 @@ describe('generateTask', () => {
     it('generate test tasks', () => {
         let tks = generateTask(tasks, { oper: Operation.test, watch: true });
 
-        expect(tks.length).to.equals(4);
+        expect(tks.length).to.equals(3);
 
         let tseq = registerTask(tks, Operation.test, { watch: true });
         // console.log(tseq);
 
-        expect(tseq.join(',')).eq('test-clean,test-test,test-tscompile,test-watch');
+        expect(tseq.join(',')).eq('test-clean,test-tscompile,test-watch');
     });
 
     it('generate release tasks', () => {
