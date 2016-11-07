@@ -64,23 +64,44 @@ export function convertOper(tinfo: ITaskInfo, def = Operation.default) {
     return tinfo;
 }
 function convertMatchOper(match: ITaskInfo) {
-    if ((match.oper & Operation.test) > 0 && (match.oper & Operation.release) <= 0) {
+    if ((match.oper & Operation.test) && !(match.oper & Operation.release)) {
         match.oper = match.oper | Operation.build;
     }
-    if ((match.oper & Operation.e2e) > 0 && (match.oper & Operation.release) <= 0) {
+    if ((match.oper & Operation.e2e) && !(match.oper & Operation.release)) {
         match.oper = match.oper | Operation.build;
     }
-    if ((match.oper & Operation.deploy) > 0) {
+    if (match.oper & Operation.deploy) {
         match.oper = match.oper | Operation.test | Operation.e2e;
     }
-    if ((match.oper & Operation.release) > 0) {
+    if (match.oper & Operation.release) {
         match.oper = match.oper | Operation.test;
     }
 
     return match;
 }
 
-export function matchOper(tinfo: ITaskInfo, match: ITaskInfo) {
+
+/**
+ * has some oper samed.
+ * 
+ * @export
+ * @param {Operation} oper1
+ * @param {Operation} oper2
+ * @returns
+ */
+export function someOper(oper1: Operation, oper2: Operation) {
+    return (oper1 & oper2) > 0;
+}
+
+/**
+ * match task via task info.
+ * 
+ * @export
+ * @param {ITaskInfo} tinfo
+ * @param {ITaskInfo} match
+ * @returns
+ */
+export function matchTaskInfo(tinfo: ITaskInfo, match: ITaskInfo) {
 
     match = convertOper(match, Operation.build);
     tinfo = convertOper(tinfo);
@@ -99,7 +120,7 @@ export function matchOper(tinfo: ITaskInfo, match: ITaskInfo) {
         return false;
     }
 
-    if ((tinfo.oper & Operation.watch) > 0) {
+    if (tinfo.oper & Operation.watch) {
         if ((match.oper & Operation.watch) <= 0) {
             return false;
         } else {
@@ -109,8 +130,8 @@ export function matchOper(tinfo: ITaskInfo, match: ITaskInfo) {
         }
     }
 
-    if ((tinfo.oper & Operation.serve) > 0) {
-        if ((match.oper & Operation.serve) <= 0) {
+    if (tinfo.oper & Operation.serve) {
+        if (!(match.oper & Operation.serve)) {
             return false;
         } else {
             if (eq <= Operation.serve) {
@@ -119,8 +140,8 @@ export function matchOper(tinfo: ITaskInfo, match: ITaskInfo) {
         }
     }
 
-    if ((tinfo.oper & Operation.test) > 0) {
-        if ((match.oper & Operation.test) <= 0) {
+    if (tinfo.oper & Operation.test) {
+        if (!(match.oper & Operation.test)) {
             return false;
         } else {
             if (eq <= Operation.test) {
@@ -129,8 +150,8 @@ export function matchOper(tinfo: ITaskInfo, match: ITaskInfo) {
         }
     }
 
-    if ((tinfo.oper & Operation.e2e) > 0) {
-        if ((match.oper & Operation.e2e) <= 0) {
+    if (tinfo.oper & Operation.e2e) {
+        if (!(match.oper & Operation.e2e)) {
             return false;
         } else {
             if (eq <= Operation.e2e) {

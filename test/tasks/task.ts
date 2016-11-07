@@ -94,7 +94,7 @@ export class TestDynamicTask implements IDynamicTasks {
                 output: [
                     (tsmap, config, dt, gulp) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
                     (tsmap, config, dt, gulp) => {
-                        if (config.oper === Operation.release || config.oper === Operation.deploy) {
+                        if (config.oper & Operation.release || config.oper & Operation.deploy) {
                             return tsmap.js.pipe(babel({ presets: ['es2015'] }))
                                 .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
                                 .pipe(gulp.dest(config.getDist(dt)));

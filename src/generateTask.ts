@@ -4,7 +4,7 @@ import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
 import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, TaskResult, IPipe, IDynamicTaskOption, ITaskConfig, ITask } from './TaskConfig';
-import { matchTaskGroup, matchOper } from './utils';
+import { matchTaskGroup, matchTaskInfo } from './utils';
 import { PipeTask } from './PipeTask';
 
 type factory = (config: ITaskConfig, gulp: Gulp) => TaskResult;
@@ -81,7 +81,7 @@ export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], m
         if (dt.watchTasks) {
             dt.oper = (dt.oper || Operation.default) | Operation.watch;
         }
-        if (!matchOper(dt, match)) {
+        if (!matchTaskInfo(dt, match)) {
             return;
         }
 

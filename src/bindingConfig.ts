@@ -155,26 +155,18 @@ function getAssertSrc(assert: IAssertDist, taskinfo?: ITaskInfo) {
  */
 function getCurrentDist(ds: IAssertDist, oper: Operation) {
     let dist: string;
-    switch (oper) {
-        case Operation.build:
-            dist = ds.buildDist || taskStringVal(ds.dist, oper);
-            break;
-        case Operation.test:
-            dist = ds.testDist || ds.buildDist || taskStringVal(ds.dist, oper);
-            break;
-        case Operation.e2e:
-            dist = ds.e2eDist || ds.buildDist || taskStringVal(ds.dist, oper);
-            break;
-        case Operation.release:
-            dist = ds.releaseDist || taskStringVal(ds.dist, oper);
-            break;
-        case Operation.deploy:
-            dist = ds.deployDist || taskStringVal(ds.dist, oper);
-            break;
-        default:
-            dist = '';
-            break;
+    if ((oper & Operation.build) > 0) {
+        dist = ds.buildDist || taskStringVal(ds.dist, oper);
+    } else if ((oper & Operation.release) > 0) {
+        dist = ds.releaseDist || taskStringVal(ds.dist, oper);
+    } else if ((oper & Operation.deploy) > 0) {
+        dist = ds.deployDist || taskStringVal(ds.dist, oper);
+    } else if ((oper & Operation.test) > 0) {
+        dist = ds.testDist || ds.buildDist || taskStringVal(ds.dist, oper);
+    } else if ((oper & Operation.e2e) > 0) {
+        dist = ds.e2eDist || ds.buildDist || taskStringVal(ds.dist, oper);
     }
+
     return dist;
 }
 

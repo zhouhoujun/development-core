@@ -19,5 +19,22 @@ export declare function taskStringVal(name: TaskString, oper?: Operation): strin
  * @returns
  */
 export declare function convertOper(tinfo: ITaskInfo, def?: Operation): ITaskInfo;
-export declare function matchOper(tinfo: ITaskInfo, match: ITaskInfo): any;
+/**
+ * has some oper samed.
+ *
+ * @export
+ * @param {Operation} oper1
+ * @param {Operation} oper2
+ * @returns
+ */
+export declare function someOper(oper1: Operation, oper2: Operation): boolean;
+/**
+ * match task via task info.
+ *
+ * @export
+ * @param {ITaskInfo} tinfo
+ * @param {ITaskInfo} match
+ * @returns
+ */
+export declare function matchTaskInfo(tinfo: ITaskInfo, match: ITaskInfo): any;
 export declare function matchTaskGroup(tinfo: ITaskInfo, match: ITaskInfo): boolean;

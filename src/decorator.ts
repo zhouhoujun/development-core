@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import * as chalk from 'chalk';
 import { ITask, ITaskInfo, ITaskDefine, Src, IDynamicTasks } from './TaskConfig';
 import { generateTask } from './generateTask';
-import { matchTaskGroup, matchOper } from './utils';
+import { matchTaskGroup, matchTaskInfo } from './utils';
 import { existsSync } from 'fs';
 const requireDir = require('require-dir');
 
@@ -66,7 +66,7 @@ export function findTasks(target: any, match?: ITaskInfo): ITask[] {
         if (target['__task']) {
             let tinfo: ITaskInfo = target['__task'];
 
-            if (!matchOper(tinfo, match)) {
+            if (!matchTaskInfo(tinfo, match)) {
                 return tasks;
             }
 
@@ -80,7 +80,7 @@ export function findTasks(target: any, match?: ITaskInfo): ITask[] {
         } else if (target['__dynamictask']) {
             let tinfo: ITaskInfo = target['__dynamictask'];
 
-            if (!matchOper(tinfo, match)) {
+            if (!matchTaskInfo(tinfo, match)) {
                 return tasks;
             }
 

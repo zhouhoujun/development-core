@@ -286,7 +286,7 @@ let tasks = findTasks(moduleA);
 let tdfs = findTaskDefine(moduleA);
 
 // run task;
-runTaskSequence(gulp, tasks, tdfs.loadConfig(Operation.build, {src:'src', dist:'lib'}, {watch:true}));
+runTaskSequence(gulp, tasks, tdfs.loadConfig({src:'src', dist:'lib'}, {watch:true}));
 
  ```
 
@@ -295,7 +295,7 @@ runTaskSequence(gulp, tasks, tdfs.loadConfig(Operation.build, {src:'src', dist:'
 ```ts
 
 import * as gulp from 'gulp';
-import { bindingConfig, currentOperation, generateTask, runTaskSequence, IEnvOption, Operation } from 'development-core';
+import { bindingConfig, generateTask, runTaskSequence, IEnvOption, Operation } from 'development-core';
 import * as mocha from 'gulp-mocha';
 import * as minimist from 'minimist';
 import * as _ from 'lodash';
@@ -317,28 +317,39 @@ gulp.task('build', () => {
 });
 
 let createTask = (env) => {
-    let oper: Operation = currentOperation(env);
+
     let config = bindingConfig({
         env: env,
-        oper: oper,
         option: { src: 'src', dist: 'lib' }
     });
 
-    let tasks = generateTask([
+    let tasks = config.generateTask([
         {
             name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
-            pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
+            oper: Operation.build,
+            pipes: [
+                () => cache('typescript'),
+                sourcemaps.init,
+                (config) => {
+                    let transform = tsProject();
+                    transform.transformSourcePipe = (source) => source.pipe(transform)['js'];
+                    return transform;
+                },
+                (config) => babel({ presets: ['es2015'] }),
+                (config) => sourcemaps.write('./sourcemaps')
+            ]
+        },
+        {
+            name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
+            oper: Operation.release | Operation.deploy,
+            pipes: [
+                () => cache('typescript'), sourcemaps.init, tsProject
+            ],
             output: [
-                (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
-                (tsmap, config, dt) => {
-                    if (config.oper === Operation.release || config.oper === Operation.deploy) {
-                        return tsmap.js.pipe(babel({ presets: ['es2015'] }))
-                            .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
-                            .pipe(gulp.dest(config.getDist(dt)));
-                    } else {
-                        return tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist(dt)));
-                    }
-                }
+                (tsmap, config, dt, gulp) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
+                (tsmap, config, dt, gulp) => tsmap.js.pipe(babel({ presets: ['es2015'] }))
+                    .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
+                    .pipe(gulp.dest(config.getDist(dt)))
             ]
         },
         {
@@ -353,7 +364,7 @@ let createTask = (env) => {
         },
         { src: 'src/**/*.ts', name: 'watch', watchTasks: ['tscompile'] },
         { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
-    ], oper, env);
+    ]);
 
     return runTaskSequence(gulp, tasks, config);
 }
