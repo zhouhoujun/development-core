@@ -1,0 +1,152 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\nodejs\\node.exe',
+1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'publish' ]
+2 info using npm@3.10.8
+3 info using node@v7.0.0
+4 verbose publish [ '.' ]
+5 silly cache add args [ '.', null ]
+6 verbose cache add spec .
+7 silly cache add parsed spec Result {
+7 silly cache add   raw: '.',
+7 silly cache add   scope: null,
+7 silly cache add   escapedName: null,
+7 silly cache add   name: null,
+7 silly cache add   rawSpec: '.',
+7 silly cache add   spec: 'D:\\Workspace\\source\\development-core',
+7 silly cache add   type: 'directory' }
+8 verbose addLocalDirectory C:\Users\zhouyou\AppData\Roaming\npm-cache\development-core\0.7.0\package.tgz not in flight; packing
+9 verbose correctMkdir C:\Users\zhouyou\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+10 info lifecycle development-core@0.7.0~prepublish: development-core@0.7.0
+11 verbose lifecycle development-core@0.7.0~prepublish: unsafe-perm in lifecycle true
+12 verbose lifecycle development-core@0.7.0~prepublish: PATH: C:\Program Files\nodejs\node_modules\npm\bin\node-gyp-bin;D:\Workspace\source\development-core\node_modules\.bin;C:\Program Files\Docker\Docker\Resources\bin;C:\Python27\;C:\Python27\Scripts;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files (x86)\Microsoft SDKs\TypeScript\1.0\;C:\Program Files\Microsoft SQL Server\120\Tools\Binn\;C:\Program Files\Git\cmd;C:\Program Files\Java\jdk1.7.0_79/bin;D:\Workspace\Android\android-sdk\tools;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files (x86)\GtkSharp\2.12\bin;C:\Program Files\dotnet\bin;C:\Go\bin;C:\ProgramData\chocolatey\bin;D:\Workspace\phantomjs-2.1.1-windows\bin;C:\Program Files\TortoiseSVN\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files\dotnet\;C:\Program Files\nodejs\;C:\Users\zhouyou\.dnx\runtimes\dnx-clr-win-x86.1.0.0-rc1-update2\bin;C:\Users\zhouyou\.dnx\bin;C:\Program Files (x86)\Microsoft VS Code\bin;C:\Users\zhouyou\AppData\Local\Microsoft\WindowsApps;C:\Users\zhouyou\AppData\Roaming\npm
+13 verbose lifecycle development-core@0.7.0~prepublish: CWD: D:\Workspace\source\development-core
+14 silly lifecycle development-core@0.7.0~prepublish: Args: [ '/d /s /c', 'gulp build --release' ]
+15 silly lifecycle development-core@0.7.0~prepublish: Returned: code: 0  signal: null
+16 verbose tar pack [ 'C:\\Users\\zhouyou\\AppData\\Roaming\\npm-cache\\development-core\\0.7.0\\package.tgz',
+16 verbose tar pack   'D:\\Workspace\\source\\development-core' ]
+17 verbose tarball C:\Users\zhouyou\AppData\Roaming\npm-cache\development-core\0.7.0\package.tgz
+18 verbose folder D:\Workspace\source\development-core
+19 verbose addLocalTarball adding from inside cache C:\Users\zhouyou\AppData\Roaming\npm-cache\development-core\0.7.0\package.tgz
+20 verbose correctMkdir C:\Users\zhouyou\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+21 silly cache afterAdd development-core@0.7.0
+22 verbose afterAdd C:\Users\zhouyou\AppData\Roaming\npm-cache\development-core\0.7.0\package\package.json not in flight; writing
+23 verbose correctMkdir C:\Users\zhouyou\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+24 verbose afterAdd C:\Users\zhouyou\AppData\Roaming\npm-cache\development-core\0.7.0\package\package.json written
+25 silly publish { name: 'development-core',
+25 silly publish   version: '0.7.0',
+25 silly publish   description: 'development build tools.',
+25 silly publish   main: './lib/index.js',
+25 silly publish   typings: './lib/index',
+25 silly publish   scripts:
+25 silly publish    { gulp: 'gulp',
+25 silly publish      postinstall: 'npm prune',
+25 silly publish      reinstall: 'npm cache clean && npm install',
+25 silly publish      test: 'gulp build --test',
+25 silly publish      prepublish: 'gulp build --release',
+25 silly publish      e2e: 'protractor',
+25 silly publish      'e2e.live': 'protractor --elementExplorer' },
+25 silly publish   keywords: [ 'development', 'tool', 'typescript', 'node', 'babel' ],
+25 silly publish   author: { name: 'houjun' },
+25 silly publish   license: 'MIT',
+25 silly publish   bugs: { url: 'https://github.com/zhouhoujun/development-core/issues' },
+25 silly publish   registry: 'jspm',
+25 silly publish   repository:
+25 silly publish    { type: 'git',
+25 silly publish      url: 'git+https://github.com/zhouhoujun/development-core.git' },
+25 silly publish   dependencies:
+25 silly publish    { '@types/chalk': '^0.4.31',
+25 silly publish      '@types/gulp': '^3.8.32',
+25 silly publish      '@types/lodash': '^4.14.37',
+25 silly publish      '@types/minimist': '^1.1.29',
+25 silly publish      chalk: '^1.1.3',
+25 silly publish      checksum: '^0.1.1',
+25 silly publish      gulp: '^3.9.1',
+25 silly publish      lodash: '^4.13.1',
+25 silly publish      'reflect-metadata': '^0.1.8',
+25 silly publish      'require-dir': '^0.3.1' },
+25 silly publish   devDependencies:
+25 silly publish    { '@types/chai': '^3.4.34',
+25 silly publish      '@types/gulp-mocha': '0.0.29',
+25 silly publish      'babel-preset-es2015': '^6.18.0',
+25 silly publish      bluebird: '^3.4.1',
+25 silly publish      chai: '^3.5.0',
+25 silly publish      del: '^2.2.1',
+25 silly publish      'gulp-babel': '^6.1.2',
+25 silly publish      'gulp-cached': '^1.1.0',
+25 silly publish      'gulp-mocha': '^3.0.1',
+25 silly publish      'gulp-sourcemaps': '^2.1.1',
+25 silly publish      'gulp-typescript': '^3.0.2',
+25 silly publish      'gulp-uglify': '^2.0.0',
+25 silly publish      through2: '^2.0.1',
+25 silly publish      'ts-node': '^1.6.0',
+25 silly publish      tslint: '^3.15.1',
+25 silly publish      'tslint-stylish': '^2.1.0-beta',
+25 silly publish      typescript: '^2.0.3',
+25 silly publish      'zone.js': '^0.6.10' },
+25 silly publish   homepage: 'https://github.com/zhouhoujun/development-core#readme',
+25 silly publish   readme: '# packaged development-core\r\n\r\nThis repo is for distribution on `npm`. The source for this module is in the\r\n[main repo](https://github.com/zhouhoujun/development-core).\r\nPlease file issues and pull requests against that repo.\r\nThis package use to develop kit for project development via gulp tasks.\r\n\r\n\r\nDevelopment core can generate tasks, run task in sequence via Promise.\r\n\r\n\r\n## Install\r\n\r\nYou can install this package either with `npm`.\r\n\r\n### npm\r\n\r\n```shell\r\n\r\nnpm install development-core\r\n\r\n```\r\n\r\nYou can `import` modules:\r\n\r\n## import module\r\n\r\n```ts\r\nimport * as gulp from \'gulp\';\r\nimport  { generateTask, runTaskSequence, runSequence } from \'development-core\';\r\n\r\n```\r\n\r\n## run task by sequence via Promise\r\n\r\n```ts\r\n\r\n    runSequence(\'taskA\', [\'taskb\',\'taskc\'], \'taskd\');\r\n\r\n```\r\n\r\n## define task and taskdefine.\r\n decorator not support function now, so refactor ITask interface.\r\n\r\n ```ts\r\n\r\n // module A\r\nimport {PipeTask, Pipe, IAssertDist, taskdefine, bindingConfig, Operation, ITaskOption, IEnvOption, ITaskConfig, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from \'development-core\';\r\n\r\n@task({\r\n    group: \'pipetask\'\r\n})\r\nexport class TestPipeTask extends PipeTask {\r\n    name = \'pipetask\';\r\n    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): Pipe[] {\r\n        return [\r\n            () => cache(\'typescript\'),\r\n            sourcemaps.init,\r\n            tsProject\r\n        ]\r\n    }\r\n}\r\n\r\n\r\n@task\r\nexport class TestPipeTask extends PipeTask {\r\n    name = \'pipetask1\';\r\n    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): Pipe[] {\r\n        return [\r\n            () => cache(\'typescript\'),\r\n            {\r\n                oper: Operation.build,\r\n                toTransform: ()=> sourcemaps.init(),\r\n            },\r\n            tsProject\r\n        ]\r\n    }\r\n}\r\n\r\n@dynamicTask\r\nexport class TestTaskC implements IDynamicTasks {\r\n    tasks(): IDynamicTaskOption[]{\r\n        return [\r\n            {\r\n                name: \'tscompile\', src: \'src/**/*.ts\', dist: \'lib\',\r\n                pipes: [() => cache(\'typescript\'), sourcemaps.init, tsProject],\r\n                output: [\r\n                    (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),\r\n                    (tsmap, config, dt) => {\r\n                        if (config.oper === Operation.release || config.oper === Operation.deploy) {\r\n                            return tsmap.js.pipe(babel({ presets: [\'es2015\'] }))\r\n                                .pipe(uglify()).pipe(sourcemaps.write(\'./sourcemaps\'))\r\n                                .pipe(gulp.dest(config.getDist(dt)));\r\n                        } else {\r\n                            return tsmap.js.pipe(sourcemaps.write(\'./sourcemaps\')).pipe(gulp.dest(config.getDist(dt)));\r\n                        }\r\n                    }\r\n                ]\r\n            },\r\n            {\r\n                name: \'test\', src: \'test/**/*spec.ts\', order: 1,\r\n                oper: Operation.test | Operation.release | Operation.deploy,\r\n                pipe(src) {\r\n                    return src.pipe(mocha())\r\n                        .once(\'error\', () => {\r\n                            process.exit(1);\r\n                        });\r\n                }\r\n            },\r\n            { src: \'src/**/*.ts\', name: \'watch\', watch: [\'tscompile\'] },\r\n            { name: \'clean\', order: 0, src: \'src\', dist: \'lib\', task: (config) => del(config.getDist()) }\r\n        ];\r\n    }\r\n}\r\n\r\n@task\r\nexport class TestTaskX implements ITask {\r\n    public decorator: ITaskInfo = {};\r\n    constructor() {\r\n    }\r\n    setup(config: ITaskConfig, gulp): TaskResult {\r\n        // todo...\r\n        return \'TestTaskX\';\r\n    }\r\n}\r\n\r\n@task({\r\n    oper: Operation.build | Operation.test\r\n})\r\nexport class TestTaskC implements ITask {\r\n    public decorator: ITaskInfo = {};\r\n    constructor() {\r\n    }\r\n    setup(config: ITaskConfig, gulp): TaskResult {\r\n        // todo...\r\n\r\n        let taskname = config.subTaskName(\'TestTaskC\');\r\n\r\n        gulp.task(taskname, ()=>{\r\n            gulp.src(config.getSrc())\r\n                .pipe(...)\r\n                ...\r\n                .pipe(gulp.dest(config.getDist()))\r\n        });\r\n\r\n        // return task name, enable this task to add in run sequence.\r\n        // or just set to decorator.\r\n        // this.decorator.name = taskname;\r\n        return taskname\r\n    }\r\n}\r\n\r\n@taskdefine()\r\nexport class TaskDefine implements ITaskDefine {\r\n    loadConfig(oper: Operation, option: ITaskOption, env: IEnvOption): ITaskConfig {\r\n        return bindingConfig({\r\n            oper: oper,\r\n            option: option,\r\n            env: env\r\n        });\r\n    }\r\n}\r\n\r\n```\r\n\r\n## define task by group.\r\n\r\n```ts\r\n\r\n\r\n@task({\r\n    group: [\'test\', \'node\']\r\n    oper: Operation.build | Operation.test\r\n    ...\r\n})\r\nexport class TestTaskGA implements ITask {\r\n    public decorator: ITaskInfo = {};\r\n    constructor() {\r\n    }\r\n    setup(config: ITaskConfig, gulp): TaskResult {\r\n        // todo...\r\n        return \'TestTaskGA\';\r\n    }\r\n}\r\n@task({\r\n    group: \'node\',\r\n    oper: Operation.build | Operation.test\r\n    ...\r\n})\r\nexport class TestTaskGB implements ITask {\r\n    public decorator: ITaskInfo = {};\r\n    constructor() {\r\n    }\r\n    setup(config: ITaskConfig, gulp): TaskResult {\r\n        // todo...\r\n        return \'TestTaskGB\';\r\n    }\r\n}\r\n\r\n\r\n@task({\r\n    group: [\'test\', \'node\'],\r\n    oper: Operation.build | Operation.test\r\n    ...\r\n})\r\nexport class TestTaskGC implements ITask {\r\n    public decorator: ITaskInfo = {};\r\n    constructor() {\r\n    }\r\n    setup(config: ITaskConfig, gulp): TaskResult {\r\n        // todo...\r\n        return \'TestTaskGC\';\r\n    }\r\n}\r\n\r\n@dynamicTask({\r\n    group: \'ts\',\r\n    oper: Operation.build | Operation.test\r\n    ...\r\n})\r\nexport class TestTaskC implements IDynamicTasks {\r\n    tasks(): IDynamicTaskOption[]{\r\n        return [\r\n            {\r\n                name: \'tscompile\', src: \'src/**/*.ts\', dist: \'lib\',\r\n                pipes: [() => cache(\'typescript\'), sourcemaps.init, tsProject],\r\n                output: [\r\n                    (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),\r\n                    (tsmap, config, dt) => {\r\n                        if (config.oper === Operation.release || config.oper === Operation.deploy) {\r\n                            return tsmap.js.pipe(babel({ presets: [\'es2015\'] }))\r\n                                .pipe(uglify()).pipe(sourcemaps.write(\'./sourcemaps\'))\r\n                                .pipe(gulp.dest(config.getDist(dt)));\r\n                        } else {\r\n                            return tsmap.js.pipe(sourcemaps.write(\'./sourcemaps\')).pipe(gulp.dest(config.getDist(dt)));\r\n                        }\r\n                    }\r\n                ]\r\n            }\r\n        ]\r\n    }\r\n}\r\n\r\n```\r\n\r\n## user task, add special pipe work or add special output\r\n\r\n```ts\r\n\r\n// module use.\r\nimport { findTasks, bindingConfig, Operation, runTaskSequence, findTaskDefine }  from \'development-core\';\r\n\r\nlet config = bindingConfig({\r\n    env: env, oper: oper,\r\n    option: {\r\n        src: \'src\',dist: \'lib\',\r\n        loader:{\r\n            module:\'module a\',\r\n            pipes:[\r\n                {\r\n                    name: \'tscompile\'\r\n                    oper: Operation.build,\r\n                    order: 1,\r\n                    toTransform: ()=> tslint(),\r\n                },\r\n            ]\r\n        }\r\n    }\r\n});\r\nconfig.findTasks(\'module a\')\r\n    .then(task =>{\r\n        // run task;\r\n        return runTaskSequence(gulp, tasks, tasks);\r\n    });\r\n\r\n\r\n ```\r\n\r\n## user task by task define\r\n\r\n```ts\r\n\r\n// module use.\r\nimport { findTasks, Operation, runTaskSequence, findTaskDefine }  from \'development-core\';\r\nlet moduleA = require(\'module a\');\r\nlet tasks = findTasks(moduleA);\r\nlet tdfs = findTaskDefine(moduleA);\r\n\r\n// run task;\r\nrunTaskSequence(gulp, tasks, tdfs.loadConfig(Operation.build, {src:\'src\', dist:\'lib\'}, {watch:true}));\r\n\r\n ```\r\n\r\n## Create development tool with dynamic tasks via Promise\r\n\r\n```ts\r\nimport * as gulp from \'gulp\';\r\nimport { bindingConfig, currentOperation, generateTask, runTaskSequence, IEnvOption, Operation } from \'development-core\';\r\nimport * as mocha from \'gulp-mocha\';\r\nimport * as minimist from \'minimist\';\r\nimport * as _ from \'lodash\';\r\n\r\nconst del = require(\'del\');\r\nconst cache = require(\'gulp-cached\');\r\nconst ts = require(\'gulp-typescript\');\r\nconst sourcemaps = require(\'gulp-sourcemaps\');\r\nlet tsProject = ts.createProject(\'tsconfig.json\');\r\nconst uglify = require(\'gulp-uglify\');\r\nconst babel = require(\'gulp-babel\');\r\n\r\ngulp.task(\'build\', () => {\r\n    var options: IEnvOption = minimist(process.argv.slice(2), {\r\n        string: \'env\',\r\n        default: { env: process.env.NODE_ENV || \'development\' }\r\n    });\r\n    return createTask(options);\r\n});\r\n\r\nlet createTask = (env) => {\r\n    let oper: Operation = currentOperation(env);\r\n    let config = bindingConfig({\r\n        env: env,\r\n        oper: oper,\r\n        option: { src: \'src\', dist: \'lib\' }\r\n    });\r\n\r\n    let tasks = generateTask([\r\n        {\r\n            name: \'tscompile\', src: \'src/**/*.ts\', dist: \'lib\',\r\n            pipes: [() => cache(\'typescript\'), sourcemaps.init, tsProject],\r\n            output: [\r\n                (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),\r\n                (tsmap, config, dt) => {\r\n                    if (config.oper === Operation.release || config.oper === Operation.deploy) {\r\n                        return tsmap.js.pipe(babel({ presets: [\'es2015\'] }))\r\n                            .pipe(uglify()).pipe(sourcemaps.write(\'./sourcemaps\'))\r\n                            .pipe(gulp.dest(config.getDist(dt)));\r\n                    } else {\r\n                        return tsmap.js.pipe(sourcemaps.write(\'./sourcemaps\')).pipe(gulp.dest(config.getDist(dt)));\r\n                    }\r\n                }\r\n            ]\r\n        },\r\n        {\r\n            name: \'test\', src: \'test/**/*spec.ts\', order: 1,\r\n            oper: Operation.test | Operation.release | Operation.deploy,\r\n            pipe(src) {\r\n                return src.pipe(mocha())\r\n                    .once(\'error\', () => {\r\n                        process.exit(1);\r\n                    });\r\n            }\r\n        },\r\n        { src: \'src/**/*.ts\', name: \'watch\', watchTasks: [\'tscompile\'] },\r\n        { name: \'clean\', order: 0, src: \'src\', dist: \'lib\', task: (config) => del(config.getDist()) }\r\n    ], oper, env);\r\n\r\n    return runTaskSequence(gulp, tasks, config);\r\n}\r\n\r\n```\r\n\r\n\r\nhttps://github.com/zhouhoujun/development-core.git\r\nThe mocks are then available at `jspm_components/development-core/development-core.js`.\r\n\r\n## Documentation\r\n\r\nDocumentation is available on the\r\n[development-core docs site](https://github.com/zhouhoujun/development-core).\r\n\r\n## License\r\n\r\nMIT © [Houjun](https://github.com/zhouhoujun/)',
+25 silly publish   readmeFilename: 'README.md',
+25 silly publish   gitHead: '585d382f457ed0d7700fa4d9dd036577828a41bf',
+25 silly publish   _id: 'development-core@0.7.0',
+25 silly publish   _shasum: 'dd824b126bc5751fe453152cb42b1977c98fdeb6',
+25 silly publish   _from: '.' }
+26 verbose getPublishConfig undefined
+27 silly mapToRegistry name development-core
+28 silly mapToRegistry using default registry
+29 silly mapToRegistry registry https://registry.npmjs.org/
+30 silly mapToRegistry data Result {
+30 silly mapToRegistry   raw: 'development-core',
+30 silly mapToRegistry   scope: null,
+30 silly mapToRegistry   escapedName: 'development-core',
+30 silly mapToRegistry   name: 'development-core',
+30 silly mapToRegistry   rawSpec: '',
+30 silly mapToRegistry   spec: 'latest',
+30 silly mapToRegistry   type: 'tag' }
+31 silly mapToRegistry uri https://registry.npmjs.org/development-core
+32 verbose publish registryBase https://registry.npmjs.org/
+33 silly publish uploading C:\Users\zhouyou\AppData\Roaming\npm-cache\development-core\0.7.0\package.tgz
+34 verbose request uri https://registry.npmjs.org/development-core
+35 verbose request sending authorization for write operation
+36 info attempt registry request try #1 at 14:26:43
+37 verbose request using bearer token for auth
+38 verbose request id 4690e9758308197c
+39 http request PUT https://registry.npmjs.org/development-core
+40 http 403 https://registry.npmjs.org/development-core
+41 verbose headers { 'content-type': 'application/json',
+41 verbose headers   'cache-control': 'max-age=300',
+41 verbose headers   'content-length': '95',
+41 verbose headers   'accept-ranges': 'bytes',
+41 verbose headers   date: 'Mon, 07 Nov 2016 06:26:45 GMT',
+41 verbose headers   via: '1.1 varnish',
+41 verbose headers   connection: 'keep-alive',
+41 verbose headers   'x-served-by': 'cache-ams4424-AMS',
+41 verbose headers   'x-cache': 'MISS',
+41 verbose headers   'x-cache-hits': '0',
+41 verbose headers   'x-timer': 'S1478500004.476497,VS0,VE1381',
+41 verbose headers   vary: 'Accept-Encoding' }
+42 verbose request invalidating C:\Users\zhouyou\AppData\Roaming\npm-cache\registry.npmjs.org\development-core on PUT
+43 error publish Failed PUT 403
+44 verbose stack Error: "You cannot publish over the previously published version 0.7.0." : development-core
+44 verbose stack     at makeError (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:302:12)
+44 verbose stack     at CachingRegistryClient.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:290:14)
+44 verbose stack     at Request._callback (C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-client\lib\request.js:210:14)
+44 verbose stack     at Request.self.callback (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:187:22)
+44 verbose stack     at emitTwo (events.js:106:13)
+44 verbose stack     at Request.emit (events.js:191:7)
+44 verbose stack     at Request.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:1044:10)
+44 verbose stack     at emitOne (events.js:96:13)
+44 verbose stack     at Request.emit (events.js:188:7)
+44 verbose stack     at IncomingMessage.<anonymous> (C:\Program Files\nodejs\node_modules\npm\node_modules\request\request.js:965:12)
+45 verbose statusCode 403
+46 verbose pkgid development-core
+47 verbose cwd D:\Workspace\source\development-core
+48 error Windows_NT 10.0.14931
+49 error argv "C:\\Program Files\\nodejs\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "publish"
+50 error node v7.0.0
+51 error npm  v3.10.8
+52 error code E403
+53 error "You cannot publish over the previously published version 0.7.0." : development-core
+54 error If you need help, you may report this error at:
+54 error     <https://github.com/npm/npm/issues>
+55 verbose exit [ 1, true ]
