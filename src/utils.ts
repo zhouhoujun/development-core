@@ -60,6 +60,9 @@ function convertMatchOper(match: ITaskInfo) {
     if ((match.oper & Operation.test) > 0) {
         match.oper = match.oper | Operation.build;
     }
+    if ((match.oper & Operation.e2e) > 0) {
+        match.oper = match.oper | Operation.build;
+    }
     if ((match.oper & Operation.deploy) > 0) {
         match.oper = match.oper | Operation.test;
     }
@@ -67,12 +70,7 @@ function convertMatchOper(match: ITaskInfo) {
         match.oper = match.oper | Operation.test;
     }
 
-    if ((match.oper & Operation.e2e) > 0) {
-        match.oper = match.oper | Operation.build;
-    }
-
     return match;
-
 }
 
 export function matchOper(tinfo: ITaskInfo, match: ITaskInfo) {
