@@ -101,10 +101,6 @@ export function currentOperation(env: IEnvOption, cfg?: ITaskConfig) {
         oper = Operation.deploy;
     } else if (env.release) {
         oper = Operation.release;
-    } else if (env.e2e) {
-        oper = Operation.e2e;
-    } else if (env.test) {
-        oper = Operation.test;
     } else {
         oper = Operation.build;
     }

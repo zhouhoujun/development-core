@@ -50,6 +50,40 @@ describe('decorator:', () => {
 
     })
 
+    it('findTasks from module with Operation.test | Operation.watch', () => {
+
+        let tasks = findTasks(model, { oper: Operation.test | Operation.watch });
+
+        expect(tasks.length).eq(8);
+        let seq = toSequence(gulp, tasks, bindingConfig({
+            oper: Operation.build,
+            env: {},
+            option: { src: 'src', dist: 'lib' }
+        }));
+
+        // console.log(seq);
+        expect(seq.length).eq(6);
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch,TestTaskC')
+
+    })
+
+    it('findTasks from module with Operation.build | Operation.test | Operation.watch', () => {
+
+        let tasks = findTasks(model, { oper: Operation.build | Operation.test | Operation.watch });
+
+        expect(tasks.length).eq(8);
+        let seq = toSequence(gulp, tasks, bindingConfig({
+            oper: Operation.build,
+            env: {},
+            option: { src: 'src', dist: 'lib' }
+        }));
+
+        // console.log(seq);
+        expect(seq.length).eq(6);
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch,TestTaskC')
+
+    })
+
 
     it('findTasks from module with Operation and env', () => {
 
