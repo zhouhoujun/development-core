@@ -106,6 +106,14 @@ export interface ITaskInfo extends IOperate {
      */
     group?: Src;
     /**
+     * custom jduge info match to another.
+     *
+     * @param {ITaskInfo} another
+     *
+     * @memberOf ITaskInfo
+     */
+    match?(another: ITaskInfo): any;
+    /**
      * well be remove, please use Operation.watch instead. is watch task or not.
      *
      * @type {boolean | string}
@@ -657,6 +665,16 @@ export interface ITaskConfig {
      * @memberOf ITaskConfig
      */
     option: IAsserts | ITaskOption;
+    /**
+     * custom task match filter
+     *
+     * @param {ITaskInfo} task
+     * @param {ITaskInfo} match
+     * @returns {boolean}
+     *
+     * @memberOf ITaskConfig
+     */
+    match?(task: ITaskInfo, match: ITaskInfo): boolean;
     /**
      * get Src of current state.   default implement in bindingConfig.
      *

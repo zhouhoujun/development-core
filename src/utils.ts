@@ -40,7 +40,15 @@ function contains(arr1: string[], arr2: string[]) {
 }
 
 
-function convertOper(tinfo: ITaskInfo, def = Operation.default) {
+/**
+ * convert old version Operation to new version Operation
+ * 
+ * @export
+ * @param {ITaskInfo} tinfo
+ * @param {any} [def=Operation.default]
+ * @returns
+ */
+export function convertOper(tinfo: ITaskInfo, def = Operation.default) {
     tinfo = tinfo || {};
     if (tinfo.watch) {
         tinfo.oper = (tinfo.oper || 0) | Operation.watch;
@@ -56,15 +64,14 @@ function convertOper(tinfo: ITaskInfo, def = Operation.default) {
     return tinfo;
 }
 function convertMatchOper(match: ITaskInfo) {
-    match = convertOper(match, Operation.build);
-    if ((match.oper & Operation.test) > 0) {
+    if ((match.oper & Operation.test) > 0 && (match.oper & Operation.release) <= 0) {
         match.oper = match.oper | Operation.build;
     }
-    if ((match.oper & Operation.e2e) > 0) {
+    if ((match.oper & Operation.e2e) > 0 && (match.oper & Operation.release) <= 0) {
         match.oper = match.oper | Operation.build;
     }
     if ((match.oper & Operation.deploy) > 0) {
-        match.oper = match.oper | Operation.test;
+        match.oper = match.oper | Operation.test | Operation.e2e;
     }
     if ((match.oper & Operation.release) > 0) {
         match.oper = match.oper | Operation.test;
@@ -75,8 +82,16 @@ function convertMatchOper(match: ITaskInfo) {
 
 export function matchOper(tinfo: ITaskInfo, match: ITaskInfo) {
 
-    match = convertMatchOper(match);
+    match = convertOper(match, Operation.build);
     tinfo = convertOper(tinfo);
+
+    if (match.match) {
+        return match.match(tinfo);
+    } else if (tinfo.match) {
+        return tinfo.match(match);
+    } else {
+        match = convertMatchOper(match);
+    }
 
     if ((tinfo.oper & match.oper) <= 0) {
         return false;

@@ -8,6 +8,7 @@ import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefi
 
 
 
+
 /**
  * binding Config to implement default func.
  * 
@@ -25,14 +26,14 @@ export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
     cfg.runSequence = cfg.runSequence || runSequence;
     cfg.addToSequence = cfg.addToSequence || addToSequence;
     cfg.generateTask = cfg.generateTask || ((tasks, match?) => {
-        return generateTask(tasks, _.extend({ oper: cfg.oper, watch: cfg.env.watch }, match || {}));
+        return generateTask(tasks, _.extend(createDefaultMatch(cfg), match || {}));
     });
 
     cfg.findTasks = cfg.findTasks || ((mdl, match?) => {
-        return findTasksInModule(mdl, _.extend({ oper: cfg.oper, watch: cfg.env.watch }, match || {}));
+        return findTasksInModule(mdl, _.extend(createDefaultMatch(cfg), match || {}));
     });
     cfg.findTasksInDir = cfg.findTasksInDir || ((dirs, match?) => {
-        return findTasksInDir(dirs, _.extend({ oper: cfg.oper, watch: cfg.env.watch }, match || {}));
+        return findTasksInDir(dirs, _.extend(createDefaultMatch(cfg), match || {}));
     });
 
     cfg.findTaskDefine = cfg.findTaskDefine || findTaskDefineInModule.bind(cfg);
@@ -76,6 +77,15 @@ export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
     return cfg;
 }
 
+let createDefaultMatch = (cfg: ITaskConfig) => {
+    let match: ITaskInfo = { oper: cfg.oper };
+    if (cfg.match) {
+        match.match = (anothor: ITaskInfo) => {
+            return cfg.match(match, anothor);
+        }
+    }
+    return match;
+}
 
 
 /**
