@@ -61,6 +61,22 @@ export interface IPipeTask extends ITask {
     working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp): Promise<any>;
 }
 /**
+ * mutil source stream pipe task run way.
+ *
+ * @export
+ * @enum {number}
+ */
+export declare enum RunWay {
+    /**
+     * run mutil source stream by sequence.
+     */
+    sequence = 1,
+    /**
+     * run mutil source stream by parallel.
+     */
+    parallel = 2,
+}
+/**
  * Task base class.
  *
  * @export
@@ -68,6 +84,13 @@ export interface IPipeTask extends ITask {
  * @implements {ITask}
  */
 export declare abstract class PipeTask implements IPipeTask {
+    /**
+     * run mutil source stream way. default parallel.
+     *
+     *
+     * @memberOf PipeTask
+     */
+    runWay: RunWay;
     /**
      * task default name.
      *

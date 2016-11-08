@@ -66,6 +66,23 @@ export interface IPipeTask extends ITask {
 }
 
 /**
+ * mutil source stream pipe task run way.
+ * 
+ * @export
+ * @enum {number}
+ */
+export enum RunWay {
+    /**
+     * run mutil source stream by sequence.
+     */
+    sequence = 1,
+    /**
+     * run mutil source stream by parallel.
+     */
+    parallel = 2
+}
+
+/**
  * Task base class.
  * 
  * @export
@@ -73,6 +90,13 @@ export interface IPipeTask extends ITask {
  * @implements {ITask}
  */
 export abstract class PipeTask implements IPipeTask {
+    /**
+     * run mutil source stream way. default parallel.
+     * 
+     * 
+     * @memberOf PipeTask
+     */
+    public runWay = RunWay.parallel;
     /**
      * task default name.
      * 
@@ -242,7 +266,23 @@ export abstract class PipeTask implements IPipeTask {
             return Promise.resolve(this.sourceStream(config, option, gulp))
                 .then(stream => {
                     if (_.isArray(stream)) {
-                        return Promise.all(_.map(stream, st => this.working(st, config, option, gulp)));
+                        if (this.runWay === RunWay.parallel) {
+                            return Promise.all(_.map(stream, st => this.working(st, config, option, gulp)));
+                        } else if (this.runWay === RunWay.sequence) {
+                            let pthen: Promise<any>;
+                            _.each(stream, st => {
+                                if (!pthen) {
+                                    pthen = this.working(st, config, option, gulp);
+                                } else {
+                                    pthen = pthen.then(() => {
+                                        return this.working(st, config, option, gulp);
+                                    });
+                                }
+                            });
+                            return pthen;
+                        } else {
+                            return Promise.reject('runWay setting error.');
+                        }
                     } else {
                         return this.working(stream, config, option, gulp);
                     }
