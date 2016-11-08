@@ -52,17 +52,15 @@ export interface IPipeTask extends ITask {
      */
     output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): OutputPipe[];
     /**
-     * pipe task working.
+     * execute task works.
      * 
-     * @param {ITransform} source
      * @param {ITaskConfig} config
-     * @param {IAssertDist} option
      * @param {Gulp} gulp
      * @returns {Promise<any>}
      * 
      * @memberOf IPipeTask
      */
-    working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp): Promise<any>;
+    execute(config: ITaskConfig, gulp: Gulp): Promise<any>;
 }
 
 /**
@@ -172,7 +170,7 @@ export abstract class PipeTask implements IPipeTask {
         return true;
     }
 
-    working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp) {
+    protected working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp) {
         let name = config.subTaskName(option, this.name);
         return Promise.resolve(source)
             .then(psrc => {
@@ -255,39 +253,60 @@ export abstract class PipeTask implements IPipeTask {
             });
     }
 
+    /**
+     * execute task working
+     * 
+     * @param {ITaskConfig} config
+     * @param {Gulp} gulp
+     * @returns {Promise<any>}
+     * 
+     * @memberOf PipeTask
+     */
+    execute(config: ITaskConfig, gulp: Gulp): Promise<any> {
+        let option = this.getOption(config);
+        return Promise.resolve(this.sourceStream(config, option, gulp))
+            .then(stream => {
+                if (_.isArray(stream)) {
+                    if (this.runWay === RunWay.parallel) {
+                        return Promise.all(_.map(stream, st => this.working(st, config, option, gulp)));
+                    } else if (this.runWay === RunWay.sequence) {
+                        let pthen: Promise<any>;
+                        _.each(stream, st => {
+                            if (!pthen) {
+                                pthen = this.working(st, config, option, gulp);
+                            } else {
+                                pthen = pthen.then(() => {
+                                    return this.working(st, config, option, gulp);
+                                });
+                            }
+                        });
+                        return pthen;
+                    } else {
+                        return Promise.reject('runWay setting error.');
+                    }
+                } else {
+                    return this.working(stream, config, option, gulp);
+                }
+            });
+    }
+
+    /**
+     * setup task works.
+     * 
+     * @param {ITaskConfig} config
+     * @param {Gulp} [gulp]
+     * @returns {TaskResult}
+     * 
+     * @memberOf PipeTask
+     */
     setup(config: ITaskConfig, gulp?: Gulp): TaskResult {
         gulp = gulp || coregulp;
         let option = this.getOption(config);
         let tk = config.subTaskName(option, this.name);
-
         console.log(`register ${this.name} task:`, chalk.cyan(tk));
 
         gulp.task(tk, () => {
-            return Promise.resolve(this.sourceStream(config, option, gulp))
-                .then(stream => {
-                    if (_.isArray(stream)) {
-                        if (this.runWay === RunWay.parallel) {
-                            return Promise.all(_.map(stream, st => this.working(st, config, option, gulp)));
-                        } else if (this.runWay === RunWay.sequence) {
-                            let pthen: Promise<any>;
-                            _.each(stream, st => {
-                                if (!pthen) {
-                                    pthen = this.working(st, config, option, gulp);
-                                } else {
-                                    pthen = pthen.then(() => {
-                                        return this.working(st, config, option, gulp);
-                                    });
-                                }
-                            });
-                            return pthen;
-                        } else {
-                            return Promise.reject('runWay setting error.');
-                        }
-                    } else {
-                        return this.working(stream, config, option, gulp);
-                    }
-                })
-
+            return this.execute(config, gulp);
         });
 
         this.decorator.taskName = tk;

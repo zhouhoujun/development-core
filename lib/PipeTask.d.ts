@@ -48,17 +48,15 @@ export interface IPipeTask extends ITask {
      */
     output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): OutputPipe[];
     /**
-     * pipe task working.
+     * execute task works.
      *
-     * @param {ITransform} source
      * @param {ITaskConfig} config
-     * @param {IAssertDist} option
      * @param {Gulp} gulp
      * @returns {Promise<any>}
      *
      * @memberOf IPipeTask
      */
-    working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp): Promise<any>;
+    execute(config: ITaskConfig, gulp: Gulp): Promise<any>;
 }
 /**
  * mutil source stream pipe task run way.
@@ -121,6 +119,25 @@ export declare abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     protected match(p: IPipeOperate, name: string, config: ITaskConfig): boolean;
-    working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp): Promise<void | {}[]>;
+    protected working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp): Promise<void | {}[]>;
+    /**
+     * execute task working
+     *
+     * @param {ITaskConfig} config
+     * @param {Gulp} gulp
+     * @returns {Promise<any>}
+     *
+     * @memberOf PipeTask
+     */
+    execute(config: ITaskConfig, gulp: Gulp): Promise<any>;
+    /**
+     * setup task works.
+     *
+     * @param {ITaskConfig} config
+     * @param {Gulp} [gulp]
+     * @returns {TaskResult}
+     *
+     * @memberOf PipeTask
+     */
     setup(config: ITaskConfig, gulp?: Gulp): TaskResult;
 }
