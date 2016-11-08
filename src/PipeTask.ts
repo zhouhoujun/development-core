@@ -159,7 +159,7 @@ export abstract class PipeTask implements IPipeTask {
         if (!p) {
             return false;
         }
-        if (p.name && !name.endsWith(name)) {
+        if (p.name && !name.endsWith(p.name)) {
             return false;
         }
 
@@ -170,11 +170,11 @@ export abstract class PipeTask implements IPipeTask {
         return true;
     }
 
-    protected working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp) {
+    protected working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp, pipes?: Pipe[], output?: OutputPipe[]) {
         let name = config.subTaskName(option, this.name);
         return Promise.resolve(source)
             .then(psrc => {
-                return Promise.all(_.map(this.pipes(config, option, gulp), (p: Pipe) => {
+                return Promise.all(_.map(pipes || this.pipes(config, option, gulp), (p: Pipe) => {
                     if (_.isFunction(p)) {
                         return p(config, option, gulp);
                     } else {
@@ -220,7 +220,7 @@ export abstract class PipeTask implements IPipeTask {
                     })
             })
             .then(stream => {
-                let outputs = this.output(config, option, gulp);
+                let outputs = output || this.output(config, option, gulp);
                 return Promise.all(_.map(outputs, output => {
                     if (_.isFunction(output)) {
                         return output(stream, config, option, gulp);

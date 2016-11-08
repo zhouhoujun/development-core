@@ -119,7 +119,7 @@ export declare abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     protected match(p: IPipeOperate, name: string, config: ITaskConfig): boolean;
-    protected working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp): Promise<void | {}[]>;
+    protected working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp, pipes?: Pipe[], output?: OutputPipe[]): Promise<void | {}[]>;
     /**
      * execute task working
      *
