@@ -3,7 +3,7 @@ import { Gulp, WatchEvent } from 'gulp';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
-import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, TaskResult, IPipe, IDynamicTaskOption, ITaskConfig, ITask } from './TaskConfig';
+import { IAssertDist, IOutputPipe, Operation, ITaskInfo, TransformSource, TaskResult, IPipe, IDynamicTaskOption, ITaskConfig, ITask } from './TaskConfig';
 import { matchTaskGroup, matchTaskInfo } from './utils';
 import { PipeTask } from './PipeTask';
 
@@ -30,19 +30,33 @@ class DynamicPipeTask extends PipeTask {
         return this.dt || config.option;
     }
 
-    sourceStream(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform> {
+    sourceStream(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): TransformSource | Promise<TransformSource> {
         if (this.dt.pipe) {
             return Promise.resolve(super.sourceStream(config, dist, gulp))
                 .then(stream => {
-                    return new Promise((resolve, reject) => {
-                        this.dt.pipe(stream, config, this.dt, (err) => {
-                            if (err) {
-                                reject(err);
-                            } else {
-                                resolve(stream);
-                            }
+                    if (!_.isArray(stream)) {
+                        return new Promise((resolve, reject) => {
+                            this.dt.pipe(stream, config, this.dt, (err) => {
+                                if (err) {
+                                    reject(err);
+                                } else {
+                                    resolve(stream);
+                                }
+                            });
                         });
-                    });
+                    } else {
+                        return Promise.all(_.map(stream, it => {
+                            return new Promise((resolve, reject) => {
+                                this.dt.pipe(it, config, this.dt, (err) => {
+                                    if (err) {
+                                        reject(err);
+                                    } else {
+                                        resolve(stream);
+                                    }
+                                });
+                            });
+                        }));
+                    }
                 });
         } else {
             return super.sourceStream(config, dist, gulp);

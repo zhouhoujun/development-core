@@ -192,6 +192,10 @@ export interface ITransform extends IOperate, NodeJS.ReadWriteStream {
 }
 
 /**
+ * transform source.
+ */
+export type TransformSource = ITransform | ITransform[];
+/**
  * output transform. support typescript output.
  * 
  * @export
