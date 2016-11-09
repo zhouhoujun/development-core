@@ -4,7 +4,7 @@ import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
 import { IAssertDist, IOutputPipe, Operation, ITaskInfo, TransformSource, TaskResult, IPipe, IDynamicTaskOption, ITaskConfig, ITask } from './TaskConfig';
-import { matchTaskGroup, matchTaskInfo } from './utils';
+import { matchTaskGroup, matchTaskInfo, taskStringVal } from './utils';
 import { PipeTask } from './PipeTask';
 
 type factory = (config: ITaskConfig, gulp: Gulp) => TaskResult;
@@ -27,6 +27,7 @@ class DynamicPipeTask extends PipeTask {
     }
 
     protected getOption(config: ITaskConfig) {
+        this.name = this.name ||  taskStringVal(this.dt.name, config.oper);
         return this.dt || config.option;
     }
 

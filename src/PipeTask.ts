@@ -303,7 +303,7 @@ export abstract class PipeTask implements IPipeTask {
         gulp = gulp || coregulp;
         let option = this.getOption(config);
         let tk = config.subTaskName(option, this.name);
-        console.log(`register ${this.name} task:`, chalk.cyan(tk));
+        console.log(`register ${this.name || ''} task:`, chalk.cyan(tk));
 
         gulp.task(tk, () => {
             return this.execute(config, gulp);
