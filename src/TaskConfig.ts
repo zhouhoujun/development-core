@@ -734,6 +734,14 @@ export interface ITaskConfig {
      */
     globals?: any;
     /**
+     * convert relative path (relative evn.root) to absolute, or not. 
+     * default auto convert relative path (relative evn.root) to absolute.  
+     * 
+     * @type {boolean}
+     * @memberOf ITaskConfig
+     */
+    autoJoinRoot?: boolean;
+    /**
      * env
      * 
      * @type {EnvOption}
@@ -899,6 +907,26 @@ export interface ITaskConfig {
      * @memberOf ITaskConfig
      */
     subTaskName?(assert: string | IAsserts, defaultName?: string);
+
+    /**
+     * join src to absolute path src with root( env.root ). 
+     * 
+     * @param {Src} src
+     * @returns {Src}
+     * 
+     * @memberOf ITaskConfig
+     */
+    toRootSrc?(src: Src): Src
+
+    /**
+     * join pathstr to absolute path src with root( env.root ). 
+     * 
+     * @param {string} pathstr
+     * @returns {string}
+     * 
+     * @memberOf ITaskConfig
+     */
+    toRootPath?(pathstr: string): string
 }
 
 /**

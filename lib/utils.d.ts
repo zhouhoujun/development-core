@@ -1,4 +1,4 @@
-import { TaskSource, TaskString, Operation, ITaskInfo } from './TaskConfig';
+import { TaskSource, TaskString, Operation, ITaskInfo, Src } from './TaskConfig';
 /**
  * filter fileName in directory.
  *
@@ -38,3 +38,21 @@ export declare function someOper(oper1: Operation, oper2: Operation): boolean;
  */
 export declare function matchTaskInfo(tinfo: ITaskInfo, match: ITaskInfo): any;
 export declare function matchTaskGroup(tinfo: ITaskInfo, match: ITaskInfo): boolean;
+/**
+ * convert path to absolute path.
+ *
+ * @export
+ * @param {string} root
+ * @param {string} pathstr
+ * @returns {string}
+ */
+export declare function absolutePath(root: string, pathstr: string): string;
+/**
+ * convert src to absolute path src.
+ *
+ * @export
+ * @param {string} root
+ * @param {Src} src
+ * @returns {Src}
+ */
+export declare function absoluteSrc(root: string, src: Src): Src;

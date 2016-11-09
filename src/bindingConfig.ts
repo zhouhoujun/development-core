@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { IAssertDist, IEnvOption, Operation, ITaskConfig, ITaskInfo, Src } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { runSequence, addToSequence } from './taskSequence';
-import { files, taskStringVal, taskSourceVal } from './utils';
+import { files, taskStringVal, taskSourceVal, absoluteSrc, absolutePath } from './utils';
 import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefineInDir } from './decorator';
 
 
@@ -61,17 +61,25 @@ export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
         if (!src) {
             src = taskSourceVal(getAssertSrc(cfg.option, taskinfo), cfg.oper)
         }
-        return src
+        return (cfg.autoJoinRoot === false) ? src : absoluteSrc(cfg.env.root, src);
     });
 
     cfg.getDist = cfg.getDist || ((ds?: IAssertDist) => {
+        let dist;
         if (ds) {
-            let dist = getCurrentDist(ds, cfg.oper);
-            if (dist) {
-                return dist;
-            }
+            dist = getCurrentDist(ds, cfg.oper);
         }
-        return getCurrentDist(cfg.option, cfg.oper);
+        dist = dist || getCurrentDist(cfg.option, cfg.oper);
+
+        return (cfg.autoJoinRoot === false) ? dist : absolutePath(cfg.env.root, dist);
+    });
+
+    cfg.toRootSrc = cfg.toRootSrc || ((src: Src): Src => {
+        return absoluteSrc(cfg.env.root, src);
+    });
+
+    cfg.toRootPath = cfg.toRootPath || ((pathstr: string): string => {
+        return absolutePath(cfg.env.root, pathstr);
     });
 
     return cfg;

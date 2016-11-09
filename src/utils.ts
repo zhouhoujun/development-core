@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
-import { TaskSource, TaskString, Operation, ITaskInfo } from './TaskConfig';
+import { TaskSource, TaskString, Operation, ITaskInfo, Src } from './TaskConfig';
 import { readdirSync, lstatSync } from 'fs';
+import * as path from 'path';
 /**
  * filter fileName in directory.
  * 
@@ -185,4 +186,35 @@ export function matchTaskGroup(tinfo: ITaskInfo, match: ITaskInfo): boolean {
     }
 
     return true;
+}
+
+/**
+ * convert path to absolute path.
+ * 
+ * @export
+ * @param {string} root
+ * @param {string} pathstr
+ * @returns {string}
+ */
+export function absolutePath(root: string, pathstr: string): string {
+    if (!root || path.isAbsolute(pathstr)) {
+        return pathstr;
+    }
+    return path.join(root, pathstr);
+}
+
+/**
+ * convert src to absolute path src.
+ * 
+ * @export
+ * @param {string} root
+ * @param {Src} src
+ * @returns {Src}
+ */
+export function absoluteSrc(root: string, src: Src): Src {
+    if (_.isString(src)) {
+        return absolutePath(root, src)
+    } else {
+        return _.map(src, p => absolutePath(root, p));
+    }
 }

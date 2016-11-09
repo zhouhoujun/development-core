@@ -22,6 +22,7 @@ gulp.task('build', () => {
 });
 
 let createTask = (env) => {
+    env.root = __dirname;
     let config = bindingConfig({
         env: env,
         option: { src: 'src', dist: 'lib' }
