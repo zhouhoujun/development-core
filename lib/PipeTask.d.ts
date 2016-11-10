@@ -1,6 +1,6 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { TransformSource, IAssertDist, ITaskInfo, TaskResult, ITaskConfig, IPipeOperate, Pipe, OutputPipe, ITask, ITransform } from './TaskConfig';
+import { TransformSource, IAssertDist, ITaskInfo, TaskResult, ITaskConfig, IPipeOperate, ICustomPipe, Pipe, OutputPipe, ITask, ITransform } from './TaskConfig';
 /**
  * pipe task.
  *
@@ -119,6 +119,75 @@ export declare abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     protected match(p: IPipeOperate, name: string, config: ITaskConfig): boolean;
+    /**
+     * convert custom pipe result to Promise.
+     *
+     * @protected
+     * @param {ITransform} source
+     * @param {ICustomPipe} opt
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} dist
+     * @param {Gulp} gulp
+     * @returns
+     *
+     * @memberOf PipeTask
+     */
+    protected cpipe2Promise(source: ITransform, opt: ICustomPipe, config: ITaskConfig, dist: IAssertDist, gulp: Gulp): Promise<ITransform>;
+    /**
+     * covert pipes transform to Promise.
+     *
+     * @protected
+     * @param {ITransform} source
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} dist
+     * @param {Gulp} gulp
+     * @param {Pipe[]} [pipes]
+     * @returns
+     *
+     * @memberOf PipeTask
+     */
+    protected pipes2Promise(source: ITransform, config: ITaskConfig, dist: IAssertDist, gulp: Gulp, pipes?: Pipe[]): Promise<ITransform>;
+    /**
+     * output pipes transform to Promise.
+     *
+     * @protected
+     * @param {ITransform} source
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} dist
+     * @param {Gulp} gulp
+     * @param {OutputPipe[]} [output]
+     * @returns
+     *
+     * @memberOf PipeTask
+     */
+    protected output2Promise(source: ITransform, config: ITaskConfig, dist: IAssertDist, gulp: Gulp, output?: OutputPipe[]): Promise<{}[]>;
+    /**
+     *  custom pipe Promise.
+     *
+     * @protected
+     * @param {ITransform} source
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} dist
+     * @param {Gulp} gulp
+     * @returns
+     *
+     * @memberOf PipeTask
+     */
+    protected customPipe(source: ITransform, config: ITaskConfig, dist: IAssertDist, gulp: Gulp): ITransform | Promise<ITransform>;
+    /**
+     * each one source stream works.
+     *
+     * @protected
+     * @param {ITransform} source
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} option
+     * @param {Gulp} gulp
+     * @param {Pipe[]} [pipes]
+     * @param {OutputPipe[]} [output]
+     * @returns
+     *
+     * @memberOf PipeTask
+     */
     protected working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp, pipes?: Pipe[], output?: OutputPipe[]): Promise<void | {}[]>;
     /**
      * execute task working

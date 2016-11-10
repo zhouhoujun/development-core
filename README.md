@@ -162,7 +162,7 @@ export class TaskDefine implements ITaskDefine {
 
 ```
 
-## define task by group.
+## define task by group
 
 ```ts
 
@@ -244,6 +244,8 @@ export class TestTaskC implements IDynamicTasks {
 
 ## user task, add special pipe work or add special output
 
+special pipe work or add special output work with class implements IDynamicTasks, class extends PipeTask. also you can implements IPipeTask or ITask by youself.
+
 ```ts
 
 // module use.
@@ -262,8 +264,18 @@ let config = bindingConfig({
                     order: 1,
                     toTransform: ()=> tslint(),
                 },
+            ],
+            output:[
+                ...
             ]
-        }
+        },
+        //also can setting here after v0.7.11
+        pipes:[
+            ...
+        ],
+        output:[
+            ...
+        ]
     }
 });
 config.findTasks('module a')

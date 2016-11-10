@@ -409,19 +409,6 @@ export interface ITask {
  */
 export interface IPipeOption {
     /**
-     * custom stream pipe.
-     * 
-     * @param {ITransform} gulpsrc
-     * @param {ITaskConfig} config
-     * @param {IAssertDist} [dist]
-     * @param {TaskCallback} [callback]
-     * @returns {(ITransform | Promise<ITransform> | void)}
-     * 
-     * @memberOf IPipeOption
-     */
-    pipe?(gulpsrc: ITransform, config: ITaskConfig, dist?: IAssertDist, callback?: TaskCallback): ITransform | Promise<ITransform> | void;
-
-    /**
      * task pipe works.
      * 
      * 
@@ -440,13 +427,36 @@ export interface IPipeOption {
 
 
 /**
+ * custom pipe.
+ * 
+ * @export
+ * @interface ICustomPipe
+ */
+export interface ICustomPipe {
+    /**
+     * custom stream pipe.
+     * 
+     * @param {ITransform} gulpsrc
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} [dist]
+     * @param {Gulp} [gulp]
+     * @param {TaskCallback} [callback]
+     * @returns {(ITransform | Promise<ITransform> | void)}
+     * 
+     * @memberOf ICustomPipe
+    * */
+    pipe?(gulpsrc: ITransform, config: ITaskConfig, dist?: IAssertDist, gulp?: Gulp, callback?: TaskCallback): ITransform | Promise<ITransform> | void;
+
+}
+
+/**
  * dynamic gulp task.
  * 
  * @export
  * @interface IDynamicTaskOption
  * @extends {IAssertDist}
  */
-export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ITaskInfo {
+export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPipe, ITaskInfo {
     /**
      * task name
      * 
@@ -503,7 +513,8 @@ export interface IDynamicTasks {
  * @interface ILoaderOption
  * @extends {IPipeOption}
  */
-export interface ILoaderOption extends IPipeOption {
+export interface ILoaderOption extends IPipeOption, ICustomPipe {
+
     /**
      * loader type, default module.
      * 
@@ -646,7 +657,7 @@ export interface ISubTaskOption {
  * @interface IAsserts
  * @extends {IAssertDist}
  */
-export interface IAsserts extends IAssertDist, ITaskLoaderOption {
+export interface IAsserts extends IAssertDist, ITaskLoaderOption, IPipeOption, ICustomPipe {
 
     /**
      * tasks to deal with IAsserts.
