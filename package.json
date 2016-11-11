@@ -1,6 +1,6 @@
 {
   "name": "development-core",
-  "version": "0.7.11",
+  "version": "0.7.12",
   "description": "development build tools.",
   "main": "./lib/index.js",
   "typings": "./lib/index",
@@ -16,6 +16,7 @@
   "keywords": [
     "development",
     "tool",
+    "gulp",
     "typescript",
     "node",
     "babel"

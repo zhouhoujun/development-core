@@ -3,15 +3,15 @@ import { Gulp, WatchEvent } from 'gulp';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
-import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, TaskResult, IPipe, IDynamicTaskOption, ITaskConfig, ITask } from './TaskConfig';
+import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
 import { matchTaskGroup, matchTaskInfo, taskStringVal } from './utils';
 import { PipeTask } from './PipeTask';
 
-type factory = (config: ITaskConfig, gulp: Gulp) => TaskResult;
+type factory = (config: ITaskContext, gulp: Gulp) => TaskResult;
 class DynamicTask implements ITask {
     constructor(public decorator: ITaskInfo, private factory: factory) {
     }
-    setup(config: ITaskConfig, gulp?: Gulp) {
+    setup(config: ITaskContext, gulp?: Gulp) {
         let name = this.factory(config, gulp || coregulp);
         if (name) {
             this.decorator.taskName = name;
@@ -26,12 +26,12 @@ class DynamicPipeTask extends PipeTask {
         this.decorator = info || dt;
     }
 
-    protected getOption(config: ITaskConfig) {
+    protected getOption(config: ITaskContext) {
         this.name = this.name || taskStringVal(this.dt.name, config.oper);
         return this.dt || config.option;
     }
 
-    protected customPipe(source: ITransform, config: ITaskConfig, dist: IAssertDist, gulp: Gulp) {
+    protected customPipe(source: ITransform, config: ITaskContext, dist: IAssertDist, gulp: Gulp) {
         if (this.dt.pipe) {
             return Promise.resolve(super.customPipe(source, config, dist, gulp))
                 .then(stream => this.cpipe2Promise(stream, this.dt, config, dist, gulp));
@@ -40,13 +40,13 @@ class DynamicPipeTask extends PipeTask {
         }
     }
 
-    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): IPipe[] {
+    pipes(config: ITaskContext, dist: IAssertDist, gulp?: Gulp): IPipe[] {
         let pipes = _.isFunction(this.dt.pipes) ? this.dt.pipes(config, dist, gulp) : this.dt.pipes;
         pipes = pipes || [];
         return pipes.concat(super.pipes(config, dist, gulp));
     }
 
-    output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): IOutputPipe[] {
+    output(config: ITaskContext, dist: IAssertDist, gulp?: Gulp): IOutputPipe[] {
         if (this.dt.output === null) {
             return [stream => stream];
         }
@@ -103,7 +103,7 @@ export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], m
  * @returns
  */
 function createTask(dt: IDynamicTaskOption) {
-    let factory = (cfg: ITaskConfig, gulp: Gulp) => {
+    let factory = (cfg: ITaskContext, gulp: Gulp) => {
         let tk = cfg.subTaskName(dt.name);
         console.log('register custom dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
@@ -122,7 +122,7 @@ function createTask(dt: IDynamicTaskOption) {
  * @returns
  */
 function createWatchTask(dt: IDynamicTaskOption) {
-    let factory = (cfg: ITaskConfig, gulp: Gulp) => {
+    let factory = (cfg: ITaskContext, gulp: Gulp) => {
         let watchs = _.isFunction(dt.watchTasks) ? dt.watchTasks(cfg) : dt.watchTasks;
         if (!_.isFunction(_.last(watchs))) {
             watchs.push(<WatchCallback>(event: WatchEvent) => {
@@ -138,7 +138,7 @@ function createWatchTask(dt: IDynamicTaskOption) {
         let tk = cfg.subTaskName(dt);
         console.log('register watch  dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
-            let src = cfg.getSrc(dt, dt);
+            let src = cfg.getSrc(dt);
             console.log('watch, src:', chalk.cyan.call(chalk, src));
             gulp.watch(src, watchs)
         });

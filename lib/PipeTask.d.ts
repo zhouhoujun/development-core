@@ -25,7 +25,7 @@ export interface IPipeTask extends ITask {
      *
      * @memberOf IPipeTask
      */
-    sourceStream(config: ITaskConfig, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource>;
+    source(config: ITaskConfig, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource>;
     /**
      * task pipe works.
      *
@@ -104,10 +104,60 @@ export declare abstract class PipeTask implements IPipeTask {
      */
     decorator: ITaskInfo;
     constructor(info?: ITaskInfo);
-    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): Pipe[];
-    output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): OutputPipe[];
-    protected getOption(config: ITaskConfig): IAssertDist;
+    /**
+     * source streams.
+     *
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} option
+     * @param {Gulp} gulp
+     * @returns {(TransformSource | Promise<TransformSource>)}
+     *
+     * @memberOf PipeTask
+     */
+    source(config: ITaskConfig, option: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource>;
+    /**
+     * pelease use source method.
+     *
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} option
+     * @param {Gulp} gulp
+     * @returns {(TransformSource | Promise<TransformSource>)}
+     *
+     * @memberOf PipeTask
+     */
     sourceStream(config: ITaskConfig, option: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource>;
+    /**
+     * task pipe works.
+     *
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} dist
+     * @param {Gulp} [gulp]
+     * @returns {Pipe[]}
+     *
+     * @memberOf PipeTask
+     */
+    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): Pipe[];
+    /**
+     * output pipes.
+     *
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} dist
+     * @param {Gulp} [gulp]
+     * @returns {OutputPipe[]}
+     *
+     * @memberOf PipeTask
+     */
+    output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): OutputPipe[];
+    /**
+     * get option.
+     *
+     * @protected
+     * @param {ITaskConfig} config
+     * @returns {IAssertDist}
+     *
+     * @memberOf PipeTask
+     */
+    protected getOption(config: ITaskConfig): IAssertDist;
     /**
      * match pipe Operate
      *

@@ -1,5 +1,6 @@
 import { Gulp } from 'gulp';
-import { TransformSource, IAssertDist, ITaskInfo, TaskResult, ITaskConfig, IPipeOperate, ICustomPipe, Pipe, OutputPipe, ITask, ITransform, ILoaderOption } from './TaskConfig';
+import { TransformSource, IAssertDist, ITaskInfo, TaskResult, ITaskContext, IOperate, ICustomPipe, Pipe, OutputPipe, ITask, ITransform, ILoaderOption } from './TaskConfig';
+import { taskStringVal } from './utils';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 import * as _ from 'lodash';
@@ -28,7 +29,7 @@ export interface IPipeTask extends ITask {
      * 
      * @memberOf IPipeTask
      */
-    sourceStream(config: ITaskConfig, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource>;
+    source(config: ITaskContext, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource>;
     /**
      * task pipe works.
      * 
@@ -39,7 +40,7 @@ export interface IPipeTask extends ITask {
      * 
      * @memberOf IPipeTask
      */
-    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): Pipe[];
+    pipes(config: ITaskContext, dist: IAssertDist, gulp?: Gulp): Pipe[];
 
     /**
      * output pipes.
@@ -50,7 +51,7 @@ export interface IPipeTask extends ITask {
      * 
      * @memberOf IPipeTask
      */
-    output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): OutputPipe[];
+    output(config: ITaskContext, dist: IAssertDist, gulp?: Gulp): OutputPipe[];
     /**
      * execute task works.
      * 
@@ -60,7 +61,7 @@ export interface IPipeTask extends ITask {
      * 
      * @memberOf IPipeTask
      */
-    execute(config: ITaskConfig, gulp: Gulp): Promise<any>;
+    execute(config: ITaskContext, gulp: Gulp): Promise<any>;
 }
 
 /**
@@ -113,7 +114,54 @@ export abstract class PipeTask implements IPipeTask {
         this.decorator = info || {};
     }
 
-    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): Pipe[] {
+    /**
+     * source streams.
+     * 
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} option
+     * @param {Gulp} gulp
+     * @returns {(TransformSource | Promise<TransformSource>)}
+     * 
+     * @memberOf PipeTask
+     */
+    source(config: ITaskContext, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource> {
+        let option = config.option;
+        let pipes: Pipe[] = null;
+        if (option.source) {
+            return _.isFunction(option.source) ? option.source(config, dist, gulp) : option.source;
+        }
+        let loader = <ILoaderOption>option.loader;
+        if (loader && _.isFunction(loader.pipes)) {
+            pipes = _.isFunction(loader.pipes) ? loader.pipes(config, option, gulp) : _.filter(<Pipe[]>loader.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
+        }
+        return gulp.src(config.getSrc(dist, this.decorator));
+    }
+
+    /**
+     * pelease use source method.
+     * 
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} option
+     * @param {Gulp} gulp
+     * @returns {(TransformSource | Promise<TransformSource>)}
+     * 
+     * @memberOf PipeTask
+     */
+    sourceStream(config: ITaskContext, option: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource> {
+        return this.source(config, option, gulp);
+    }
+
+    /**
+     * task pipe works.
+     * 
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} dist
+     * @param {Gulp} [gulp]
+     * @returns {Pipe[]}
+     * 
+     * @memberOf PipeTask
+     */
+    pipes(config: ITaskContext, dist: IAssertDist, gulp?: Gulp): Pipe[] {
         let option = config.option;
         let pipes: Pipe[] = null;
         let loader = <ILoaderOption>option.loader;
@@ -130,7 +178,17 @@ export abstract class PipeTask implements IPipeTask {
         return pipes || [];
     }
 
-    output(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): OutputPipe[] {
+    /**
+     * output pipes.
+     * 
+     * @param {ITaskConfig} config
+     * @param {IAssertDist} dist
+     * @param {Gulp} [gulp]
+     * @returns {OutputPipe[]}
+     * 
+     * @memberOf PipeTask
+     */
+    output(config: ITaskContext, dist: IAssertDist, gulp?: Gulp): OutputPipe[] {
         let option = config.option;
         let pipes: OutputPipe[] = null;
         let loader = <ILoaderOption>option.loader;
@@ -153,12 +211,17 @@ export abstract class PipeTask implements IPipeTask {
         return pipes || [(stream) => stream.pipe(gulp.dest(config.getDist(dist)))]
     }
 
-    protected getOption(config: ITaskConfig): IAssertDist {
+    /**
+     * get option.
+     * 
+     * @protected
+     * @param {ITaskConfig} config
+     * @returns {IAssertDist}
+     * 
+     * @memberOf PipeTask
+     */
+    protected getOption(config: ITaskContext): IAssertDist {
         return config.option;
-    }
-
-    sourceStream(config: ITaskConfig, option: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource> {
-        return gulp.src(config.getSrc(option, this.decorator));
     }
 
     /**
@@ -171,11 +234,11 @@ export abstract class PipeTask implements IPipeTask {
      * 
      * @memberOf PipeTask
      */
-    protected match(p: IPipeOperate, name: string, config: ITaskConfig) {
+    protected match(p: IOperate, name: string, config: ITaskContext) {
         if (!p) {
             return false;
         }
-        if (p.name && !name.endsWith(p.name)) {
+        if (p.name && !name.endsWith(taskStringVal(p.name, p.oper))) {
             return false;
         }
 
@@ -199,7 +262,7 @@ export abstract class PipeTask implements IPipeTask {
      * 
      * @memberOf PipeTask
      */
-    protected cpipe2Promise(source: ITransform, opt: ICustomPipe, config: ITaskConfig, dist: IAssertDist, gulp: Gulp) {
+    protected cpipe2Promise(source: ITransform, opt: ICustomPipe, config: ITaskContext, dist: IAssertDist, gulp: Gulp) {
         return new Promise<ITransform>((resolve, reject) => {
             let ps = opt.pipe(source, config, dist, gulp, (err) => {
                 if (err) {
@@ -227,7 +290,7 @@ export abstract class PipeTask implements IPipeTask {
      * 
      * @memberOf PipeTask
      */
-    protected pipes2Promise(source: ITransform, config: ITaskConfig, dist: IAssertDist, gulp: Gulp, pipes?: Pipe[]) {
+    protected pipes2Promise(source: ITransform, config: ITaskContext, dist: IAssertDist, gulp: Gulp, pipes?: Pipe[]) {
         let name = config.subTaskName(dist, this.name);
         return Promise.all(_.map(pipes || this.pipes(config, dist, gulp), (p: Pipe) => {
             if (_.isFunction(p)) {
@@ -288,7 +351,7 @@ export abstract class PipeTask implements IPipeTask {
      * 
      * @memberOf PipeTask
      */
-    protected output2Promise(source: ITransform, config: ITaskConfig, dist: IAssertDist, gulp: Gulp, output?: OutputPipe[]) {
+    protected output2Promise(source: ITransform, config: ITaskContext, dist: IAssertDist, gulp: Gulp, output?: OutputPipe[]) {
         let name = config.subTaskName(dist, this.name);
         let outputs = output || this.output(config, dist, gulp);
         return Promise.all(_.map(outputs, output => {
@@ -332,7 +395,7 @@ export abstract class PipeTask implements IPipeTask {
      * 
      * @memberOf PipeTask
      */
-    protected customPipe(source: ITransform, config: ITaskConfig, dist: IAssertDist, gulp: Gulp) {
+    protected customPipe(source: ITransform, config: ITaskContext, dist: IAssertDist, gulp: Gulp) {
         let cfgopt = config.option;
         let loader = <ILoaderOption>cfgopt.loader;
         let prsrc: Promise<ITransform>;
@@ -362,7 +425,7 @@ export abstract class PipeTask implements IPipeTask {
      * 
      * @memberOf PipeTask
      */
-    protected working(source: ITransform, config: ITaskConfig, option: IAssertDist, gulp: Gulp, pipes?: Pipe[], output?: OutputPipe[]) {
+    protected working(source: ITransform, config: ITaskContext, option: IAssertDist, gulp: Gulp, pipes?: Pipe[], output?: OutputPipe[]) {
         return Promise.resolve(source)
             .then(psrc => this.customPipe(psrc, config, option, gulp))
             .then(psrc => this.pipes2Promise(psrc, config, option, gulp, pipes))
@@ -382,7 +445,7 @@ export abstract class PipeTask implements IPipeTask {
      * 
      * @memberOf PipeTask
      */
-    execute(config: ITaskConfig, gulp: Gulp): Promise<any> {
+    execute(config: ITaskContext, gulp: Gulp): Promise<any> {
         let option = this.getOption(config);
         return Promise.resolve(this.sourceStream(config, option, gulp))
             .then(stream => {
@@ -419,7 +482,7 @@ export abstract class PipeTask implements IPipeTask {
      * 
      * @memberOf PipeTask
      */
-    setup(config: ITaskConfig, gulp?: Gulp): TaskResult {
+    setup(config: ITaskContext, gulp?: Gulp): TaskResult {
         gulp = gulp || coregulp;
         let option = this.getOption(config);
         let tk = config.subTaskName(option, this.name);

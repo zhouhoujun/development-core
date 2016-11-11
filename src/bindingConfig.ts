@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { IAssertDist, IEnvOption, Operation, ITaskConfig, ITaskInfo, Src } from './TaskConfig';
+import { IAssertDist, IEnvOption, Operation, ITaskContext, ITaskConfig, ITaskInfo, Src } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { runSequence, addToSequence } from './taskSequence';
 import { files, taskStringVal, taskSourceVal, absoluteSrc, absolutePath } from './utils';
@@ -13,83 +13,88 @@ import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefi
  * binding Config to implement default func.
  * 
  * @export
- * @param {TaskConfig} cfg
- * @returns {TaskConfig}
+ * @param {ITaskConfig} cfg
+ * @returns {ITaskContext}
  */
-export function bindingConfig(cfg: ITaskConfig): ITaskConfig {
+export function bindingConfig(cfg: ITaskConfig): ITaskContext {
     // if (!cfg.oper) {
     //     cfg.oper = currentOperation(cfg.env);
     // }
-    currentOperation(cfg.env, cfg);
+    let oper = currentOperation(cfg.env);
 
-    cfg.fileFilter = cfg.fileFilter || files;
-    cfg.runSequence = cfg.runSequence || runSequence;
-    cfg.addToSequence = cfg.addToSequence || addToSequence;
-    cfg.generateTask = cfg.generateTask || ((tasks, match?) => {
-        return generateTask(tasks, _.extend(createDefaultMatch(cfg), match || {}));
-    });
+    let context = <ITaskContext>{
+        oper: oper,
+        taskName:'',
+        define: {},
+        config: cfg,
+        fileFilter: files,
+        runSequence: runSequence,
+        addToSequence: cfg.addToSequence || addToSequence,
+        generateTask(tasks, match?) {
+            return generateTask(tasks, _.extend(createDefaultMatch(context), match || {}));
+        },
+        findTasks(mdl, match?) {
+            return findTasksInModule(mdl, _.extend(createDefaultMatch(context), match || {}));
+        },
+        findTasksInDir(dirs, match?) {
+            return findTasksInDir(dirs, _.extend(createDefaultMatch(context), match || {}));
+        },
 
-    cfg.findTasks = cfg.findTasks || ((mdl, match?) => {
-        return findTasksInModule(mdl, _.extend(createDefaultMatch(cfg), match || {}));
-    });
-    cfg.findTasksInDir = cfg.findTasksInDir || ((dirs, match?) => {
-        return findTasksInDir(dirs, _.extend(createDefaultMatch(cfg), match || {}));
-    });
+        findTaskDefine: findTaskDefineInModule.bind(this),
 
-    cfg.findTaskDefine = cfg.findTaskDefine || findTaskDefineInModule.bind(cfg);
-    cfg.findTaskDefineInDir = cfg.findTaskDefineInDir || findTaskDefineInDir.bind(cfg);
+        findTaskDefineInDir: findTaskDefineInDir.bind(this),
 
-    cfg.subTaskName = cfg.subTaskName || ((dt, deft = '') => {
-        let name = '';
-        if (_.isString(dt)) {
-            name = dt;
-        } else if (dt && cfg.option !== dt) {
-            name = taskStringVal(dt.name, cfg.oper)
-        } else {
-            name = deft;
+        subTaskName(dt, deft = '') {
+            let name = '';
+            if (_.isString(dt)) {
+                name = dt;
+            } else if (dt && cfg.option !== dt) {
+                name = taskStringVal(dt.name, context.oper)
+            } else {
+                name = deft;
+            }
+            let parentName = taskStringVal(cfg.option.name, context.oper);
+
+            return parentName ? `${parentName}-${name}` : name;
+        },
+
+        getSrc(relative = false): Src {
+            let src: Src;
+            if (this.assert) {
+                src = taskSourceVal(getAssertSrc(this.assert, context.define.oper || context.oper), context.oper)
+            }
+            if (!src) {
+                src = taskSourceVal(getAssertSrc(cfg.option, context.define.oper || context.oper), context.oper)
+            }
+            return (relative === false) ? src : absoluteSrc(cfg.env.root, src);
+        },
+
+        getDist(relative = false) {
+            let dist;
+            if (context.assert) {
+                dist = getCurrentDist(context.assert, context.oper);
+            }
+            dist = dist || getCurrentDist(context.config.option, context.oper);
+
+            return (relative === false) ? dist : absolutePath(cfg.env.root, dist);
+        },
+
+        toRootSrc(src: Src): Src {
+            return absoluteSrc(cfg.env.root, src);
+        },
+        toRootPath(pathstr: string): string {
+            return absolutePath(cfg.env.root, pathstr);
         }
-        let parentName = taskStringVal(cfg.option.name, cfg.oper);
+    };
 
-        return parentName ? `${parentName}-${name}` : name;
-    });
-
-    cfg.getSrc = cfg.getSrc || ((assert?: IAssertDist, taskinfo?: ITaskInfo): Src => {
-        let src: Src;
-        if (assert) {
-            src = taskSourceVal(getAssertSrc(assert, taskinfo), cfg.oper)
-        }
-        if (!src) {
-            src = taskSourceVal(getAssertSrc(cfg.option, taskinfo), cfg.oper)
-        }
-        return (cfg.autoJoinRoot === false) ? src : absoluteSrc(cfg.env.root, src);
-    });
-
-    cfg.getDist = cfg.getDist || ((ds?: IAssertDist) => {
-        let dist;
-        if (ds) {
-            dist = getCurrentDist(ds, cfg.oper);
-        }
-        dist = dist || getCurrentDist(cfg.option, cfg.oper);
-
-        return (cfg.autoJoinRoot === false) ? dist : absolutePath(cfg.env.root, dist);
-    });
-
-    cfg.toRootSrc = cfg.toRootSrc || ((src: Src): Src => {
-        return absoluteSrc(cfg.env.root, src);
-    });
-
-    cfg.toRootPath = cfg.toRootPath || ((pathstr: string): string => {
-        return absolutePath(cfg.env.root, pathstr);
-    });
-
-    return cfg;
+    return context;
 }
 
-let createDefaultMatch = (cfg: ITaskConfig) => {
-    let match: ITaskInfo = { oper: cfg.oper };
-    if (cfg.match) {
+let createDefaultMatch = (ctx: ITaskContext) => {
+    let match: ITaskInfo = { oper: ctx.oper };
+    if (ctx.match) {
         match.match = (anothor: ITaskInfo) => {
-            return cfg.match(match, anothor);
+            return ctx.match(match, anothor);
         }
     }
     return match;
@@ -103,7 +108,7 @@ let createDefaultMatch = (cfg: ITaskConfig) => {
  * @param {EnvOption} env
  * @returns
  */
-export function currentOperation(env: IEnvOption, cfg?: ITaskConfig) {
+export function currentOperation(env: IEnvOption) {
     let oper: Operation;
     if (env.deploy) {
         oper = Operation.deploy;
@@ -126,30 +131,23 @@ export function currentOperation(env: IEnvOption, cfg?: ITaskConfig) {
         oper = oper | Operation.e2e;
     }
 
-
-    if (cfg) {
-        cfg.oper = (cfg.oper || 0) | oper;
-        return cfg.oper;
-    } else {
-        return oper;
-    }
+    return oper;
 }
 
 
-function getAssertSrc(assert: IAssertDist, taskinfo?: ITaskInfo) {
+function getAssertSrc(assert: IAssertDist, oper: Operation) {
     let src = null;
-    if (taskinfo) {
-        taskinfo.oper = taskinfo.oper || Operation.default;
-        if ((taskinfo.oper & Operation.test) > 0) {
-            src = assert.testSrc;
-        } else if ((taskinfo.oper & Operation.e2e) > 0) {
-            src = assert.e2eSrc;
-        } else if ((taskinfo.oper & Operation.watch) > 0) {
-            src = assert.watchSrc;
-        } else if ((taskinfo.oper & Operation.clean) > 0) {
-            src = assert.cleanSrc || assert.dist;
-        }
+
+    if ((oper & Operation.test) > 0) {
+        src = assert.testSrc;
+    } else if ((oper & Operation.e2e) > 0) {
+        src = assert.e2eSrc;
+    } else if ((oper & Operation.watch) > 0) {
+        src = assert.watchSrc;
+    } else if ((oper & Operation.clean) > 0) {
+        src = assert.cleanSrc || assert.dist;
     }
+
 
     return src || assert.src;
 }

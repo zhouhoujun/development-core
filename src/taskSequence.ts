@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { Gulp } from 'gulp';
 import * as chalk from 'chalk';
-import { Src, ITaskInfo, ITaskConfig, ITask } from './TaskConfig';
+import { Src, ITaskInfo, ITaskContext, ITask } from './TaskConfig';
 
 /**
  * convert setup task result to run sequence src.
@@ -12,7 +12,7 @@ import { Src, ITaskInfo, ITaskConfig, ITask } from './TaskConfig';
  * @param {ITaskConfig} config
  * @returns {Src[]}
  */
-export function toSequence(gulp: Gulp, tasks: ITask[], config: ITaskConfig): Src[] {
+export function toSequence(gulp: Gulp, tasks: ITask[], config: ITaskContext): Src[] {
     let seq: Src[] = [];
     let len = tasks.length;
     if (len < 1) {
@@ -151,7 +151,7 @@ function startTask(gulp: Gulp, task: Src): Promise<any> {
  * @param {TaskConfig} config
  * @returns {Promise<any>}
  */
-export function runTaskSequence(gulp: Gulp, tasks: ITask[] | Promise<ITask[]>, config: ITaskConfig): Promise<any> {
+export function runTaskSequence(gulp: Gulp, tasks: ITask[] | Promise<ITask[]>, config: ITaskContext): Promise<any> {
     return Promise.resolve(tasks)
         .then(tasks => {
             let taskseq = toSequence(gulp, tasks, config);

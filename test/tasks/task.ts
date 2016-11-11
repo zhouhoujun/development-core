@@ -7,7 +7,7 @@ const sourcemaps = require('gulp-sourcemaps');
 let tsProject = ts.createProject('tsconfig.json');
 const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
-import { IPipe, PipeTask, IAssertDist, taskdefine, bindingConfig, IDynamicTaskOption, Operation, ITaskOption, IEnvOption, ITaskConfig, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from '../../src';
+import { IPipe, PipeTask, IAssertDist, taskdefine, bindingConfig, IDynamicTaskOption, Operation, ITaskOption, IEnvOption, ITaskContext, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from '../../src';
 
 
 @task({
@@ -17,7 +17,7 @@ export class TestTaskGA implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(config: ITaskContext, gulp): TaskResult {
         // todo...
         return 'TestTaskGA';
     }
@@ -29,7 +29,7 @@ export class TestTaskGB implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(config: ITaskContext, gulp): TaskResult {
         // todo...
         return 'TestTaskGB';
     }
@@ -43,7 +43,7 @@ export class TestTaskGC implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(config: ITaskContext, gulp): TaskResult {
         // todo...
         return 'TestTaskGC';
     }
@@ -53,7 +53,7 @@ export class TestTaskA implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(config: ITaskContext, gulp): TaskResult {
         // todo...
         return;
     }
@@ -64,7 +64,7 @@ export class TestTaskE implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(config: ITaskContext, gulp): TaskResult {
         // todo...
         return 'TestTaskE';
     }
@@ -75,7 +75,7 @@ export class TestTaskE implements ITask {
 })
 export class TestPipeTask extends PipeTask {
     name = 'pipetask';
-    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): IPipe[] {
+    pipes(config: ITaskContext, dist: IAssertDist, gulp?: Gulp): IPipe[] {
         return [
             () => cache('typescript'),
             sourcemaps.init,
@@ -124,7 +124,7 @@ export class TestDynamicTask implements IDynamicTasks {
 @taskdefine
 export class TaskDefine implements ITaskDefine {
     public fags = 'define';
-    loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig {
+    loadConfig(option: ITaskOption, env: IEnvOption): ITaskContext {
         return bindingConfig({
             option: option,
             env: env
@@ -140,7 +140,7 @@ export class TestTaskB implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(config: ITaskContext, gulp): TaskResult {
         // todo...
 
         return config.subTaskName('TestTaskB');
@@ -155,7 +155,7 @@ export class TestTaskC implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(config: ITaskContext, gulp): TaskResult {
         // todo...
 
         return config.subTaskName('TestTaskC');
@@ -169,7 +169,7 @@ export class TestTaskD implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(config: ITaskContext, gulp): TaskResult {
         // todo...
 
         return config.subTaskName('TestTaskD');
@@ -185,7 +185,7 @@ export class TestTaskW implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(config: ITaskContext, gulp): TaskResult {
         // todo...
 
         return config.subTaskName('TestTaskW');
