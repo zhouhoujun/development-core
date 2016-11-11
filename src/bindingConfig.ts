@@ -8,7 +8,6 @@ import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefi
 
 
 
-
 /**
  * binding Config to implement default func.
  * 
@@ -20,13 +19,16 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
     // if (!cfg.oper) {
     //     cfg.oper = currentOperation(cfg.env);
     // }
-    let oper = currentOperation(cfg.env);
+    let oper = (cfg.oper || 0) | currentOperation(cfg.env);
 
-    let context = <ITaskContext>{
+    let context: ITaskContext = <ITaskContext>{
         oper: oper,
-        taskName: '',
-        define: {},
-        config: cfg,
+
+        env: cfg.env,
+        globals: cfg.globals || {},
+        option: cfg.option,
+        runTasks: cfg.runTasks,
+
         fileFilter: files,
         runSequence: runSequence,
         addToSequence: cfg.addToSequence || addToSequence,
@@ -58,23 +60,23 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
             return parentName ? `${parentName}-${name}` : name;
         },
 
-        getSrc(relative = false): Src {
+        getSrc(task?: ITaskInfo, relative = false): Src {
             let src: Src;
-            if (this.assert) {
-                src = taskSourceVal(getAssertSrc(this.assert, context.define.oper || context.oper), context.oper)
+            if (task && task.assert) {
+                src = taskSourceVal(getAssertSrc(task.assert, task.oper || context.oper), context.oper)
             }
             if (!src) {
-                src = taskSourceVal(getAssertSrc(cfg.option, context.define.oper || context.oper), context.oper)
+                src = taskSourceVal(getAssertSrc(cfg.option, task.oper || context.oper), context.oper)
             }
             return (relative === false) ? src : absoluteSrc(cfg.env.root, src);
         },
 
-        getDist(relative = false) {
+        getDist(task?: ITaskInfo, relative = false) {
             let dist;
-            if (context.assert) {
-                dist = getCurrentDist(context.assert, context.oper);
+            if (task && task.assert) {
+                dist = getCurrentDist(task.assert, context.oper);
             }
-            dist = dist || getCurrentDist(context.config.option, context.oper);
+            dist = dist || getCurrentDist(context.option, context.oper);
 
             return (relative === false) ? dist : absolutePath(cfg.env.root, dist);
         },

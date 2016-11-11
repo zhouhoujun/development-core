@@ -1,12 +1,12 @@
-import { IEnvOption, Operation, ITaskConfig } from './TaskConfig';
+import { IEnvOption, Operation, ITaskContext, ITaskConfig } from './TaskConfig';
 /**
  * binding Config to implement default func.
  *
  * @export
- * @param {TaskConfig} cfg
- * @returns {TaskConfig}
+ * @param {ITaskConfig} cfg
+ * @returns {ITaskContext}
  */
-export declare function bindingConfig(cfg: ITaskConfig): ITaskConfig;
+export declare function bindingConfig(cfg: ITaskConfig): ITaskContext;
 /**
  * get current env Operation.
  *
@@ -14,4 +14,4 @@ export declare function bindingConfig(cfg: ITaskConfig): ITaskConfig;
  * @param {EnvOption} env
  * @returns
  */
-export declare function currentOperation(env: IEnvOption, cfg?: ITaskConfig): Operation;
+export declare function currentOperation(env: IEnvOption): Operation;

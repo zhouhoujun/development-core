@@ -1,32 +1,32 @@
 /// <reference types="chai" />
 import 'reflect-metadata';
-import { ITask, ITaskInfo, ITaskDefine, Src } from './TaskConfig';
+import { ITask, ITaskDecorator, ITaskDefine, Src } from './TaskConfig';
 /**
  * task decorator.
  *
  * @export
- * @param {ITaskInfo} type
+ * @param {ITaskDecorator} type
  * @returns
  */
-export declare function task<T extends Function>(target?: (new <T>() => T) | ITaskInfo): any;
+export declare function task<T extends Function>(target?: (new <T>() => T) | ITaskDecorator): any;
 /**
  * dynamic task decorator.
  *
  * @export
  * @template T
- * @param {((new <T>() => T) | ITaskInfo)} [target]
+ * @param {((new <T>() => T) | ITaskDecorator)} [target]
  * @returns {*}
  */
-export declare function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITaskInfo): any;
+export declare function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITaskDecorator): any;
 /**
  * find tasks in Object module.
  *
  * @export
  * @param {*} target
- * @param {ITaskInfo} [match]
+ * @param {ITaskDecorator} [match]
  * @returns {ITask[]}
  */
-export declare function findTasks(target: any, match?: ITaskInfo): ITask[];
+export declare function findTasks(target: any, match?: ITaskDecorator): ITask[];
 /**
  * decorator task define implements ITaskDefine.
  *
@@ -58,7 +58,7 @@ export declare function findTaskDefine(target: any): ITaskDefine;
  * @returns {Promise<ITaskDefine>}
  */
 export declare function findTaskDefineInModule(md: string | Object): Promise<ITaskDefine>;
-export declare function findTasksInModule(md: string | Object, match?: ITaskInfo): Promise<ITask[]>;
+export declare function findTasksInModule(md: string | Object, match?: ITaskDecorator): Promise<ITask[]>;
 /**
  * find one task define in directories.
  *
@@ -72,7 +72,7 @@ export declare function findTaskDefineInDir(dirs: Src): Promise<ITaskDefine>;
  *
  * @export
  * @param {Src} dirs
- * @param {ITaskInfo} [match]
+ * @param {ITaskDecorator} [match]
  * @returns {Promise<ITask[]>}
  */
-export declare function findTasksInDir(dirs: Src, match?: ITaskInfo): Promise<ITask[]>;
+export declare function findTasksInDir(dirs: Src, match?: ITaskDecorator): Promise<ITask[]>;

@@ -24,6 +24,7 @@ class DynamicPipeTask extends PipeTask {
     constructor(private dt: IDynamicTaskOption, info?: ITaskInfo) {
         super(info);
         this.decorator = info || dt;
+        this.decorator.assert = dt;
     }
 
     protected getOption(config: ITaskContext) {

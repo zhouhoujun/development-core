@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import * as _ from 'lodash';
 import * as chalk from 'chalk';
-import { ITask, ITaskInfo, ITaskDefine, Src, IDynamicTasks } from './TaskConfig';
+import { ITask, ITaskDecorator, ITaskDefine, Src, IDynamicTasks } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { matchTaskGroup, matchTaskInfo } from './utils';
 import { existsSync } from 'fs';
@@ -12,10 +12,10 @@ const requireDir = require('require-dir');
  * task decorator.
  * 
  * @export
- * @param {ITaskInfo} type
+ * @param {ITaskDecorator} type
  * @returns
  */
-export function task<T extends Function>(target?: (new <T>() => T) | ITaskInfo): any {
+export function task<T extends Function>(target?: (new <T>() => T) | ITaskDecorator): any {
     if (_.isFunction(target)) {
         target['__task'] = {};
         return target;
@@ -33,10 +33,10 @@ export function task<T extends Function>(target?: (new <T>() => T) | ITaskInfo):
  * 
  * @export
  * @template T
- * @param {((new <T>() => T) | ITaskInfo)} [target]
+ * @param {((new <T>() => T) | ITaskDecorator)} [target]
  * @returns {*}
  */
-export function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITaskInfo): any {
+export function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITaskDecorator): any {
     if (target && _.isFunction(target)) {
         target['__dynamictask'] = {};
         return target;
@@ -54,17 +54,17 @@ export function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITas
  * 
  * @export
  * @param {*} target
- * @param {ITaskInfo} [match]
+ * @param {ITaskDecorator} [match]
  * @returns {ITask[]}
  */
-export function findTasks(target: any, match?: ITaskInfo): ITask[] {
+export function findTasks(target: any, match?: ITaskDecorator): ITask[] {
     let tasks: ITask[] = [];
     if (!target) {
         return tasks;
     }
     if (_.isFunction(target)) {
         if (target['__task']) {
-            let tinfo: ITaskInfo = target['__task'];
+            let tinfo: ITaskDecorator = target['__task'];
 
             if (!matchTaskInfo(tinfo, match)) {
                 return tasks;
@@ -78,7 +78,7 @@ export function findTasks(target: any, match?: ITaskInfo): ITask[] {
             task.decorator = _.extend(task.decorator || {}, tinfo);
             tasks.push(task);
         } else if (target['__dynamictask']) {
-            let tinfo: ITaskInfo = target['__dynamictask'];
+            let tinfo: ITaskDecorator = target['__dynamictask'];
 
             if (!matchTaskInfo(tinfo, match)) {
                 return tasks;
@@ -233,7 +233,7 @@ export function findTaskDefineInModule(md: string | Object): Promise<ITaskDefine
 }
 
 
-export function findTasksInModule(md: string | Object, match?: ITaskInfo): Promise<ITask[]> {
+export function findTasksInModule(md: string | Object, match?: ITaskDecorator): Promise<ITask[]> {
     let mdls;
     try {
         if (_.isString(md)) {
@@ -277,10 +277,10 @@ export function findTaskDefineInDir(dirs: Src): Promise<ITaskDefine> {
  * 
  * @export
  * @param {Src} dirs
- * @param {ITaskInfo} [match]
+ * @param {ITaskDecorator} [match]
  * @returns {Promise<ITask[]>}
  */
-export function findTasksInDir(dirs: Src, match?: ITaskInfo): Promise<ITask[]> {
+export function findTasksInDir(dirs: Src, match?: ITaskDecorator): Promise<ITask[]> {
     return Promise.all(_.map(_.isArray(dirs) ? dirs : [dirs], dir => {
         console.log(chalk.grey('begin load task from dir'), chalk.cyan(dir));
         try {

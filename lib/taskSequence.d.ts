@@ -1,6 +1,6 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { Src, ITaskInfo, ITaskConfig, ITask } from './TaskConfig';
+import { Src, ITaskInfo, ITaskContext, ITask } from './TaskConfig';
 /**
  * convert setup task result to run sequence src.
  *
@@ -10,7 +10,7 @@ import { Src, ITaskInfo, ITaskConfig, ITask } from './TaskConfig';
  * @param {ITaskConfig} config
  * @returns {Src[]}
  */
-export declare function toSequence(gulp: Gulp, tasks: ITask[], config: ITaskConfig): Src[];
+export declare function toSequence(gulp: Gulp, tasks: ITask[], config: ITaskContext): Src[];
 /**
  * add task to task sequence.
  *
@@ -40,4 +40,4 @@ export declare function runSequence(gulp: Gulp, tasks: Src[]): Promise<any>;
  * @param {TaskConfig} config
  * @returns {Promise<any>}
  */
-export declare function runTaskSequence(gulp: Gulp, tasks: ITask[] | Promise<ITask[]>, config: ITaskConfig): Promise<any>;
+export declare function runTaskSequence(gulp: Gulp, tasks: ITask[] | Promise<ITask[]>, config: ITaskContext): Promise<any>;

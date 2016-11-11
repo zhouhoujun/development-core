@@ -96,13 +96,13 @@ export interface IOperate {
 }
 
 /**
- * task decorator data.
+ * task decorator info.
  * 
  * @export
- * @interface ITaskInfo
+ * @interface ITaskDecorator
  * @extends {IOperate}
  */
-export interface ITaskInfo extends IOperate {
+export interface ITaskDecorator extends IOperate {
     /**
      * assert tasks. assert group name or extends name.
      * 
@@ -119,7 +119,6 @@ export interface ITaskInfo extends IOperate {
      * @memberOf ITaskInfo
      */
     match?(another: ITaskInfo);
-
 
     /**
      * well be remove, please use Operation.watch instead. is watch task or not. 
@@ -146,6 +145,30 @@ export interface ITaskInfo extends IOperate {
     e2e?: boolean | string;
 }
 
+/**
+ * task decorator data.
+ * 
+ * @export
+ * @interface ITaskInfo
+ * @extends {ITaskDecorator}
+ */
+export interface ITaskInfo extends ITaskDecorator {
+    /**
+     * finally task name.
+     * 
+     * @type {Src}
+     * @memberOf ITaskInfo
+     */
+    taskName?: Src;
+
+    /**
+     * assert dist info.
+     * 
+     * @type {IAssertDist}
+     * @memberOf ITaskInfo
+     */
+    assert?: IAssertDist
+}
 
 /**
  * task interface.
@@ -154,14 +177,13 @@ export interface ITaskInfo extends IOperate {
  * @interface ITask
  */
 export interface ITask {
-
     /**
-     * task context
+     * old filed. 
      * 
-     * @type {ITaskContext}
+     * @type {ITaskInfo}
      * @memberOf ITask
      */
-    context: ITaskContext;
+    decorator: ITaskInfo;
     /**
      * setup task.
      * 
@@ -717,6 +739,13 @@ export interface ITaskDefine {
  */
 export interface ITaskConfig {
     /**
+     * run operation
+     * 
+     * @type {Operation}
+     * @memberOf ITaskConfig
+     */
+    oper?: Operation;
+    /**
      * custom global data cache.
      */
     globals?: any;
@@ -766,44 +795,14 @@ export interface ITaskConfig {
  * @export
  * @interface ITaskContext
  */
-export interface ITaskContext {
+export interface ITaskContext extends ITaskConfig {
     /**
      * run operation
      * 
      * @type {Operation}
      * @memberOf ITaskContext
      */
-    oper?: Operation;
-
-    /**
-     * finally task name.
-     * 
-     * @type {Src}
-     * @memberOf ITaskInfo
-     */
-    taskName: Src;
-    /**
-     * task info.
-     * 
-     * @type {ITaskInfo}
-     * @memberOf ITaskContext
-     */
-    define: ITaskInfo;
-    /**
-     * assert info.
-     * 
-     * @type {IAssertDist}
-     * @memberOf ITaskContext
-     */
-    assert?: IAssertDist;
-
-    /**
-     * global config.
-     * 
-     * @type {ITaskConfig}
-     * @memberOf ITaskContext
-     */
-    config: ITaskConfig;
+    oper: Operation;
 
     /**
      * custom task match filter
@@ -819,26 +818,25 @@ export interface ITaskContext {
     /**
      * get Src of current state.   default implement in bindingConfig.
      * 
-     * @param {IAssertDist} [assert]
+     * @param {ITaskInfo} [task]
      * @param {boolean} [relative] get relative path or absolute path. 
      * @returns {Src}
      * 
      * @memberOf ITaskContext
      */
-    getSrc(assert?: IAssertDist, relative?: boolean): Src;
+    getSrc(task?: ITaskInfo, relative?: boolean): Src;
 
     /**
      * get dist of current state.  default implement in bindingConfig.
      * 
-     * @param {IAssertDist} dist
+     * @param {ITaskInfo} task
      * @param {boolean} [relative] get relative path or absolute path. 
      * @returns {string}
      * 
      * @memberOf ITaskContext
      */
-    getDist(dist?: IAssertDist, relative?: boolean): string;
+    getDist(task?: ITaskInfo, relative?: boolean): string;
 
-    
     /**
      * custom print help.
      * 

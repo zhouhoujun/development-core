@@ -1,5 +1,5 @@
-/// <reference types="node" />
 /// <reference types="gulp" />
+/// <reference types="node" />
 /// <reference types="chai" />
 import { Gulp, WatchEvent, WatchCallback, TaskCallback } from 'gulp';
 /**
@@ -68,6 +68,13 @@ export declare type Src = string | string[];
  */
 export interface IOperate {
     /**
+     * operate name
+     *
+     * @type {TaskString}
+     * @memberOf IOperate
+     */
+    name?: TaskString;
+    /**
      * operation
      *
      * enmu flags.
@@ -84,20 +91,13 @@ export interface IOperate {
     order?: number;
 }
 /**
- * task decorator data.
+ * task decorator info.
  *
  * @export
- * @interface ITaskInfo
+ * @interface ITaskDecorator
  * @extends {IOperate}
  */
-export interface ITaskInfo extends IOperate {
-    /**
-     * dynamic generate task name.
-     *
-     * @type {Src}
-     * @memberOf ITaskInfo
-     */
-    taskName?: Src;
+export interface ITaskDecorator extends IOperate {
     /**
      * assert tasks. assert group name or extends name.
      *
@@ -134,6 +134,54 @@ export interface ITaskInfo extends IOperate {
      * @memberOf ITaskInfo
      */
     e2e?: boolean | string;
+}
+/**
+ * task decorator data.
+ *
+ * @export
+ * @interface ITaskInfo
+ * @extends {ITaskDecorator}
+ */
+export interface ITaskInfo extends ITaskDecorator {
+    /**
+     * finally task name.
+     *
+     * @type {Src}
+     * @memberOf ITaskInfo
+     */
+    taskName?: Src;
+    /**
+     * assert dist info.
+     *
+     * @type {IAssertDist}
+     * @memberOf ITaskInfo
+     */
+    assert?: IAssertDist;
+}
+/**
+ * task interface.
+ *
+ * @export
+ * @interface ITask
+ */
+export interface ITask {
+    /**
+     * old filed.
+     *
+     * @type {ITaskInfo}
+     * @memberOf ITask
+     */
+    decorator: ITaskInfo;
+    /**
+     * setup task.
+     *
+     * @param {ITaskContext} context
+     * @param {Gulp} [gulp]
+     * @returns {TaskResult}
+     *
+     * @memberOf ITask
+     */
+    setup(context: ITaskContext, gulp?: Gulp): TaskResult;
 }
 export declare type TaskResult = Src | void;
 export declare type TaskSource = Src | ((oper?: Operation) => Src);
@@ -179,31 +227,13 @@ export interface ITransform extends IOperate, NodeJS.ReadWriteStream {
  */
 export declare type TransformSource = ITransform | ITransform[];
 /**
- * output transform. support typescript output.
+ * output transform.
  *
  * @export
  * @interface IOutput
  * @extends {ITransform}
  */
 export interface IOutput extends ITransform {
-    dts?: ITransform;
-    js?: ITransform;
-}
-/**
- * pipe operate
- *
- * @export
- * @interface IPipeOperate
- * @extends {IOperate}
- */
-export interface IPipeOperate extends IOperate {
-    /**
-     * pipe work group name.
-     *
-     * @type {string}
-     * @memberOf IPipe
-     */
-    name?: string;
 }
 /**
  * pipe work
@@ -211,53 +241,54 @@ export interface IPipeOperate extends IOperate {
  * @export
  * @interface IPipe
  */
-export interface IPipe extends IPipeOperate {
+export interface IPipe extends IOperate {
     /**
      * transform to pipe work
      *
-     * @param {ITaskConfig} config
+     * @param {ITaskContext} context
      * @param {IAssertDist} [dist]
      * @param {Gulp} [gulp]
      * @returns {(ITransform | Promise<ITransform>)}
      *
      * @memberOf IPipe
      */
-    toTransform?(config: ITaskConfig, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
+    toTransform?(context: ITaskContext, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
 }
-export declare type Pipe = IPipe | ((config?: ITaskConfig, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
+export declare type Pipe = IPipe | ((config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
 /**
  * output pipe
  *
  * @export
  * @interface IOutputPipe
  */
-export interface IOutputPipe extends IPipeOperate {
+export interface IOutputPipe extends IOperate {
     /**
      * output pipes
      *
-     * @param {IOutput} stream
-     * @param {ITaskConfig} config
+     * @param {ITransform} stream
+     * @param {ITaskContext} context
      * @param {IAssertDist} [dist]
      * @param {Gulp} [gulp]
      * @returns {(ITransform | Promise<ITransform>)}
      *
      * @memberOf IOutputPipe
      */
-    toTransform?(stream: IOutput, config: ITaskConfig, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
+    toTransform?(stream: ITransform, context: ITaskContext, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
 }
-export declare type OutputPipe = IOutputPipe | ((stream: IOutput, config?: ITaskConfig, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
+export declare type OutputPipe = IOutputPipe | ((stream: ITransform, config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
 /**
  * assert dist.
  *
  * @export
  * @interface IAssertDist
+ * @extends {IOperate}
  */
 export interface IAssertDist {
     /**
-     * IAsserts extends name. for register dynamic task.
+     * assert name
      *
-     * @type {TaskName}
-     * @memberOf IAsserts
+     * @type {TaskString}
+     * @memberOf IOperate
      */
     name?: TaskString;
     /**
@@ -336,31 +367,6 @@ export interface IAssertDist {
     deployDist?: string;
 }
 /**
- * task interface.
- *
- * @export
- * @interface ITask
- */
-export interface ITask {
-    /**
-     * decorator of task.
-     *
-     * @type {ITaskInfo}
-     * @memberOf ITask
-     */
-    decorator: ITaskInfo;
-    /**
-     * setup task.
-     *
-     * @param {ITaskConfig} config
-     * @param {Gulp} [gulp]
-     * @returns {TaskResult}
-     *
-     * @memberOf ITask
-     */
-    setup(config: ITaskConfig, gulp?: Gulp): TaskResult;
-}
-/**
  * pipe works.
  *
  * @export
@@ -368,19 +374,26 @@ export interface ITask {
  */
 export interface IPipeOption {
     /**
+     * task source stream config.
+     *
+     *
+     * @memberOf IPipeOption
+     */
+    source?: TransformSource | ((config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => TransformSource);
+    /**
      * task pipe works.
      *
      *
      * @memberOf IDynamicTaskOption
      */
-    pipes?: Pipe[] | ((config?: ITaskConfig, dist?: IAssertDist, gulp?: Gulp) => Pipe[]);
+    pipes?: Pipe[] | ((config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => Pipe[]);
     /**
      * output pipe task
      *
      *
      * @memberOf IPipeOption
      */
-    output?: IOutputPipe[] | ((config?: ITaskConfig, dist?: IAssertDist, gulp?: Gulp) => IOutputPipe[]);
+    output?: IOutputPipe[] | ((config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => IOutputPipe[]);
 }
 /**
  * custom pipe.
@@ -393,7 +406,7 @@ export interface ICustomPipe {
      * custom stream pipe.
      *
      * @param {ITransform} gulpsrc
-     * @param {ITaskConfig} config
+     * @param {ITaskContext} context
      * @param {IAssertDist} [dist]
      * @param {Gulp} [gulp]
      * @param {TaskCallback} [callback]
@@ -401,7 +414,7 @@ export interface ICustomPipe {
      *
      * @memberOf ICustomPipe
     * */
-    pipe?(gulpsrc: ITransform, config: ITaskConfig, dist?: IAssertDist, gulp?: Gulp, callback?: TaskCallback): ITransform | Promise<ITransform> | void;
+    pipe?(gulpsrc: ITransform, context: ITaskContext, dist?: IAssertDist, gulp?: Gulp, callback?: TaskCallback): ITransform | Promise<ITransform> | void;
 }
 /**
  * dynamic gulp task.
@@ -412,10 +425,10 @@ export interface ICustomPipe {
  */
 export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPipe, ITaskInfo {
     /**
-     * task name
+     * IAsserts extends name. for register dynamic task.
      *
      * @type {TaskName}
-     * @memberOf IDynamicTaskOption
+     * @memberOf IAsserts
      */
     name: TaskString;
     /**
@@ -424,27 +437,27 @@ export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPip
      *
      * @memberOf IDynamicTaskOption
      */
-    watchTasks?: Array<string | WatchCallback> | ((config?: ITaskConfig, dt?: IDynamicTaskOption) => Array<string | WatchCallback>);
+    watchTasks?: Array<string | WatchCallback> | ((config?: ITaskContext, dt?: IDynamicTaskOption) => Array<string | WatchCallback>);
     /**
      * watch changed.
      *
      * @param {WatchEvent} event
-     * @param {ITaskConfig} config
+     * @param {ITaskContext} context
      *
      * @memberOf IDynamicTaskOption
      */
-    watchChanged?(event: WatchEvent, config: ITaskConfig): any;
+    watchChanged?(event: WatchEvent, context: ITaskContext): any;
     /**
      * custom task.
      *
-     * @param {ITaskConfig} config
+     * @param {ITaskContext} context
      * @param {IDynamicTaskOption} [dt]
      * @param {Gulp} [gulp]
      * @returns {(void | ITransform | Promise<any>)}
      *
      * @memberOf IDynamicTaskOption
      */
-    task?(config: ITaskConfig, dt?: IDynamicTaskOption, gulp?: Gulp): void | ITransform | Promise<any>;
+    task?(context: ITaskContext, dt?: IDynamicTaskOption, gulp?: Gulp): void | ITransform | Promise<any>;
 }
 /**
  * dynamic tasks
@@ -538,7 +551,7 @@ export interface IDynamicLoaderOption extends ILoaderOption {
      */
     dynamicTasks?: IDynamicTaskOption | IDynamicTaskOption[];
 }
-export declare type customLoader = (config: ITaskConfig) => ITask[] | Promise<ITask[]>;
+export declare type customLoader = (context: ITaskContext) => ITask[] | Promise<ITask[]>;
 /**
  * task loader option.
  *
@@ -628,49 +641,30 @@ export interface ITaskDefine {
      * load config in modules
      *
      * @param {ITaskOption} option
-     * @returns {ITaskConfig}
+     * @returns {ITaskContext}
      *
      * @memberOf ITaskDefine
      */
-    loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig;
+    loadConfig(option: ITaskOption, env: IEnvOption): ITaskContext;
     /**
      * load task in modules.
      *
-     * @param {ITaskConfig} config
+     * @param {ITaskContext} context
      * @param {tasksInModule} findInModule
      * @param {tasksInDir} findInDir
      * @returns {Task[]}
      *
      * @memberOf ITaskDefine
      */
-    loadTasks?(config: ITaskConfig): Promise<ITask[]>;
+    loadTasks?(context: ITaskContext): Promise<ITask[]>;
 }
 /**
- * run time task config for setup task.
+ * task config. runtime task config for setup task.
  *
  * @export
  * @interface ITaskConfig
  */
 export interface ITaskConfig {
-    /**
-     * custom global data cache.
-     */
-    globals?: any;
-    /**
-     * convert relative path (relative evn.root) to absolute, or not.
-     * default auto convert relative path (relative evn.root) to absolute.
-     *
-     * @type {boolean}
-     * @memberOf ITaskConfig
-     */
-    autoJoinRoot?: boolean;
-    /**
-     * env
-     *
-     * @type {EnvOption}
-     * @memberOf ITaskConfig
-     */
-    env: IEnvOption;
     /**
      * run operation
      *
@@ -679,128 +673,23 @@ export interface ITaskConfig {
      */
     oper?: Operation;
     /**
+     * custom global data cache.
+     */
+    globals?: any;
+    /**
+     * env
+     *
+     * @type {EnvOption}
+     * @memberOf ITaskConfig
+     */
+    env: IEnvOption;
+    /**
      * task option setting.
      *
      * @type {IAsserts}
      * @memberOf ITaskConfig
      */
     option: IAsserts | ITaskOption;
-    /**
-     * custom task match filter
-     *
-     * @param {ITaskInfo} task
-     * @param {ITaskInfo} match
-     * @returns {boolean}
-     *
-     * @memberOf ITaskConfig
-     */
-    match?(task: ITaskInfo, match: ITaskInfo): boolean;
-    /**
-     * get Src of current state.   default implement in bindingConfig.
-     *
-     * @param {IAssertDist} [assert]
-     * @param {ITaskInfo} [taskinfo]
-     * @returns {Src}
-     *
-     * @memberOf ITaskConfig
-     */
-    getSrc?(assert?: IAssertDist, taskinfo?: ITaskInfo): Src;
-    /**
-     * get dist of current state.  default implement in bindingConfig.
-     *
-     * @param {IAssertDist} dist
-     * @returns {string}
-     *
-     * @memberOf ITaskConfig
-     */
-    getDist?(dist?: IAssertDist): string;
-    /**
-     * custom config run tasks sequence in.
-     *
-     * @param {Src[]} [tasks]
-     * @param {ITaskInfo} [assertTasks]
-     * @param {ITaskInfo} [subGroupTask]
-     * @returns {Src[]}
-     *
-     * @memberOf ITaskConfig
-     */
-    runTasks?(tasks?: Src[], assertTasks?: ITaskInfo, subGroupTask?: ITaskInfo): Src[];
-    /**
-     * custom print help.
-     *
-     * @param {string} lang
-     *
-     * @memberOf ITaskConfig
-     */
-    printHelp?(lang: string): void;
-    /**
-     * find  task in module. default implement in bindingConfig.
-     *
-     * @param {(string | Object)} module
-     * @param {ITaskInfo} [match]
-     * @returns {Promise<ITask[]>}
-     *
-     * @memberOf ITaskConfig
-     */
-    findTasks?(module: string | Object, match?: ITaskInfo): Promise<ITask[]>;
-    /**
-     * find  task in directories. default implement in bindingConfig.
-     *
-     * @param {Src} dirs
-     * @param {ITaskInfo} [match]
-     * @returns {Promise<ITask[]>}
-     *
-     * @memberOf ITaskConfig
-     */
-    findTasksInDir?(dirs: Src, match?: ITaskInfo): Promise<ITask[]>;
-    /**
-     * find taskdefine in module. default implement in bindingConfig.
-     *
-     * @param {(string | Object)} module
-     * @returns {Promise<ITaskDefine>}
-     *
-     * @memberOf ITaskConfig
-     */
-    findTaskDefine?(module: string | Object): Promise<ITaskDefine>;
-    /**
-     * find taskdefine in directories.  default implement in bindingConfig.
-     *
-     * @param {Src} dirs
-     * @returns {Promise<ITaskDefine>}
-     *
-     * @memberOf ITaskConfig
-     */
-    findTaskDefineInDir?(dirs: Src): Promise<ITaskDefine>;
-    /**
-     * filter file in directory.  default implement in bindingConfig.
-     *
-     * @param {string} directory
-     * @param {((fileName: string) => boolean)} [express]
-     * @returns {string[]}
-     *
-     * @memberOf ITaskConfig
-     */
-    fileFilter?(directory: string, express?: ((fileName: string) => boolean)): string[];
-    /**
-     * filter file in directory.  default implement in bindingConfig.
-     *
-     * @param {Gulp} gulp
-     * @param {Src[]} tasks
-     * @returns {Promise<any>}
-     *
-     * @memberOf ITaskConfig
-     */
-    runSequence?(gulp: Gulp, tasks: Src[]): Promise<any>;
-    /**
-     * dynamic generate tasks.  default implement in bindingConfig.
-     *
-     * @param {(IDynamicTaskOption | IDynamicTaskOption[])} tasks
-     * @param {ITaskInfo} [match]
-     * @returns {ITask[]}
-     *
-     * @memberOf ITaskConfig
-     */
-    generateTask?(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[];
     /**
      * add task result to task sequence. default implement in bindingConfig.
      *
@@ -812,32 +701,174 @@ export interface ITaskConfig {
      */
     addToSequence?(sequence: Src[], task: ITaskInfo): Src[];
     /**
+     * custom config run tasks sequence in.
+     *
+     * @param {Src[]} [tasks]
+     * @param {ITaskInfo} [assertTasks]
+     * @param {ITaskInfo} [subGroupTask]
+     * @returns {Src[]}
+     *
+     * @memberOf ITaskContext
+     */
+    runTasks?(tasks?: Src[], assertTasks?: ITaskInfo, subGroupTask?: ITaskInfo): Src[];
+}
+/**
+ * runtime task context.
+ *
+ * @export
+ * @interface ITaskContext
+ */
+export interface ITaskContext extends ITaskConfig {
+    /**
+     * run operation
+     *
+     * @type {Operation}
+     * @memberOf ITaskContext
+     */
+    oper: Operation;
+    /**
+     * custom task match filter
+     *
+     * @param {ITaskInfo} task
+     * @param {ITaskInfo} match
+     * @returns {boolean}
+     *
+     * @memberOf ITaskContext
+     */
+    match?(task: ITaskInfo, match: ITaskInfo): boolean;
+    /**
+     * get Src of current state.   default implement in bindingConfig.
+     *
+     * @param {ITaskInfo} [task]
+     * @param {boolean} [relative] get relative path or absolute path.
+     * @returns {Src}
+     *
+     * @memberOf ITaskContext
+     */
+    getSrc(task?: ITaskInfo, relative?: boolean): Src;
+    /**
+     * get dist of current state.  default implement in bindingConfig.
+     *
+     * @param {ITaskInfo} task
+     * @param {boolean} [relative] get relative path or absolute path.
+     * @returns {string}
+     *
+     * @memberOf ITaskContext
+     */
+    getDist(task?: ITaskInfo, relative?: boolean): string;
+    /**
+     * custom print help.
+     *
+     * @param {string} lang
+     *
+     * @memberOf ITaskContext
+     */
+    printHelp?(lang: string): void;
+    /**
+     * find  task in module. default implement in bindingConfig.
+     *
+     * @param {(string | Object)} module
+     * @param {ITaskInfo} [match]
+     * @returns {Promise<ITask[]>}
+     *
+     * @memberOf ITaskContext
+     */
+    findTasks(module: string | Object, match?: ITaskInfo): Promise<ITask[]>;
+    /**
+     * find  task in directories. default implement in bindingConfig.
+     *
+     * @param {Src} dirs
+     * @param {ITaskInfo} [match]
+     * @returns {Promise<ITask[]>}
+     *
+     * @memberOf ITaskContext
+     */
+    findTasksInDir(dirs: Src, match?: ITaskInfo): Promise<ITask[]>;
+    /**
+     * find taskdefine in module. default implement in bindingConfig.
+     *
+     * @param {(string | Object)} module
+     * @returns {Promise<ITaskDefine>}
+     *
+     * @memberOf ITaskContext
+     */
+    findTaskDefine?(module: string | Object): Promise<ITaskDefine>;
+    /**
+     * find taskdefine in directories.  default implement in bindingConfig.
+     *
+     * @param {Src} dirs
+     * @returns {Promise<ITaskDefine>}
+     *
+     * @memberOf ITaskContext
+     */
+    findTaskDefineInDir(dirs: Src): Promise<ITaskDefine>;
+    /**
+     * filter file in directory.  default implement in bindingConfig.
+     *
+     * @param {string} directory
+     * @param {((fileName: string) => boolean)} [express]
+     * @returns {string[]}
+     *
+     * @memberOf ITaskContext
+     */
+    fileFilter(directory: string, express?: ((fileName: string) => boolean)): string[];
+    /**
+     * filter file in directory.  default implement in bindingConfig.
+     *
+     * @param {Gulp} gulp
+     * @param {Src[]} tasks
+     * @returns {Promise<any>}
+     *
+     * @memberOf ITaskContext
+     */
+    runSequence(gulp: Gulp, tasks: Src[]): Promise<any>;
+    /**
+     * dynamic generate tasks.  default implement in bindingConfig.
+     *
+     * @param {(IDynamicTaskOption | IDynamicTaskOption[])} tasks
+     * @param {ITaskInfo} [match]
+     * @returns {ITask[]}
+     *
+     * @memberOf ITaskContext
+     */
+    generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[];
+    /**
+     * add task result to task sequence. default implement in bindingConfig.
+     *
+     * @param {Src[]} sequence  task sequence.
+     * @param {ITaskInfo} task
+     * @returns {Src[]}
+     *
+     * @memberOf ITaskContext
+     */
+    addToSequence(sequence: Src[], task: ITaskInfo): Src[];
+    /**
      * generate sub task name. default implement in bindingConfig.
      *
      * @param {IAsserts | string} assert
      * @param {string} [defaultName]
      *
-     * @memberOf ITaskConfig
+     * @memberOf ITaskContext
      */
-    subTaskName?(assert: string | IAsserts, defaultName?: string): any;
+    subTaskName(assert: string | IAsserts, defaultName?: string): any;
     /**
      * join src to absolute path src with root( env.root ).
      *
      * @param {Src} src
      * @returns {Src}
      *
-     * @memberOf ITaskConfig
+     * @memberOf ITaskContext
      */
-    toRootSrc?(src: Src): Src;
+    toRootSrc(src: Src): Src;
     /**
      * join pathstr to absolute path src with root( env.root ).
      *
      * @param {string} pathstr
      * @returns {string}
      *
-     * @memberOf ITaskConfig
+     * @memberOf ITaskContext
      */
-    toRootPath?(pathstr: string): string;
+    toRootPath(pathstr: string): string;
 }
 /**
  * event option
