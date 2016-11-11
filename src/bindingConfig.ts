@@ -24,7 +24,7 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
 
     let context = <ITaskContext>{
         oper: oper,
-        taskName:'',
+        taskName: '',
         define: {},
         config: cfg,
         fileFilter: files,
