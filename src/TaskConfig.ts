@@ -114,11 +114,11 @@ export interface ITaskDecorator extends IOperate {
     /**
      * custom jduge info match to another.
      * 
-     * @param {ITaskInfo} another
+     * @param {ITaskDecorator} another
      * 
      * @memberOf ITaskInfo
      */
-    match?(another: ITaskInfo);
+    match?(another: ITaskDecorator);
 
     /**
      * well be remove, please use Operation.watch instead. is watch task or not. 

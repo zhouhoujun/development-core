@@ -1,4 +1,4 @@
-import { TaskSource, TaskString, Operation, ITaskInfo, Src } from './TaskConfig';
+import { TaskSource, TaskString, Operation, ITaskDecorator, ITaskInfo, Src } from './TaskConfig';
 /**
  * filter fileName in directory.
  *
@@ -14,11 +14,11 @@ export declare function taskStringVal(name: TaskString, oper?: Operation): strin
  * convert old version Operation to new version Operation
  *
  * @export
- * @param {ITaskInfo} tinfo
+ * @param {ITaskDecorator} decor
  * @param {any} [def=Operation.default]
  * @returns
  */
-export declare function convertOper(tinfo: ITaskInfo, def?: Operation): ITaskInfo;
+export declare function convertOper(decor: ITaskDecorator, def?: Operation): ITaskDecorator;
 /**
  * has some oper samed.
  *
@@ -32,11 +32,11 @@ export declare function someOper(oper1: Operation, oper2: Operation): boolean;
  * match task via task info.
  *
  * @export
- * @param {ITaskInfo} tinfo
- * @param {ITaskInfo} match
+ * @param {ITaskDecorator} decor
+ * @param {ITaskDecorator} match
  * @returns
  */
-export declare function matchTaskInfo(tinfo: ITaskInfo, match: ITaskInfo): any;
+export declare function matchTaskInfo(decor: ITaskDecorator, match: ITaskDecorator): any;
 export declare function matchTaskGroup(tinfo: ITaskInfo, match: ITaskInfo): boolean;
 /**
  * convert path to absolute path.

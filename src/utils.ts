@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { TaskSource, TaskString, Operation, ITaskInfo, Src } from './TaskConfig';
+import { TaskSource, TaskString, Operation, ITaskDecorator, ITaskInfo, Src } from './TaskConfig';
 import { readdirSync, lstatSync } from 'fs';
 import * as path from 'path';
 /**
@@ -45,26 +45,26 @@ function contains(arr1: string[], arr2: string[]) {
  * convert old version Operation to new version Operation
  * 
  * @export
- * @param {ITaskInfo} tinfo
+ * @param {ITaskDecorator} decor
  * @param {any} [def=Operation.default]
  * @returns
  */
-export function convertOper(tinfo: ITaskInfo, def = Operation.default) {
-    tinfo = tinfo || {};
-    if (tinfo.watch) {
-        tinfo.oper = (tinfo.oper || def) | Operation.watch;
+export function convertOper(decor: ITaskDecorator, def = Operation.default) {
+    decor = decor || {};
+    if (decor.watch) {
+        decor.oper = (decor.oper || def) | Operation.watch;
     }
-    if (tinfo.e2e) {
-        tinfo.oper = (tinfo.oper || def) | Operation.e2e;
+    if (decor.e2e) {
+        decor.oper = (decor.oper || def) | Operation.e2e;
     }
-    if (tinfo.test) {
-        tinfo.oper = (tinfo.oper || def) | Operation.test;
+    if (decor.test) {
+        decor.oper = (decor.oper || def) | Operation.test;
     }
 
-    tinfo.oper = tinfo.oper || def;
-    return tinfo;
+    decor.oper = decor.oper || def;
+    return decor;
 }
-function convertMatchOper(match: ITaskInfo) {
+function convertMatchOper(match: ITaskDecorator) {
     if ((match.oper & Operation.test) && !(match.oper & Operation.release)) {
         match.oper = match.oper | Operation.build;
     }
@@ -98,30 +98,30 @@ export function someOper(oper1: Operation, oper2: Operation) {
  * match task via task info.
  * 
  * @export
- * @param {ITaskInfo} tinfo
- * @param {ITaskInfo} match
+ * @param {ITaskDecorator} decor
+ * @param {ITaskDecorator} match
  * @returns
  */
-export function matchTaskInfo(tinfo: ITaskInfo, match: ITaskInfo) {
+export function matchTaskInfo(decor: ITaskDecorator, match: ITaskDecorator) {
 
     match = convertOper(match, Operation.build);
-    tinfo = convertOper(tinfo);
+    decor = convertOper(decor);
 
     if (match.match) {
-        return match.match(tinfo);
-    } else if (tinfo.match) {
-        return tinfo.match(match);
+        return match.match(decor);
+    } else if (decor.match) {
+        return decor.match(match);
     } else {
         match = convertMatchOper(match);
     }
 
-    let eq = tinfo.oper & match.oper;
+    let eq = decor.oper & match.oper;
     // console.log('eq------->:', eq);
     if (eq <= 0) {
         return false;
     }
 
-    if (tinfo.oper & Operation.watch) {
+    if (decor.oper & Operation.watch) {
         if ((match.oper & Operation.watch) <= 0) {
             return false;
         } else {
@@ -131,7 +131,7 @@ export function matchTaskInfo(tinfo: ITaskInfo, match: ITaskInfo) {
         }
     }
 
-    if (tinfo.oper & Operation.serve) {
+    if (decor.oper & Operation.serve) {
         if (!(match.oper & Operation.serve)) {
             return false;
         } else {
@@ -141,7 +141,7 @@ export function matchTaskInfo(tinfo: ITaskInfo, match: ITaskInfo) {
         }
     }
 
-    if (tinfo.oper & Operation.test) {
+    if (decor.oper & Operation.test) {
         if (!(match.oper & Operation.test)) {
             return false;
         } else {
@@ -151,7 +151,7 @@ export function matchTaskInfo(tinfo: ITaskInfo, match: ITaskInfo) {
         }
     }
 
-    if (tinfo.oper & Operation.e2e) {
+    if (decor.oper & Operation.e2e) {
         if (!(match.oper & Operation.e2e)) {
             return false;
         } else {
