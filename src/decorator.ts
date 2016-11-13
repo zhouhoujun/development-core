@@ -1,8 +1,9 @@
 import 'reflect-metadata';
 import * as _ from 'lodash';
 import * as chalk from 'chalk';
-import { ITask, ITaskDecorator, ITaskDefine, Src, IDynamicTasks } from './TaskConfig';
+import { ITask, ITaskDecorator, ITaskOption, ITaskConfig, IContextDefine, ITaskDefine, Src, IDynamicTasks } from './TaskConfig';
 import { generateTask } from './generateTask';
+import { bindingConfig } from './bindingConfig';
 import { matchTaskGroup, matchTaskInfo } from './utils';
 import { existsSync } from 'fs';
 const requireDir = require('require-dir');
@@ -112,23 +113,24 @@ export function findTasks(target: any, match?: ITaskDecorator): ITask[] {
 }
 
 /**
- * decorator task define implements ITaskDefine.
+ * decorator task define implements IContextDefine.
  * 
  * @export
  * @param {Function} constructor
  */
 export function taskdefine<T extends Function>(target?: (new <T>() => T)): any {
     if (_.isFunction(target)) {
-        target['__taskdefine'] = true;
+        target['__task_context'] = true;
         return target;
     } else {
         let tg = target;
         return (target: any) => {
-            target['__taskdefine'] = tg || true;
+            target['__task_context'] = tg || true;
             return target;
         }
     }
 }
+
 
 /**
  * get all taskdefine in module.
@@ -137,14 +139,18 @@ export function taskdefine<T extends Function>(target?: (new <T>() => T)): any {
  * @param {any} target
  * @returns
  */
-export function findTaskDefines(target): ITaskDefine[] {
-    let defs: ITaskDefine[] = [];
+export function findTaskDefines(target): IContextDefine[] {
+    let defs: IContextDefine[] = [];
     if (!target) {
         return defs;
     }
     if (_.isFunction(target)) {
-        if (target['__taskdefine']) {
-            defs.push(<ITaskDefine>new target());
+        if (target['__task_context']) {
+            let dc = new target();
+            if (!dc['getContext']) {
+                dc = taskDefine2Context(dc);
+            }
+            defs.push(<IContextDefine>dc);
         }
     } else if (_.isArray(target)) {
         _.each(target, sm => {
@@ -171,14 +177,19 @@ export function findTaskDefines(target): ITaskDefine[] {
  * @param {any} target
  * @returns
  */
-export function findTaskDefine(target): ITaskDefine {
-    let def: ITaskDefine;
+export function findTaskDefine(target): IContextDefine {
+    let def: IContextDefine;
     if (!target) {
         return null;
     }
     if (_.isFunction(target)) {
-        if (target['__taskdefine']) {
-            def = <ITaskDefine>new target();
+        if (target['__task_context']) {
+            let dc = new target();
+            if (dc['getContext']) {
+                def = dc;
+            } else {
+                def = taskDefine2Context(dc);
+            }
         }
     } else if (_.isArray(target)) {
         _.each(target, sm => {
@@ -210,9 +221,9 @@ export function findTaskDefine(target): ITaskDefine {
  * 
  * @export
  * @param {(string | Object)} md
- * @returns {Promise<ITaskDefine>}
+ * @returns {Promise<IContextDefine>}
  */
-export function findTaskDefineInModule(md: string | Object): Promise<ITaskDefine> {
+export function findTaskDefineInModule(md: string | Object): Promise<IContextDefine> {
     let tsdef;
     try {
         if (_.isString(md)) {
@@ -254,11 +265,11 @@ export function findTasksInModule(md: string | Object, match?: ITaskDecorator): 
  * 
  * @export
  * @param {Src} dirs
- * @returns {Promise<ITaskDefine>}
+ * @returns {Promise<IContextDefine>}
  */
-export function findTaskDefineInDir(dirs: Src): Promise<ITaskDefine> {
-    return Promise.race<ITaskDefine>(_.map(_.isArray(dirs) ? dirs : [dirs], dir => {
-        return new Promise<ITaskDefine>((resolve, reject) => {
+export function findTaskDefineInDir(dirs: Src): Promise<IContextDefine> {
+    return Promise.race<IContextDefine>(_.map(_.isArray(dirs) ? dirs : [dirs], dir => {
+        return new Promise<IContextDefine>((resolve, reject) => {
             if (existsSync(dir)) {
                 let mdl = requireDir(dir);
                 if (mdl) {
@@ -293,4 +304,22 @@ export function findTasksInDir(dirs: Src, match?: ITaskDecorator): Promise<ITask
         .then(tasks => {
             return _.flatten(tasks);
         });
+}
+
+/**
+ * task define context convert.
+ * 
+ * @export
+ * @param {ITaskDefine} tdef
+ * @returns {IContextDefine}
+ */
+export function taskDefine2Context(tdef: ITaskDefine): IContextDefine {
+    let context: any = _.extend({}, tdef);
+    context['getContext'] = (cfg: ITaskConfig) => {
+        return bindingConfig(tdef.loadConfig(<ITaskOption>cfg.option, cfg.env));
+    };
+
+    context['tasks'] = tdef.loadTasks ? (context) => tdef.loadTasks(context) : null;
+
+    return <IContextDefine>context;
 }

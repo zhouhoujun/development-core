@@ -39,7 +39,8 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
 
 ```
 
-## define task and taskdefine.
+## define task and taskdefine
+
  decorator not support function now, so refactor ITask interface.
 
  ```ts
@@ -52,7 +53,7 @@ import {PipeTask, Pipe, IAssertDist, taskdefine, bindingConfig, Operation, ITask
 })
 export class TestPipeTask extends PipeTask {
     name = 'pipetask';
-    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): Pipe[] {
+    pipes(ctx: ITaskConfig, dist: IAssertDist, gulp?: Gulp): Pipe[] {
         return [
             () => cache('typescript'),
             sourcemaps.init,
@@ -65,7 +66,7 @@ export class TestPipeTask extends PipeTask {
 @task
 export class TestPipeTask extends PipeTask {
     name = 'pipetask1';
-    pipes(config: ITaskConfig, dist: IAssertDist, gulp?: Gulp): Pipe[] {
+    pipes(ctx: ITaskConfig, dist: IAssertDist, gulp?: Gulp): Pipe[] {
         return [
             () => cache('typescript'),
             {
@@ -85,14 +86,14 @@ export class TestTaskC implements IDynamicTasks {
                 name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
                 pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
                 output: [
-                    (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
-                    (tsmap, config, dt) => {
-                        if (config.oper & Operation.release || config.oper & Operation.deploy) {
+                    (tsmap, ctx, dt) => tsmap.dts.pipe(gulp.dest(ctx.getDist(dt))),
+                    (tsmap, ctx, dt) => {
+                        if (ctx.oper & Operation.release || ctx.oper & Operation.deploy) {
                             return tsmap.js.pipe(babel({ presets: ['es2015'] }))
                                 .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
-                                .pipe(gulp.dest(config.getDist(dt)));
+                                .pipe(gulp.dest(ctx.getDist(dt)));
                         } else {
-                            return tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist(dt)));
+                            return tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(ctx.getDist(dt)));
                         }
                     }
                 ]
@@ -108,7 +109,7 @@ export class TestTaskC implements IDynamicTasks {
                 }
             },
             { src: 'src/**/*.ts', name: 'watch', watch: ['tscompile'] },
-            { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
+            { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (ctx) => del(ctx.getDist()) }
         ];
     }
 }
@@ -118,7 +119,7 @@ export class TestTaskX implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(ctx: ITaskConfig, gulp): TaskResult {
         // todo...
         return 'TestTaskX';
     }
@@ -131,16 +132,16 @@ export class TestTaskC implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(ctx: ITaskConfig, gulp): TaskResult {
         // todo...
 
-        let taskname = config.subTaskName('TestTaskC');
+        let taskname = ctx.subTaskName('TestTaskC');
 
         gulp.task(taskname, ()=>{
-            gulp.src(config.getSrc())
+            gulp.src(ctx.getSrc())
                 .pipe(...)
                 ...
-                .pipe(gulp.dest(config.getDist()))
+                .pipe(gulp.dest(ctx.getDist()))
         });
 
         // return task name, enable this task to add in run sequence.
@@ -150,14 +151,28 @@ export class TestTaskC implements ITask {
     }
 }
 
-@taskdefine()
+@taskdefine
+export class TaskContext implements IContextDefine {
+    getContext(config: ITaskConfig): ITaskContext {
+        //todo setting config.
+        return bindingConfig(config);
+    }
+
+    // load tasks
+    // tasks?(context: ITaskContext): Promise<ITask[]>;
+}
+
+@taskdefine
 export class TaskDefine implements ITaskDefine {
     loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig {
-        return bindingConfig({
+        //todo setting option.
+        return {
             option: option,
             env: env
-        });
+        };
     }
+    // load tasks
+    // loadTasks?(context: ITaskContext): Promise<ITask[]>;
 }
 
 ```
@@ -176,7 +191,7 @@ export class TestTaskGA implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(ctx: ITaskConfig, gulp): TaskResult {
         // todo...
         return 'TestTaskGA';
     }
@@ -190,7 +205,7 @@ export class TestTaskGB implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(ctx: ITaskConfig, gulp): TaskResult {
         // todo...
         return 'TestTaskGB';
     }
@@ -206,7 +221,7 @@ export class TestTaskGC implements ITask {
     public decorator: ITaskInfo = {};
     constructor() {
     }
-    setup(config: ITaskConfig, gulp): TaskResult {
+    setup(ctx: ITaskConfig, gulp): TaskResult {
         // todo...
         return 'TestTaskGC';
     }
@@ -224,14 +239,14 @@ export class TestTaskC implements IDynamicTasks {
                 name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
                 pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
                 output: [
-                    (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
-                    (tsmap, config, dt) => {
-                        if (config.oper & Operation.release || config.oper & Operation.deploy) {
+                    (tsmap, ctx, dt) => tsmap.dts.pipe(gulp.dest(ctx.getDist(dt))),
+                    (tsmap, ctx, dt) => {
+                        if (ctx.oper & Operation.release || ctx.oper & Operation.deploy) {
                             return tsmap.js.pipe(babel({ presets: ['es2015'] }))
                                 .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
-                                .pipe(gulp.dest(config.getDist(dt)));
+                                .pipe(gulp.dest(ctx.getDist(dt)));
                         } else {
-                            return tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist(dt)));
+                            return tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(ctx.getDist(dt)));
                         }
                     }
                 ]
@@ -251,7 +266,7 @@ special pipe work or add special output work with class implements IDynamicTasks
 // module use.
 import { findTasks, bindingConfig, Operation, runTaskSequence, findTaskDefine }  from 'development-core';
 
-let config = bindingConfig({
+let ctx = bindingConfig({
     env: env, oper: oper,
     option: {
         src: 'src',dist: 'lib',
@@ -278,7 +293,7 @@ let config = bindingConfig({
         ]
     }
 });
-config.findTasks('module a')
+ctx.findTasks('module a')
     .then(task =>{
         // run task;
         return runTaskSequence(gulp, tasks, tasks);
@@ -330,25 +345,25 @@ gulp.task('build', () => {
 
 let createTask = (env) => {
 
-    let config = bindingConfig({
+    let ctx = bindingConfig({
         env: env,
         option: { src: 'src', dist: 'lib' }
     });
 
-    let tasks = config.generateTask([
+    let tasks = ctx.generateTask([
         {
             name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
             oper: Operation.build,
             pipes: [
                 () => cache('typescript'),
                 sourcemaps.init,
-                (config) => {
+                (ctx) => {
                     let transform = tsProject();
                     transform.transformSourcePipe = (source) => source.pipe(transform)['js'];
                     return transform;
                 },
-                (config) => babel({ presets: ['es2015'] }),
-                (config) => sourcemaps.write('./sourcemaps')
+                (ctx) => babel({ presets: ['es2015'] }),
+                (ctx) => sourcemaps.write('./sourcemaps')
             ]
         },
         {
@@ -358,10 +373,10 @@ let createTask = (env) => {
                 () => cache('typescript'), sourcemaps.init, tsProject
             ],
             output: [
-                (tsmap, config, dt, gulp) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
-                (tsmap, config, dt, gulp) => tsmap.js.pipe(babel({ presets: ['es2015'] }))
+                (tsmap, ctx, dt, gulp) => tsmap.dts.pipe(gulp.dest(ctx.getDist(dt))),
+                (tsmap, ctx, dt, gulp) => tsmap.js.pipe(babel({ presets: ['es2015'] }))
                     .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
-                    .pipe(gulp.dest(config.getDist(dt)))
+                    .pipe(gulp.dest(ctx.getDist(dt)))
             ]
         },
         {
@@ -375,10 +390,10 @@ let createTask = (env) => {
             }
         },
         { src: 'src/**/*.ts', name: 'watch', watchTasks: ['tscompile'] },
-        { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
+        { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (ctx) => del(ctx.getDist()) }
     ]);
 
-    return runTaskSequence(gulp, tasks, config);
+    return runTaskSequence(gulp, tasks, ctx);
 }
 
 ```

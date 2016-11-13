@@ -16,9 +16,7 @@ import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefi
  * @returns {ITaskContext}
  */
 export function bindingConfig(cfg: ITaskConfig): ITaskContext {
-    // if (!cfg.oper) {
-    //     cfg.oper = currentOperation(cfg.env);
-    // }
+
     let oper = (cfg.oper || 0) | currentOperation(cfg.env);
 
     let context: ITaskContext = <ITaskContext>{
@@ -66,7 +64,7 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
                 src = taskSourceVal(getAssertSrc(task.assert, task.oper || context.oper), context.oper)
             }
             if (!src) {
-                src = taskSourceVal(getAssertSrc(cfg.option, task.oper || context.oper), context.oper)
+                src = taskSourceVal(getAssertSrc(cfg.option, context.oper), context.oper)
             }
             return (relative === false) ? src : absoluteSrc(cfg.env.root, src);
         },

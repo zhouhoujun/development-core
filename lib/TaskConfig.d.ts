@@ -505,12 +505,19 @@ export interface ILoaderOption extends IPipeOption, ICustomPipe {
      */
     taskModule?: string | Object;
     /**
-     * task define.
+     * custom task define
      *
-     * @type {ITaskDefine}
+     *
      * @memberOf ILoaderOption
      */
     taskDefine?: ITaskDefine;
+    /**
+     * context define.
+     *
+     * @type {IContextDefine}
+     * @memberOf ILoaderOption
+     */
+    contextDefine?: IContextDefine;
 }
 /**
  * loader to load tasks from directory.
@@ -631,7 +638,8 @@ export interface ITaskOption extends IAsserts, ISubTaskOption {
     src: TaskSource;
 }
 /**
- * custom modules task load define
+ * custom modules task load define.
+ * will be remove. use IContextDefine instead.
  *
  * @export
  * @interface ITaskDefine
@@ -645,7 +653,7 @@ export interface ITaskDefine {
      *
      * @memberOf ITaskDefine
      */
-    loadConfig(option: ITaskOption, env: IEnvOption): ITaskContext;
+    loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig;
     /**
      * load task in modules.
      *
@@ -657,6 +665,32 @@ export interface ITaskDefine {
      * @memberOf ITaskDefine
      */
     loadTasks?(context: ITaskContext): Promise<ITask[]>;
+}
+/**
+ * task context define.
+ *
+ * @export
+ * @interface IContextDefine
+ */
+export interface IContextDefine {
+    /**
+     * get context of tasks module.
+     *
+     * @param {ITaskConfig} config
+     * @returns {ITaskContext}
+     *
+     * @memberOf IContextDefine
+     */
+    getContext(config: ITaskConfig): ITaskContext;
+    /**
+     * get tasks in module.
+     *
+     * @param {ITaskContext} context
+     * @returns {Promise<ITask[]>}
+     *
+     * @memberOf IContextDefine
+     */
+    tasks?(context: ITaskContext): Promise<ITask[]>;
 }
 /**
  * task config. runtime task config for setup task.
