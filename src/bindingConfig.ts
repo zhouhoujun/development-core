@@ -58,25 +58,27 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
             return parentName ? `${parentName}-${name}` : name;
         },
 
-        getSrc(task?: ITaskInfo, relative = false): Src {
+        getSrc(task: ITaskInfo, relative = false): Src {
             let src: Src;
+            let oper = task ? (task.oper || context.oper) : context.oper;
             if (task && task.assert) {
-                src = taskSourceVal(getAssertSrc(task.assert, task.oper || context.oper), context.oper)
+                src = taskSourceVal(getAssertSrc(task.assert, oper), oper)
             }
             if (!src) {
-                src = taskSourceVal(getAssertSrc(cfg.option, context.oper), context.oper)
+                src = taskSourceVal(getAssertSrc(cfg.option, oper), oper)
             }
-            return (relative === false) ? src : absoluteSrc(cfg.env.root, src);
+            return (relative !== false) ? src : absoluteSrc(cfg.env.root, src);
         },
 
-        getDist(task?: ITaskInfo, relative = false) {
+        getDist(task: ITaskInfo, relative = false) {
             let dist;
+            let oper = task ? (task.oper || context.oper) : context.oper;
             if (task && task.assert) {
-                dist = getCurrentDist(task.assert, context.oper);
+                dist = getCurrentDist(task.assert, oper);
             }
-            dist = dist || getCurrentDist(context.option, context.oper);
+            dist = dist || getCurrentDist(context.option, oper);
 
-            return (relative === false) ? dist : absolutePath(cfg.env.root, dist);
+            return (relative !== false) ? dist : absolutePath(cfg.env.root, dist);
         },
 
         toRootSrc(src: Src): Src {
@@ -161,16 +163,16 @@ function getAssertSrc(assert: IAssertDist, oper: Operation) {
  */
 function getCurrentDist(ds: IAssertDist, oper: Operation) {
     let dist: string;
-    if ((oper & Operation.build) > 0) {
-        dist = ds.buildDist || taskStringVal(ds.dist, oper);
+    if ((oper & Operation.deploy) > 0) {
+        dist = ds.deployDist || taskStringVal(ds.dist, oper);
     } else if ((oper & Operation.release) > 0) {
         dist = ds.releaseDist || taskStringVal(ds.dist, oper);
-    } else if ((oper & Operation.deploy) > 0) {
-        dist = ds.deployDist || taskStringVal(ds.dist, oper);
-    } else if ((oper & Operation.test) > 0) {
-        dist = ds.testDist || ds.buildDist || taskStringVal(ds.dist, oper);
     } else if ((oper & Operation.e2e) > 0) {
         dist = ds.e2eDist || ds.buildDist || taskStringVal(ds.dist, oper);
+    } else if ((oper & Operation.test) > 0) {
+        dist = ds.testDist || ds.buildDist || taskStringVal(ds.dist, oper);
+    } else if ((oper & Operation.build) > 0) {
+        dist = ds.buildDist || taskStringVal(ds.dist, oper);
     }
 
     return dist;

@@ -866,7 +866,7 @@ export interface ITaskContext extends ITaskConfig {
     /**
      * get dist of current state.  default implement in bindingConfig.
      * 
-     * @param {ITaskInfo} task
+     * @param {ITaskInfo} [task]
      * @param {boolean} [relative] get relative path or absolute path. 
      * @returns {string}
      * 

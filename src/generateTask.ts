@@ -114,7 +114,7 @@ function createTask(dt: IDynamicTaskOption) {
         return tk
     };
 
-    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: dt.watch, group: dt.group }, factory);
+    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: dt.watch, group: dt.group, assert: dt }, factory);
 }
 /**
  * create dynamic watch task.
@@ -147,7 +147,7 @@ function createWatchTask(dt: IDynamicTaskOption) {
         return tk;
     };
 
-    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: dt.watch, group: dt.group }, factory);
+    return new DynamicTask({ order: dt.order, oper: dt.oper, watch: dt.watch, group: dt.group, assert: dt }, factory);
 }
 
 function createPipesTask(dt: IDynamicTaskOption) {

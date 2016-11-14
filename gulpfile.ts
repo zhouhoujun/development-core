@@ -25,7 +25,7 @@ let createTask = (env) => {
     env.root = __dirname;
     let config = bindingConfig({
         env: env,
-        option: { src: 'src', dist: 'lib' }
+        option: { src: 'src', dist: 'lib', buildDist: 'build' }
     });
 
     console.log(config);
