@@ -183,7 +183,16 @@ export interface ITask {
      * @type {ITaskInfo}
      * @memberOf ITask
      */
-    decorator: ITaskInfo;
+    getInfo(): ITaskInfo;
+
+    /**
+     * set task info.
+     * 
+     * @param {ITaskInfo} info
+     * 
+     * @memberOf ITask
+     */
+    setInfo?(info: ITaskInfo);
     /**
      * setup task.
      * 
@@ -875,6 +884,16 @@ export interface ITaskContext extends ITaskConfig {
     getDist(task?: ITaskInfo, relative?: boolean): string;
 
     /**
+     * generate sub task name. default implement in bindingConfig.
+     * 
+     * @param {string | ITaskInfo} task
+     * @param {string} [defaultName]
+     * 
+     * @memberOf ITaskContext
+     */
+    subTaskName(task: string | ITaskInfo, defaultName?: string);
+
+    /**
      * custom print help.
      * 
      * @param {string} lang
@@ -966,15 +985,6 @@ export interface ITaskContext extends ITaskConfig {
      * @memberOf ITaskContext
      */
     addToSequence(sequence: Src[], task: ITaskInfo): Src[];
-    /**
-     * generate sub task name. default implement in bindingConfig.
-     * 
-     * @param {IAsserts | string} assert
-     * @param {string} [defaultName]
-     * 
-     * @memberOf ITaskContext
-     */
-    subTaskName(assert: string | IAsserts, defaultName?: string);
 
     /**
      * join src to absolute path src with root( env.root ). 

@@ -103,15 +103,26 @@ export abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     name: string;
+
+
+    constructor(info?: ITaskInfo) {
+        this.info = info || {};
+        this.info.name = this.info.name || this.name;
+    }
+
+    protected info: ITaskInfo;
+
     /**
-     * task info.
+     * get task info.
      * 
      * @type {ITaskInfo}
      * @memberOf PipeTask
      */
-    public decorator: ITaskInfo;
-    constructor(info?: ITaskInfo) {
-        this.decorator = info || {};
+    public getInfo(): ITaskInfo {
+        if (!this.info.name) {
+            this.info.name = this.name;
+        }
+        return this.info;
     }
 
     /**
@@ -134,7 +145,7 @@ export abstract class PipeTask implements IPipeTask {
         if (loader && _.isFunction(loader.pipes)) {
             pipes = _.isFunction(loader.pipes) ? loader.pipes(context, option, gulp) : _.filter(<Pipe[]>loader.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
         }
-        return gulp.src(context.getSrc(this.decorator));
+        return gulp.src(context.getSrc(this.getInfo()));
     }
 
 
@@ -176,19 +187,19 @@ export abstract class PipeTask implements IPipeTask {
      * 
      * @memberOf PipeTask
      */
-    output(context: ITaskContext, dist: IAssertDist, gulp?: Gulp): OutputPipe[] {
-        let option = context.option;
+    output(ctx: ITaskContext, dist: IAssertDist, gulp?: Gulp): OutputPipe[] {
+        let option = ctx.option;
         let pipes: OutputPipe[] = null;
         let loader = <ILoaderOption>option.loader;
         if (loader && !_.isString(loader) && !_.isArray(loader)) {
             if (loader.output) {
-                pipes = _.isFunction(loader.output) ? loader.output(context, option, gulp) : _.filter(<OutputPipe[]>loader.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
+                pipes = _.isFunction(loader.output) ? loader.output(ctx, option, gulp) : _.filter(<OutputPipe[]>loader.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
             } else if (loader.output === null) {
                 return [(stream) => stream];
             }
         }
         if (option.output) {
-            let opps = _.isFunction(option.output) ? option.output(context, option, gulp) : _.filter(<OutputPipe[]>option.output, p => _.isFunction(p) || (p.name && p.name === dist.name));
+            let opps = _.isFunction(option.output) ? option.output(ctx, option, gulp) : _.filter(<OutputPipe[]>option.output, p => _.isFunction(p) || (p.name && p.name === dist.name));
             if (opps && opps.length > 0) {
                 pipes = pipes ? pipes.concat(opps) : opps;
             }
@@ -196,7 +207,7 @@ export abstract class PipeTask implements IPipeTask {
             return [(stream) => stream];
         }
 
-        return pipes || [(stream) => stream.pipe(gulp.dest(context.getDist(dist)))]
+        return pipes || [(stream) => stream.pipe(gulp.dest(ctx.getDist(dist)))]
     }
 
     /**
@@ -278,16 +289,16 @@ export abstract class PipeTask implements IPipeTask {
      * 
      * @memberOf PipeTask
      */
-    protected pipes2Promise(source: ITransform, context: ITaskContext, dist: IAssertDist, gulp: Gulp, pipes?: Pipe[]) {
-        let name = context.subTaskName(dist, this.name);
-        return Promise.all(_.map(pipes || this.pipes(context, dist, gulp), (p: Pipe) => {
+    protected pipes2Promise(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp, pipes?: Pipe[]) {
+        let name = ctx.subTaskName(dist, this.name);
+        return Promise.all(_.map(pipes || this.pipes(ctx, dist, gulp), (p: Pipe) => {
             if (_.isFunction(p)) {
-                return p(context, dist, gulp);
+                return p(ctx, dist, gulp);
             } else {
-                if (!this.match(p, name, context)) {
+                if (!this.match(p, name, ctx)) {
                     return null;
                 } else {
-                    return Promise.resolve(p.toTransform(context, dist, gulp))
+                    return Promise.resolve(p.toTransform(ctx, dist, gulp))
                         .then(trs => {
                             trs.order = p.order;
                             // trs.oper = p.order;
@@ -310,7 +321,7 @@ export abstract class PipeTask implements IPipeTask {
                 });
 
                 _.each(tans, stream => {
-                    if (!this.match(stream, name, context)) {
+                    if (!this.match(stream, name, ctx)) {
                         return;
                     }
 
@@ -472,15 +483,15 @@ export abstract class PipeTask implements IPipeTask {
      */
     setup(context: ITaskContext, gulp?: Gulp): TaskResult {
         gulp = gulp || coregulp;
-        let option = this.getOption(context);
-        let tk = context.subTaskName(option, this.name);
+        // let option = this.getOption(context);
+        let tk = context.subTaskName(this.getInfo());
         console.log(`register ${this.name || ''} task:`, chalk.cyan(tk));
 
         gulp.task(tk, () => {
             return this.execute(context, gulp);
         });
 
-        this.decorator.taskName = tk;
+        this.info.taskName = tk;
 
         return tk;
     }

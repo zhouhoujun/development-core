@@ -44,16 +44,22 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
 
         findTaskDefineInDir: findTaskDefineInDir.bind(this),
 
-        subTaskName(dt, deft = '') {
+        subTaskName(task, deft = '') {
             let name = '';
-            if (_.isString(dt)) {
-                name = dt;
-            } else if (dt && cfg.option !== dt) {
-                name = taskStringVal(dt.name, context.oper)
+            let oper = context.oper;
+            if (_.isString(task)) {
+                name = task;
+            } else if (task && task !== context.option) {
+                oper = task.oper || context.oper;
+                let n = task.name;
+                if (!n) {
+                    n = task.assert ? task.assert.name : '';
+                }
+                name = taskStringVal(n, oper)
             } else {
                 name = deft;
             }
-            let parentName = taskStringVal(cfg.option.name, context.oper);
+            let parentName = taskStringVal(cfg.option.name, oper);
 
             return parentName ? `${parentName}-${name}` : name;
         },

@@ -14,8 +14,9 @@ import { IPipe, PipeTask, IAssertDist, taskdefine, bindingConfig, IDynamicTaskOp
     group: ['test', 'node']
 })
 export class TestTaskGA implements ITask {
-    public decorator: ITaskInfo = {};
-    constructor() {
+
+    getInfo(): ITaskInfo { return this.info; }
+    constructor(private info: ITaskInfo) {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
@@ -26,8 +27,8 @@ export class TestTaskGA implements ITask {
     group: ['node']
 })
 export class TestTaskGB implements ITask {
-    public decorator: ITaskInfo = {};
-    constructor() {
+    getInfo(): ITaskInfo { return this.info; }
+    constructor(private info: ITaskInfo) {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
@@ -40,8 +41,8 @@ export class TestTaskGB implements ITask {
     group: ['test', 'node']
 })
 export class TestTaskGC implements ITask {
-    public decorator: ITaskInfo = {};
-    constructor() {
+    getInfo(): ITaskInfo { return this.info; }
+    constructor(private info: ITaskInfo) {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
@@ -50,8 +51,8 @@ export class TestTaskGC implements ITask {
 }
 @task
 export class TestTaskA implements ITask {
-    public decorator: ITaskInfo = {};
-    constructor() {
+    getInfo(): ITaskInfo { return this.info; }
+    constructor(private info: ITaskInfo) {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
@@ -61,8 +62,8 @@ export class TestTaskA implements ITask {
 
 @task()
 export class TestTaskE implements ITask {
-    public decorator: ITaskInfo = {};
-    constructor() {
+    getInfo(): ITaskInfo { return this.info; }
+    constructor(private info: ITaskInfo) {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
@@ -137,8 +138,8 @@ export class TaskDefine implements ITaskDefine {
     order: 1
 })
 export class TestTaskB implements ITask {
-    public decorator: ITaskInfo = {};
-    constructor() {
+    getInfo(): ITaskInfo { return this.info; }
+    constructor(private info: ITaskInfo) {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
@@ -152,8 +153,8 @@ export class TestTaskB implements ITask {
     oper: Operation.build | Operation.test
 })
 export class TestTaskC implements ITask {
-    public decorator: ITaskInfo = {};
-    constructor() {
+    getInfo(): ITaskInfo { return this.info; }
+    constructor(private info: ITaskInfo) {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
@@ -166,8 +167,8 @@ export class TestTaskC implements ITask {
     oper: Operation.release | Operation.deploy
 })
 export class TestTaskD implements ITask {
-    public decorator: ITaskInfo = {};
-    constructor() {
+    getInfo(): ITaskInfo { return this.info; }
+    constructor(private info: ITaskInfo) {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
@@ -182,8 +183,8 @@ export class TestTaskD implements ITask {
     watch: true
 })
 export class TestTaskW implements ITask {
-    public decorator: ITaskInfo = {};
-    constructor() {
+    getInfo(): ITaskInfo { return this.info; }
+    constructor(private info: ITaskInfo) {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...

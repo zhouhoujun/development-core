@@ -66,7 +66,7 @@ export function findTasks(target: any, match?: ITaskDecorator): ITask[] {
     if (_.isFunction(target)) {
         if (target['__task']) {
             let tinfo: ITaskDecorator = target['__task'];
-
+            tinfo = _.isBoolean(tinfo) ? {} : tinfo;
             if (!matchTaskInfo(tinfo, match)) {
                 return tasks;
             }
@@ -76,7 +76,10 @@ export function findTasks(target: any, match?: ITaskDecorator): ITask[] {
             }
 
             let task: ITask = new target(tinfo);
-            task.decorator = _.extend(task.decorator || {}, tinfo);
+            if (task.setInfo) {
+                task.setInfo(tinfo);
+            }
+
             tasks.push(task);
         } else if (target['__dynamictask']) {
             let tinfo: ITaskDecorator = target['__dynamictask'];
@@ -90,7 +93,8 @@ export function findTasks(target: any, match?: ITaskDecorator): ITask[] {
             }
 
             let dyts = _.map((<IDynamicTasks>new target()).tasks(), tk => {
-                tk.group = tk.group || tinfo.group;
+                tk = _.extend(_.clone(tinfo), tk);
+                // tk.group = tk.group || tinfo.group;
                 return tk;
             });
             tasks = tasks.concat(generateTask(dyts, match));

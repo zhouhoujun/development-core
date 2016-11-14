@@ -96,14 +96,15 @@ export declare abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     name: string;
+    constructor(info?: ITaskInfo);
+    protected info: ITaskInfo;
     /**
-     * task info.
+     * get task info.
      *
      * @type {ITaskInfo}
      * @memberOf PipeTask
      */
-    decorator: ITaskInfo;
-    constructor(info?: ITaskInfo);
+    getInfo(): ITaskInfo;
     /**
      * source streams.
      *
@@ -136,7 +137,7 @@ export declare abstract class PipeTask implements IPipeTask {
      *
      * @memberOf PipeTask
      */
-    output(context: ITaskContext, dist: IAssertDist, gulp?: Gulp): OutputPipe[];
+    output(ctx: ITaskContext, dist: IAssertDist, gulp?: Gulp): OutputPipe[];
     /**
      * get option.
      *
@@ -185,7 +186,7 @@ export declare abstract class PipeTask implements IPipeTask {
      *
      * @memberOf PipeTask
      */
-    protected pipes2Promise(source: ITransform, context: ITaskContext, dist: IAssertDist, gulp: Gulp, pipes?: Pipe[]): Promise<ITransform>;
+    protected pipes2Promise(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp, pipes?: Pipe[]): Promise<ITransform>;
     /**
      * output pipes transform to Promise.
      *

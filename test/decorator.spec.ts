@@ -131,7 +131,7 @@ describe('decorator:', () => {
             option: { src: 'src', dist: 'lib' }
         }), gulp);
 
-        expect(tk.decorator.taskName).eq('pipetask');
+        expect(tk.getInfo().taskName).eq('pipetask');
 
     })
 
@@ -148,7 +148,7 @@ describe('decorator:', () => {
             option: { name: 'mytest', src: 'src', dist: 'lib' }
         }), gulp);
 
-        expect(tk.decorator.taskName).eq('mytest-pipetask');
+        expect(tk.getInfo().taskName).eq('mytest-pipetask');
 
     })
 

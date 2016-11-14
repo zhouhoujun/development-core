@@ -23,20 +23,22 @@ export function toSequence(gulp: Gulp, tasks: ITask[], config: ITaskContext): Sr
         if (_.isArray(t)) {
             return len;
         } else {
-            if (_.isNumber(t.decorator.order)) {
-                return t.decorator.order;
+            let info = t.getInfo();
+            if (_.isNumber(info.order)) {
+                return info.order;
             }
             return len;
         }
     });
 
     _.each(tasks, t => {
-        if (t.decorator.watch && !config.env.watch) {
+        let info = t.getInfo();
+        if (info.watch && !config.env.watch) {
             return;
         }
 
-        if (!t.decorator.oper ||
-            (t.decorator.oper && (t.decorator.oper & config.oper) > 0)) {
+        if (!info.oper ||
+            (info.oper && (info.oper & config.oper) > 0)) {
             let tname = t.setup(config, gulp);
             tname && seq.push(tname);
         }
