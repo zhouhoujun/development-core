@@ -48,7 +48,7 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
  // module A
 import {PipeTask, IPipe, PipeTask, IAssertDist, taskdefine, bindingConfig, IDynamicTaskOption, Operation, ITaskOption, IEnvOption, ITaskContext, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from 'development-core';
 
-
+@task
 export class TestPipeTask implements PipeTask {
     // override
     //source(context: ITaskContext, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource>{
