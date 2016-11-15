@@ -46,14 +46,35 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
  ```ts
 
  // module A
-import {PipeTask, Pipe, IAssertDist, taskdefine, bindingConfig, Operation, ITaskOption, IEnvOption, ITaskConfig, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from 'development-core';
+import {PipeTask, IPipe, PipeTask, IAssertDist, taskdefine, bindingConfig, IDynamicTaskOption, Operation, ITaskOption, IEnvOption, ITaskContext, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from 'development-core';
+
+
+export class TestPipeTask implements PipeTask {
+    // override
+    //source(context: ITaskContext, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource>{
+    //    // todo create source.
+    //    // sample as:
+    //    return gulp.src(context.getSrc(this.getInfo()));
+    //}
+    // override
+    pipes(context: ITaskContext, dist: IAssertDist, gulp?: Gulp): Pipe[]{
+        //create pipes
+        return pipes
+    }
+    // override
+    //output(context: ITaskContext, dist: IAssertDist, gulp?: Gulp): OutputPipe[]{
+    //    // output pipes.
+    //    return outputs;
+    //}
+}
+
 
 @task
 export class TestTaskA implements ITask {
     getInfo(): ITaskInfo { return this.info; }
     constructor(private info: ITaskInfo) {
     }
-    setup(config: ITaskContext, gulp): TaskResult {
+    setup(ctx: ITaskContext, gulp): TaskResult {
         // todo...
         return;
     }
@@ -66,23 +87,9 @@ export class TestTaskE implements ITask {
     }
     getInfo(): ITaskInfo { return this.info; }
     setInfo(info: ITaskInfo) { this.info = info; }
-    setup(config: ITaskContext, gulp): TaskResult {
+    setup(ctx: ITaskContext, gulp): TaskResult {
         // todo...
         return 'TestTaskE';
-    }
-}
-
-@task({
-    group: 'pipetask'
-})
-export class TestPipeTask extends PipeTask {
-    name = 'pipetask';
-    pipes(config: ITaskContext, dist: IAssertDist, gulp?: Gulp): IPipe[] {
-        return [
-            () => cache('typescript'),
-            sourcemaps.init,
-            tsProject
-        ]
     }
 }
 
@@ -94,14 +101,14 @@ export class TestDynamicTask implements IDynamicTasks {
                 name: 'test-tscompile', src: 'src/**/*.ts', dist: 'lib',
                 pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
                 output: [
-                    (tsmap, config, dt, gulp) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
-                    (tsmap, config, dt, gulp) => {
-                        if (config.oper & Operation.release || config.oper & Operation.deploy) {
+                    (tsmap, ctx, dt, gulp) => tsmap.dts.pipe(gulp.dest(ctx.getDist(dt))),
+                    (tsmap, ctx, dt, gulp) => {
+                        if (ctx.oper & Operation.release || ctx.oper & Operation.deploy) {
                             return tsmap.js.pipe(babel({ presets: ['es2015'] }))
                                 .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
-                                .pipe(gulp.dest(config.getDist(dt)));
+                                .pipe(gulp.dest(ctx.getDist(dt)));
                         } else {
-                            return tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist(dt)));
+                            return tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(ctx.getDist(dt)));
                         }
                     }
                 ]
@@ -117,7 +124,7 @@ export class TestDynamicTask implements IDynamicTasks {
                 }
             },
             { name: 'test-watch', src: 'src/**/*.ts', watchTasks: ['tscompile'] },
-            { name: 'test-clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
+            { name: 'test-clean', order: 0, src: 'src', dist: 'lib', task: (ctx) => del(ctx.getDist()) }
         ];
     }
 }
@@ -142,10 +149,10 @@ export class TestTaskB implements ITask {
     getInfo(): ITaskInfo { return this.info; }
     constructor(private info: ITaskInfo) {
     }
-    setup(config: ITaskContext, gulp): TaskResult {
+    setup(ctx: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return config.subTaskName('TestTaskB');
+        return ctx.subTaskName('TestTaskB');
     }
 }
 
@@ -157,10 +164,10 @@ export class TestTaskC implements ITask {
     getInfo(): ITaskInfo { return this.info; }
     constructor(private info: ITaskInfo) {
     }
-    setup(config: ITaskContext, gulp): TaskResult {
+    setup(ctx: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return config.subTaskName('TestTaskC');
+        return ctx.subTaskName('TestTaskC');
     }
 }
 
@@ -171,10 +178,10 @@ export class TestTaskD implements ITask {
     getInfo(): ITaskInfo { return this.info; }
     constructor(private info: ITaskInfo) {
     }
-    setup(config: ITaskContext, gulp): TaskResult {
+    setup(ctx: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return config.subTaskName('TestTaskD');
+        return ctx.subTaskName('TestTaskD');
     }
 }
 
@@ -187,10 +194,10 @@ export class TestTaskW implements ITask {
     getInfo(): ITaskInfo { return this.info; }
     constructor(private info: ITaskInfo) {
     }
-    setup(config: ITaskContext, gulp): TaskResult {
+    setup(ctx: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return config.subTaskName('TestTaskW');
+        return ctx.subTaskName('TestTaskW');
     }
 }
 
