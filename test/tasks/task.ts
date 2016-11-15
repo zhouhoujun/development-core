@@ -7,7 +7,7 @@ const sourcemaps = require('gulp-sourcemaps');
 let tsProject = ts.createProject('tsconfig.json');
 const uglify = require('gulp-uglify');
 const babel = require('gulp-babel');
-import { IPipe, PipeTask, IAssertDist, taskdefine, bindingConfig, IDynamicTaskOption, Operation, ITaskOption, IEnvOption, ITaskContext, ITaskDefine, ITask, ITaskDecorator, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from '../../src';
+import { IPipe, PipeTask, IAssertDist, taskdefine, bindingConfig, IDynamicTaskOption, Operation, ITaskOption, IEnvOption, ITaskContext, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from '../../src';
 
 
 @task({
