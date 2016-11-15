@@ -211,6 +211,7 @@ export type TaskResult = Src | void;
 export type TaskSource = Src | ((oper?: Operation) => Src);
 export type TaskString = string | ((oper?: Operation) => string);
 
+export type TaskOption = ITaskOption | ITaskOption[] | IAsserts | IAsserts[] | Array<ITaskOption | IAsserts>;
 
 /**
  * transform interface.
@@ -648,10 +649,10 @@ export interface ISubTaskOption {
     /**
      * sub tasks.
      * 
-     * @type {(ITaskOption | ITaskOption[])}
+     * @type {TaskOption}
      * @memberOf ISubTaskOption
      */
-    tasks?: ITaskOption | ITaskOption[];
+    tasks?: TaskOption;
 
     /**
      * set sub task order in this task sequence.
