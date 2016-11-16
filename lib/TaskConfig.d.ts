@@ -192,8 +192,20 @@ export interface ITask {
     setup(context: ITaskContext, gulp?: Gulp): TaskResult;
 }
 export declare type TaskResult = Src | void;
-export declare type TaskSource = Src | ((oper?: Operation) => Src);
-export declare type TaskString = string | ((oper?: Operation) => string);
+/**
+ * task source
+ * @param {Operation} oper runtime Operation.
+ */
+export declare type TaskSource = Src | ((oper?: Operation, env?: IEnvOption) => Src);
+/**
+ * task string
+ * @param {Operation} oper runtime Operation.
+ */
+export declare type TaskString = string | ((oper?: Operation, env?: IEnvOption) => string);
+/**
+ * task option.
+ * @param {Operation} oper runtime Operation.
+ */
 export declare type TaskOption = ITaskOption | ITaskOption[] | IAsserts | IAsserts[] | Array<ITaskOption | IAsserts>;
 /**
  * transform interface.

@@ -38,7 +38,7 @@ class DynamicPipeTask extends PipeTask {
     }
 
     protected getOption(ctx: ITaskContext) {
-        this.name = this.name || taskStringVal(this.dt.name, ctx.oper);
+        this.name = this.name || taskStringVal(this.dt.name, ctx.oper, ctx.env);
         return this.dt || ctx.option;
     }
 

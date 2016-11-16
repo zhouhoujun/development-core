@@ -208,9 +208,22 @@ export interface ITask {
 
 export type TaskResult = Src | void;
 
-export type TaskSource = Src | ((oper?: Operation) => Src);
-export type TaskString = string | ((oper?: Operation) => string);
+/**
+ * task source
+ * @param {Operation} oper runtime Operation.
+ */
+export type TaskSource = Src | ((oper?: Operation, env?: IEnvOption) => Src);
 
+/**
+ * task string
+ * @param {Operation} oper runtime Operation.
+ */
+export type TaskString = string | ((oper?: Operation, env?: IEnvOption) => string);
+
+/**
+ * task option.
+ * @param {Operation} oper runtime Operation.
+ */
 export type TaskOption = ITaskOption | ITaskOption[] | IAsserts | IAsserts[] | Array<ITaskOption | IAsserts>;
 
 /**

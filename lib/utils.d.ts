@@ -1,4 +1,4 @@
-import { TaskSource, TaskString, Operation, ITaskDecorator, ITaskInfo, Src } from './TaskConfig';
+import { TaskSource, TaskString, Operation, ITaskDecorator, ITaskInfo, Src, IEnvOption } from './TaskConfig';
 /**
  * filter fileName in directory.
  *
@@ -8,8 +8,26 @@ import { TaskSource, TaskString, Operation, ITaskDecorator, ITaskInfo, Src } fro
  * @returns {string[]}
  */
 export declare function files(directory: string, express?: ((fileName: string) => boolean)): string[];
-export declare function taskSourceVal(src: TaskSource, oper?: Operation): string | string[];
-export declare function taskStringVal(name: TaskString, oper?: Operation): string;
+/**
+ * task src, string or array string.
+ *
+ * @export
+ * @param {TaskSource} src
+ * @param {Operation} oper runtime Operation
+ * @param {IEnvOption} [env]
+ * @returns
+ */
+export declare function taskSourceVal(src: TaskSource, oper: Operation, env?: IEnvOption): string | string[];
+/**
+ * task string.
+ *
+ * @export
+ * @param {TaskString} name
+ * @param {Operation} oper runtime Operation
+ * @param {IEnvOption} [env]
+ * @returns
+ */
+export declare function taskStringVal(name: TaskString, oper: Operation, env?: IEnvOption): string;
 /**
  * convert old version Operation to new version Operation
  *
