@@ -1,7 +1,7 @@
 {
   "name": "development-core",
   "version": "0.8.8",
-  "description": "development tools, generate tasks, run task in sequence via Promise",
+  "description": "development tools, generate gulp tasks, run tasks in sequence via Promise",
   "main": "./lib/index.js",
   "typings": "./lib/index",
   "scripts": {
