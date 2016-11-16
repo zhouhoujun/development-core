@@ -241,7 +241,7 @@ function prefixSrc(root: string, strSrc: string): string {
     let prefix = '';
     if (/^!/.test(strSrc)) {
         prefix = '!';
-        strSrc.substring(0, strSrc.length);
+        strSrc = strSrc.substring(1, strSrc.length);
     }
     return prefix + absolutePath(root, strSrc);
 }

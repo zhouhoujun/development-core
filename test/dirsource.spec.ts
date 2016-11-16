@@ -1,7 +1,7 @@
 import 'mocha';
 import { expect } from 'chai';
 import { Operation, bindingConfig } from '../src';
-
+import * as _ from 'lodash';
 import * as path from 'path';
 let root = __dirname;
 
@@ -33,6 +33,7 @@ describe('directives', () => {
         expect(ctx.getDist()).eq(path.join(root, 'testbuild'));
 
     })
+
 
     it('e2e directives', () => {
 
@@ -86,6 +87,22 @@ describe('directives', () => {
 
         expect(ctx.getSrc()).eq(path.join(root, 'src'));
         expect(ctx.getSrc({ oper: Operation.test | Operation.default })).eq(path.join(root, 'test/**/*.spec.ts'));
+        expect(ctx.getDist()).eq(path.join(root, 'release'));
+
+    })
+
+
+    it('release testsrc with !', () => {
+
+        let ctx = bindingConfig({
+            oper: Operation.build,
+            env: { root: root, release: true },
+            option: { src: ['src', '!src/jspm'], testSrc: '!test/**/*.spec.ts', dist: 'lib', releaseDist: 'release' }
+        });
+
+
+        expect(_.last(ctx.getSrc())).eq('!' + path.join(root, 'src/jspm'));
+        expect(ctx.getSrc({ oper: Operation.test | Operation.default })).eq('!' + path.join(root, 'test/**/*.spec.ts'));
         expect(ctx.getDist()).eq(path.join(root, 'release'));
 
     })
