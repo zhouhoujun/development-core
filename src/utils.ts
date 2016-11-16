@@ -231,8 +231,17 @@ export function absolutePath(root: string, pathstr: string): string {
  */
 export function absoluteSrc(root: string, src: Src): Src {
     if (_.isString(src)) {
-        return absolutePath(root, src)
+        return prefixSrc(root, src);
     } else {
-        return _.map(src, p => absolutePath(root, p));
+        return _.map(src, p => prefixSrc(root, p));
     }
+}
+
+function prefixSrc(root: string, strSrc: string): string {
+    let prefix = '';
+    if (/^!/.test(strSrc)) {
+        prefix = '!';
+        strSrc.substring(0, strSrc.length);
+    }
+    return prefix + absolutePath(root, strSrc);
 }
