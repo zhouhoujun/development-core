@@ -8,6 +8,12 @@ import { matchTaskGroup, matchTaskInfo, taskStringVal } from './utils';
 import { PipeTask } from './PipeTask';
 
 type factory = (config: ITaskContext, gulp: Gulp) => TaskResult;
+/**
+ * custom dynamic task.
+ * 
+ * @class DynamicTask
+ * @implements {ITask}
+ */
 class DynamicTask implements ITask {
     constructor(protected info: ITaskInfo, private factory: factory) {
     }
@@ -31,6 +37,12 @@ class DynamicTask implements ITask {
     }
 }
 
+/**
+ * pipe task for dynamic task.
+ * 
+ * @class DynamicPipeTask
+ * @extends {PipeTask}
+ */
 class DynamicPipeTask extends PipeTask {
     constructor(private dt: IDynamicTaskOption, info?: ITaskInfo) {
         super(info || dt);
@@ -160,6 +172,12 @@ function createWatchTask(dt: IDynamicTaskOption) {
     return new DynamicTask({ order: dt.order, oper: dt.oper, watch: dt.watch, group: dt.group, assert: dt }, factory);
 }
 
+/**
+ * create pipe task.
+ * 
+ * @param {IDynamicTaskOption} dt
+ * @returns
+ */
 function createPipesTask(dt: IDynamicTaskOption) {
     return new DynamicPipeTask(dt);
 }

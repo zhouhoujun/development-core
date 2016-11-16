@@ -58,6 +58,14 @@ export declare function findTaskDefine(target: any): IContextDefine;
  * @returns {Promise<IContextDefine>}
  */
 export declare function findTaskDefineInModule(md: string | Object): Promise<IContextDefine>;
+/**
+ * fund tasks in module.
+ *
+ * @export
+ * @param {(string | Object)} md
+ * @param {ITaskDecorator} [match]
+ * @returns {Promise<ITask[]>}
+ */
 export declare function findTasksInModule(md: string | Object, match?: ITaskDecorator): Promise<ITask[]>;
 /**
  * find one task define in directories.

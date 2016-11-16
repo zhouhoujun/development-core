@@ -106,4 +106,19 @@ describe('directives', () => {
         expect(ctx.getDist()).eq(path.join(root, 'release'));
 
     })
+
+    it('release testsrc with relative', () => {
+
+        let ctx = bindingConfig({
+            oper: Operation.build,
+            env: { root: root, release: true },
+            option: { src: ['src', '!src/jspm'], testSrc: '!test/**/*.spec.ts', dist: 'lib', releaseDist: 'release' }
+        });
+
+
+        expect(_.last(ctx.getSrc({oper: Operation.build}, true))).eq('!src/jspm');
+        expect(ctx.getSrc({ oper: Operation.test | Operation.default }, true)).eq('!test/**/*.spec.ts');
+        expect(ctx.getDist()).eq(path.join(root, 'release'));
+
+    })
 });

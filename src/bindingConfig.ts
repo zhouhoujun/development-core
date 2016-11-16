@@ -142,7 +142,13 @@ export function currentOperation(env: IEnvOption) {
     return oper;
 }
 
-
+/**
+ * get assert source.
+ * 
+ * @param {IAssertDist} assert
+ * @param {Operation} oper
+ * @returns
+ */
 function getAssertSrc(assert: IAssertDist, oper: Operation) {
     let src = null;
 
@@ -183,5 +189,3 @@ function getCurrentDist(ds: IAssertDist, oper: Operation, env: IEnvOption) {
 
     return dist;
 }
-
-

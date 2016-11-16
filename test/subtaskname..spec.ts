@@ -30,7 +30,6 @@ describe('sub task name', () => {
             option: { name: 'appname', src: 'src', dist: 'lib' }
         });
 
-
         expect(ctx.subTaskName('test')).eq('appname-test');
         expect(ctx.subTaskName(<ITaskInfo>{ assert: { name: 'test' } })).eq('appname-test');
     })

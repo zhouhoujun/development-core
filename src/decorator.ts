@@ -247,7 +247,14 @@ export function findTaskDefineInModule(md: string | Object): Promise<IContextDef
     }
 }
 
-
+/**
+ * fund tasks in module.
+ * 
+ * @export
+ * @param {(string | Object)} md
+ * @param {ITaskDecorator} [match]
+ * @returns {Promise<ITask[]>}
+ */
 export function findTasksInModule(md: string | Object, match?: ITaskDecorator): Promise<ITask[]> {
     let mdls;
     try {
