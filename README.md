@@ -373,7 +373,9 @@ let createTask = (env) => {
 
     let ctx = bindingConfig({
         env: env,
-        option: { src: 'src', dist: 'lib' }
+        option: { src: 'src', dist: 'lib',
+        // auto create watch task for this asserts or special task.
+         watch: true | [taskname|callback] }
     });
 
     let tasks = ctx.generateTask([
