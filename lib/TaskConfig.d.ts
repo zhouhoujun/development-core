@@ -177,19 +177,16 @@ export interface ITask {
 export declare type TaskResult = Src | void;
 /**
  * task source
- * @param {Operation} oper runtime Operation.
  */
 export declare type TaskSource = Src | ((ctx?: ITaskContext) => Src);
 /**
  * task string
- * @param {Operation} oper runtime Operation.
  */
 export declare type TaskString = string | ((ctx?: ITaskContext) => string);
 /**
  * task option.
- * @param {Operation} oper runtime Operation.
  */
-export declare type TaskOption = ITaskOption | ITaskOption[] | IAsserts | IAsserts[] | Array<ITaskOption | IAsserts>;
+export declare type TaskOption = ITaskOption | IAsserts | IDynamicTaskOption | Array<ITaskOption | IAsserts | IDynamicTaskOption>;
 /**
  * transform interface.
  *
@@ -612,10 +609,10 @@ export interface IAsserts extends IAssertDist, ITaskLoaderOption, IPipeOption, I
     /**
      * tasks to deal with IAsserts.
      *
-     * @type {IMap<Src | IAsserts, IDynamicTaskOption[]>}
+     * @type {IMap<Src | TaskOption>}
      * @memberOf IAsserts
      */
-    asserts?: IMap<Src | IAsserts | IDynamicTaskOption[]>;
+    asserts?: IMap<Src | TaskOption>;
     /**
      * set IAsserts task order in this task sequence.
      *
