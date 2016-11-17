@@ -99,6 +99,8 @@ export class TestDynamicTask implements IDynamicTasks {
         return [
             {
                 name: 'test-tscompile', src: 'src/**/*.ts', dist: 'lib',
+                // auto create watch task for this asserts when watch in context.
+                watch: true,
                 pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
                 output: [
                     (tsmap, ctx, dt, gulp) => tsmap.dts.pipe(gulp.dest(ctx.getDist(dt))),
@@ -123,7 +125,7 @@ export class TestDynamicTask implements IDynamicTasks {
                         });
                 }
             },
-            { name: 'test-watch', src: 'src/**/*.ts', watchTasks: ['tscompile'] },
+            //{ name: 'test-watch', src: 'src/**/*.ts', watchTasks: ['tscompile'] },
             { name: 'test-clean', order: 0, src: 'src', dist: 'lib', task: (ctx) => del(ctx.getDist()) }
         ];
     }
@@ -263,6 +265,8 @@ export class TestTaskC implements IDynamicTasks {
         return [
             {
                 name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
+                // auto create watch task for this asserts when watch in context.
+                watch: true,
                 pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
                 output: [
                     (tsmap, ctx, dt) => tsmap.dts.pipe(gulp.dest(ctx.getDist(dt))),
@@ -293,7 +297,7 @@ special pipe work or add special output work with class implements IDynamicTasks
 import { findTasks, bindingConfig, Operation, runTaskSequence, findTaskDefine }  from 'development-core';
 
 let ctx = bindingConfig({
-    env: env, oper: oper,
+    env: env,
     option: {
         src: 'src',dist: 'lib',
         loader:{
@@ -373,9 +377,12 @@ let createTask = (env) => {
 
     let ctx = bindingConfig({
         env: env,
-        option: { src: 'src', dist: 'lib',
-        // auto create watch task for this asserts or special task.
-         watch: true | [taskname|callback] }
+        option: {
+            src: 'src',
+            dist: 'lib',
+            // auto create watch task for this asserts or special task.
+            watch: true | [taskname|callback]
+        }
     });
 
     let tasks = ctx.generateTask([
