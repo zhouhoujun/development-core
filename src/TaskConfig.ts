@@ -282,7 +282,7 @@ export interface IPipe extends IOperate {
     toTransform?(context: ITaskContext, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
 }
 
-export type Pipe = IPipe | ((config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
+export type Pipe = IPipe | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
 
 
 
@@ -307,7 +307,7 @@ export interface IOutputPipe extends IOperate {
     toTransform?(stream: ITransform, context: ITaskContext, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
 }
 
-export type OutputPipe = IOutputPipe | ((stream: ITransform, config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
+export type OutputPipe = IOutputPipe | ((stream: ITransform, ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
 
 
 /**
@@ -429,14 +429,14 @@ export interface IPipeOption {
      * 
      * @memberOf IPipeOption
      */
-    source?: TransformSource | ((config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => TransformSource)
+    source?: TransformSource | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => TransformSource)
     /**
      * task pipe works.
      * 
      * 
      * @memberOf IDynamicTaskOption
      */
-    pipes?: Pipe[] | ((config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => Pipe[]);
+    pipes?: Pipe[] | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => Pipe[]);
 
     /**
      * output pipe task
@@ -444,7 +444,7 @@ export interface IPipeOption {
      * 
      * @memberOf IPipeOption
      */
-    output?: IOutputPipe[] | ((config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => IOutputPipe[]);
+    output?: IOutputPipe[] | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => IOutputPipe[]);
 }
 
 
@@ -492,7 +492,7 @@ export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPip
      * 
      * @memberOf IDynamicTaskOption
      */
-    watchTasks?: Array<string | WatchCallback> | ((config?: ITaskContext, dt?: IDynamicTaskOption) => Array<string | WatchCallback>);
+    watchTasks?: Array<string | WatchCallback> | ((ctx?: ITaskContext, dt?: IDynamicTaskOption) => Array<string | WatchCallback>);
     /**
      * watch changed.
      * 

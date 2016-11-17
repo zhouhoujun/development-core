@@ -4,7 +4,7 @@ import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
 import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
-import { matchTaskGroup, matchTaskInfo, taskStringVal } from './utils';
+import { matchTaskGroup, matchTaskInfo, taskStringVal, taskSourceVal } from './utils';
 import { PipeTask } from './PipeTask';
 
 type factory = (config: ITaskContext, gulp: Gulp) => TaskResult;
@@ -104,6 +104,13 @@ export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], m
         }
 
         taskseq.push(createTask(dt));
+        if (dt.watch && match && (match.oper & Operation.watch)) {
+            taskseq.push(createWatchTask({
+                oper: Operation.defaultWatch,
+                name: (oper, env) => taskStringVal(dt.name, oper, env) + '-watch',
+                watchTasks: (ctx) => [taskStringVal(dt.name, ctx.oper, ctx.env)]
+            }));
+        }
     });
 
     return taskseq;
@@ -160,23 +167,23 @@ function createCustomTask(dt: IDynamicTaskOption): ITask {
  * @returns {ITask}
  */
 function createWatchTask(dt: IDynamicTaskOption): ITask {
-    let factory = (cfg: ITaskContext, gulp: Gulp) => {
-        let watchs = _.isFunction(dt.watchTasks) ? dt.watchTasks(cfg) : dt.watchTasks;
+    let factory = (ctx: ITaskContext, gulp: Gulp) => {
+        let watchs = _.isFunction(dt.watchTasks) ? dt.watchTasks(ctx, dt) : dt.watchTasks;
         if (!_.isFunction(_.last(watchs))) {
             watchs.push(<WatchCallback>(event: WatchEvent) => {
-                dt.watchChanged && dt.watchChanged(event, cfg);
+                dt.watchChanged && dt.watchChanged(event, ctx);
             });
         }
         watchs = _.map(watchs, w => {
             if (_.isString(w)) {
-                return cfg.subTaskName(w);
+                return ctx.subTaskName(w);
             }
             return w;
         })
-        let tk = cfg.subTaskName(dt);
+        let tk = ctx.subTaskName(dt);
         console.log('register watch  dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
-            let src = cfg.getSrc(dt);
+            let src = ctx.getSrc(dt);
             console.log('watch, src:', chalk.cyan.call(chalk, src));
             gulp.watch(src, watchs)
         });

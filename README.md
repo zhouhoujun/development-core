@@ -379,6 +379,8 @@ let createTask = (env) => {
     let tasks = ctx.generateTask([
         {
             name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
+            // auto create watch task for this asserts when watch in context.
+            watch: true,
             oper: Operation.build,
             pipes: [
                 () => cache('typescript'),

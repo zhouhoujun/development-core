@@ -127,11 +127,10 @@ describe('generateTask', () => {
     });
 
 
-    it('generate build test tasks with auto watch', () => {
+    it('generate tasks with auto watch', () => {
         let tks = generateTask({
-            name: 'gtest', src: 'test/**/*spec.ts', order: 1,
-            oper: Operation.build | Operation.test,
-            watch: true,
+            name: 'test', src: 'test/**/*spec.ts', order: 1,
+            oper: Operation.test | Operation.build,
             pipe(src) {
                 return src.pipe(mocha())
                     .once('error', () => {
@@ -140,54 +139,13 @@ describe('generateTask', () => {
             }
         }, { oper: Operation.test | Operation.watch });
 
-        expect(tks.length).eq(2);
+        // expect(tks.length).to.equals(2);
 
-        let tseq = registerTask(tks, { release: true });
+        let tseq = registerTask(tks, { watch: true, test: true }, { src: 'src', dist: 'lib', watch: true });
         // console.log(tseq);
 
-        expect(tseq.join(',')).eq('');
+        expect(tseq.join(',')).eq('test,test-watch');
     });
 
-    it('generate build test tasks with auto watch', () => {
-        let tks = generateTask({
-            name: 'gtest', src: 'test/**/*spec.ts', order: 1,
-            oper: Operation.release | Operation.test,
-            watch: true,
-            pipe(src) {
-                return src.pipe(mocha())
-                    .once('error', () => {
-                        process.exit(1);
-                    });
-            }
-        }, { oper: Operation.test | Operation.release });
-
-        expect(tks.length).eq(1);
-
-        let tseq = registerTask(tks, { release: true });
-        // console.log(tseq);
-
-        expect(tseq.join(',')).eq('gtest');
-    });
-
-    it('generate build tasks with auto watch', () => {
-        let btks = generateTask({
-            name: 'bgtest', src: 'test/**/*spec.ts', order: 1,
-            watch: true,
-            oper: Operation.build,
-            pipe(src) {
-                return src.pipe(mocha())
-                    .once('error', () => {
-                        process.exit(1);
-                    });
-            }
-        }, { oper: Operation.build | Operation.watch });
-
-        expect(btks.length).eq(2);
-
-        let tseq = registerTask(btks, { watch: true });
-        // console.log(tseq);
-
-        expect(tseq.join(',')).eq('bgtest,bgtest-watch');
-    });
 
 });
