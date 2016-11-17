@@ -237,7 +237,7 @@ export abstract class PipeTask implements IPipeTask {
         if (!p) {
             return false;
         }
-        if (p.name && !name.endsWith(taskStringVal(p.name, context.oper, context.env))) {
+        if (p.name && !name.endsWith(taskStringVal(p.name, context))) {
             return false;
         }
 

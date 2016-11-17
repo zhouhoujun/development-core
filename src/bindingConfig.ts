@@ -51,27 +51,34 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
                 name = task;
             } else if (task && task !== context.option) {
                 // oper = task.oper || context.oper;
-                let n = task.name;
-                if (!n) {
-                    n = task.assert ? task.assert.name : '';
+                if (task.name) {
+                    name = taskStringVal(task.name, context)
                 }
-                name = taskStringVal(n, context.oper, cfg.env)
+                if (!name && task.assert && task.assert.name) {
+                    name = taskStringVal(task.assert.name, context)
+                }
             } else {
                 name = deft;
             }
-            let parentName = taskStringVal(cfg.option.name, context.oper, cfg.env);
-
-            return parentName ? `${parentName}-${name}` : name;
+            let parentName = taskStringVal(cfg.option.name, context);
+            if (parentName) {
+                if (name.indexOf(parentName + '-') === 0) {
+                    return name;
+                }
+                return `${parentName}-${name}`;
+            } else {
+                return name;
+            }
         },
 
         getSrc(task: ITaskInfo, relative = false): Src {
             let src: Src;
             let oper = task ? (task.oper || context.oper) : context.oper;
             if (task && task.assert) {
-                src = taskSourceVal(getAssertSrc(task.assert, oper), context.oper, cfg.env)
+                src = taskSourceVal(getAssertSrc(task.assert, oper), context)
             }
             if (!src) {
-                src = taskSourceVal(getAssertSrc(cfg.option, oper), context.oper, cfg.env)
+                src = taskSourceVal(getAssertSrc(cfg.option, oper), context)
             }
             return (relative !== false) ? src : absoluteSrc(cfg.env.root, src);
         },
@@ -80,9 +87,9 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
             let dist;
             // let oper = task ? (task.oper || context.oper) : context.oper;
             if (task && task.assert) {
-                dist = getCurrentDist(task.assert, context.oper, cfg.env);
+                dist = getCurrentDist(task.assert, context);
             }
-            dist = dist || getCurrentDist(context.option, context.oper, cfg.env);
+            dist = dist || getCurrentDist(context.option, context);
 
             return (relative !== false) ? dist : absolutePath(cfg.env.root, dist);
         },
@@ -169,22 +176,24 @@ function getAssertSrc(assert: IAssertDist, oper: Operation) {
 /**
  * get dist.
  * 
- * @param {OutputDist} ds
- * @param {Operation} oper runtime Operation.
+ * @param {IAssertDist} ds
+ * @param {ITaskContext} ctx
  * @returns
  */
-function getCurrentDist(ds: IAssertDist, oper: Operation, env: IEnvOption) {
+function getCurrentDist(ds: IAssertDist, ctx: ITaskContext) {
     let dist: string;
+    let env = ctx.env;
+    let oper = ctx.oper;
     if (env.deploy || (oper & Operation.deploy) > 0) {
-        dist = ds.deployDist || taskStringVal(ds.dist, oper, env);
+        dist = ds.deployDist || taskStringVal(ds.dist, ctx);
     } else if (env.release || (oper & Operation.release) > 0) {
-        dist = ds.releaseDist || taskStringVal(ds.dist, oper, env);
+        dist = ds.releaseDist || taskStringVal(ds.dist, ctx);
     } else if (env.e2e || (oper & Operation.e2e) > 0) {
-        dist = ds.e2eDist || ds.buildDist || taskStringVal(ds.dist, oper, env);
+        dist = ds.e2eDist || ds.buildDist || taskStringVal(ds.dist, ctx);
     } else if (env.test || (oper & Operation.test) > 0) {
-        dist = ds.testDist || ds.buildDist || taskStringVal(ds.dist, oper, env);
+        dist = ds.testDist || ds.buildDist || taskStringVal(ds.dist, ctx);
     } else if ((oper & Operation.build) > 0) {
-        dist = ds.buildDist || taskStringVal(ds.dist, oper, env);
+        dist = ds.buildDist || taskStringVal(ds.dist, ctx);
     }
 
     return dist;

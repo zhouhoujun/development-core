@@ -8,3 +8,11 @@ import { ITaskInfo, IDynamicTaskOption, ITask } from './TaskConfig';
  * @returns {ITask[]}
  */
 export declare function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[];
+/**
+ * create task by dynamic option.
+ *
+ * @export
+ * @param {IDynamicTaskOption} dt
+ * @returns {ITask}
+ */
+export declare function createTask(dt: IDynamicTaskOption): ITask;

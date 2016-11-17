@@ -45,6 +45,10 @@ export declare enum Operation {
      * default operation.
      */
     default = 25,
+    /**
+     * define watch Operation (Operation.build | Operation.test | Operation.e2e | Operation.watch)
+     */
+    defaultWatch = 135,
 }
 /**
  * object map.
@@ -113,27 +117,6 @@ export interface ITaskDecorator extends IOperate {
      * @memberOf ITaskInfo
      */
     match?(another: ITaskDecorator): any;
-    /**
-     * well be remove, please use Operation.watch instead. is watch task or not.
-     *
-     * @type {boolean | string}
-     * @memberOf ITaskInfo
-     */
-    watch?: boolean | string;
-    /**
-     * well be remove, please use Operation.test instead. is test or not.
-     *
-     * @type {(boolean | string)}
-     * @memberOf ITaskInfo
-     */
-    test?: boolean | string;
-    /**
-     * well be remove, please use Operation.e2e instead. is e2e test or not.
-     *
-     * @type {(boolean | string)}
-     * @memberOf ITaskInfo
-     */
-    e2e?: boolean | string;
 }
 /**
  * task decorator data.
@@ -196,12 +179,12 @@ export declare type TaskResult = Src | void;
  * task source
  * @param {Operation} oper runtime Operation.
  */
-export declare type TaskSource = Src | ((oper?: Operation, env?: IEnvOption) => Src);
+export declare type TaskSource = Src | ((ctx?: ITaskContext) => Src);
 /**
  * task string
  * @param {Operation} oper runtime Operation.
  */
-export declare type TaskString = string | ((oper?: Operation, env?: IEnvOption) => string);
+export declare type TaskString = string | ((ctx?: ITaskContext) => string);
 /**
  * task option.
  * @param {Operation} oper runtime Operation.
@@ -275,7 +258,7 @@ export interface IPipe extends IOperate {
      */
     toTransform?(context: ITaskContext, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
 }
-export declare type Pipe = IPipe | ((config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
+export declare type Pipe = IPipe | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
 /**
  * output pipe
  *
@@ -296,7 +279,7 @@ export interface IOutputPipe extends IOperate {
      */
     toTransform?(stream: ITransform, context: ITaskContext, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
 }
-export declare type OutputPipe = IOutputPipe | ((stream: ITransform, config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
+export declare type OutputPipe = IOutputPipe | ((stream: ITransform, ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
 /**
  * assert dist.
  *
@@ -340,6 +323,13 @@ export interface IAssertDist {
      * @memberOf IAssertDist
      */
     cleanSrc?: TaskSource;
+    /**
+     * auto create task to watch this source.
+     *
+     * @type {(boolean | Array<string | WatchCallback>)}
+     * @memberOf IAssertDist
+     */
+    watch?: boolean | Array<string | WatchCallback>;
     /**
      * the watch src file filter string. default 'src'.
      *
@@ -400,21 +390,21 @@ export interface IPipeOption {
      *
      * @memberOf IPipeOption
      */
-    source?: TransformSource | ((config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => TransformSource);
+    source?: TransformSource | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => TransformSource);
     /**
      * task pipe works.
      *
      *
      * @memberOf IDynamicTaskOption
      */
-    pipes?: Pipe[] | ((config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => Pipe[]);
+    pipes?: Pipe[] | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => Pipe[]);
     /**
      * output pipe task
      *
      *
      * @memberOf IPipeOption
      */
-    output?: IOutputPipe[] | ((config?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => IOutputPipe[]);
+    output?: IOutputPipe[] | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => IOutputPipe[]);
 }
 /**
  * custom pipe.
@@ -458,7 +448,7 @@ export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPip
      *
      * @memberOf IDynamicTaskOption
      */
-    watchTasks?: Array<string | WatchCallback> | ((config?: ITaskContext, dt?: IDynamicTaskOption) => Array<string | WatchCallback>);
+    watchTasks?: Array<string | WatchCallback> | ((ctx?: ITaskContext, dt?: IDynamicTaskOption) => Array<string | WatchCallback>);
     /**
      * watch changed.
      *
@@ -720,13 +710,6 @@ export interface IContextDefine {
  * @interface ITaskConfig
  */
 export interface ITaskConfig {
-    /**
-     * run operation
-     *
-     * @type {Operation}
-     * @memberOf ITaskConfig
-     */
-    oper?: Operation;
     /**
      * custom global data cache.
      */

@@ -2,7 +2,6 @@ import * as _ from 'lodash';
 import { Gulp } from 'gulp';
 import * as chalk from 'chalk';
 import { Src, ITaskInfo, ITaskContext, ITask, Operation } from './TaskConfig';
-import { createTask } from './generateTask';
 /**
  * convert setup task result to run sequence src.
  * 
@@ -40,12 +39,13 @@ export function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext): Src[]
                 if ((info.oper & Operation.watch)) {
                     hasWatchtasks.push(tname);
                 }
+                registerTasks(ctx, tname);
+
                 seq.push(tname);
             }
         }
     });
 
-    console.log()
     let watchname = taskSequenceWatch(gulp, seq, ctx, it => {
         if (!it) {
             return false;
@@ -56,10 +56,29 @@ export function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext): Src[]
         return true;
     });
     if (watchname) {
+        registerTasks(ctx, watchname);
         seq.push(watchname);
     }
 
     return seq;
+}
+
+function registerTasks(ctx: ITaskContext, tasks: Src) {
+    ctx.globals.tasks = ctx.globals.tasks || {};
+    if (_.isArray(tasks)) {
+        _.each(tasks, t => registerGlobals(ctx, t));
+    } else {
+        registerGlobals(ctx, tasks);
+    }
+}
+function registerGlobals(ctx: ITaskContext, task: string) {
+
+    if (ctx.globals.tasks[task]) {
+        console.error(chalk.red('has same task:'), chalk.cyan(task));
+        process.exit(0);
+    } else {
+        ctx.globals.tasks[task] = task;
+    }
 }
 
 /**
@@ -87,7 +106,7 @@ export function taskSequenceWatch(gulp: Gulp, tasks: Src[], ctx: ITaskContext, e
                 last = _.isArray(last) ? _.last(last) : last;
                 name = `${first}-${last}`;
                 let taskname = name + '-seq';
-                gulp.task(ctx.subTaskName(taskname), () => {
+                gulp.task(taskname, () => {
                     return runSequence(gulp, toWatchSeq);
                 });
                 wats.push(taskname);
@@ -109,9 +128,13 @@ export function taskSequenceWatch(gulp: Gulp, tasks: Src[], ctx: ITaskContext, e
         }
 
         if (wats.length > 0) {
-            name = name ? name + '-watch' : 'watch';
-            let watchtask = createTask({ oper: Operation.defaultWatch, name: name, watchTasks: wats });
-            return watchtask.setup(ctx, gulp);
+            name = name ? name + '-owatch' : 'owatch';
+            gulp.task(name, () => {
+                let src = ctx.getSrc();
+                console.log('watch, src:', chalk.cyan.call(chalk, src));
+                gulp.watch(src, wats)
+            });
+            return name;
         }
     }
     return '';

@@ -193,13 +193,13 @@ export type TaskResult = Src | void;
  * task source
  * @param {Operation} oper runtime Operation.
  */
-export type TaskSource = Src | ((oper?: Operation, env?: IEnvOption) => Src);
+export type TaskSource = Src | ((ctx?: ITaskContext) => Src);
 
 /**
  * task string
  * @param {Operation} oper runtime Operation.
  */
-export type TaskString = string | ((oper?: Operation, env?: IEnvOption) => string);
+export type TaskString = string | ((ctx?: ITaskContext) => string);
 
 /**
  * task option.

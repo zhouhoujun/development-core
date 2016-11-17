@@ -7,7 +7,7 @@ import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, TaskResult,
 import { matchTaskGroup, matchTaskInfo, taskStringVal, taskSourceVal } from './utils';
 import { PipeTask } from './PipeTask';
 
-type factory = (config: ITaskContext, gulp: Gulp) => TaskResult;
+type factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => TaskResult;
 /**
  * custom dynamic task.
  * 
@@ -28,8 +28,8 @@ class DynamicTask implements ITask {
         return this.info;
     }
 
-    setup(config: ITaskContext, gulp?: Gulp) {
-        let name = this.factory(config, gulp || coregulp);
+    setup(ctx: ITaskContext, gulp?: Gulp) {
+        let name = this.factory(ctx, this.getInfo(), gulp || coregulp);
         if (name) {
             this.info.taskName = name;
         }
@@ -50,7 +50,7 @@ class DynamicPipeTask extends PipeTask {
     }
 
     protected getOption(ctx: ITaskContext) {
-        this.name = this.name || taskStringVal(this.dt.name, ctx.oper, ctx.env);
+        this.name = this.name || taskStringVal(this.dt.name, ctx);
         return this.dt || ctx.option;
     }
 
@@ -107,8 +107,8 @@ export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], m
         if (dt.watch && match && (match.oper & Operation.watch)) {
             taskseq.push(createWatchTask({
                 oper: Operation.defaultWatch,
-                name: (oper, env) => taskStringVal(dt.name, oper, env) + '-watch',
-                watchTasks: (ctx) => [taskStringVal(dt.name, ctx.oper, ctx.env)]
+                name: (ctx) => ctx.subTaskName(dt) + '-twatch',
+                watchTasks: (ctx) => [ctx.subTaskName(dt)]
             }));
         }
     });
@@ -145,17 +145,17 @@ export function createTask(dt: IDynamicTaskOption): ITask {
  * @returns {ITask}
  */
 function createCustomTask(dt: IDynamicTaskOption): ITask {
-    let factory = (cfg: ITaskContext, gulp: Gulp) => {
-        let tk = cfg.subTaskName(dt);
+    let factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => {
+        let tk = ctx.subTaskName(info);
         console.log('register custom dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
-            return dt.task(cfg, dt, gulp);
+            return dt.task(ctx, dt, gulp);
         });
 
         return tk
     };
 
-    return new DynamicTask({ order: dt.order, oper: dt.oper, group: dt.group, assert: dt }, factory);
+    return new DynamicTask({ name: dt.name, order: dt.order, oper: dt.oper, group: dt.group, assert: dt }, factory);
 }
 
 
@@ -167,7 +167,7 @@ function createCustomTask(dt: IDynamicTaskOption): ITask {
  * @returns {ITask}
  */
 function createWatchTask(dt: IDynamicTaskOption): ITask {
-    let factory = (ctx: ITaskContext, gulp: Gulp) => {
+    let factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => {
         let watchs = _.isFunction(dt.watchTasks) ? dt.watchTasks(ctx, dt) : dt.watchTasks;
         if (!_.isFunction(_.last(watchs))) {
             watchs.push(<WatchCallback>(event: WatchEvent) => {
@@ -180,10 +180,10 @@ function createWatchTask(dt: IDynamicTaskOption): ITask {
             }
             return w;
         })
-        let tk = ctx.subTaskName(dt);
+        let tk = ctx.subTaskName(info);
         console.log('register watch  dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
-            let src = ctx.getSrc(dt);
+            let src = ctx.getSrc(info);
             console.log('watch, src:', chalk.cyan.call(chalk, src));
             gulp.watch(src, watchs)
         });
@@ -191,7 +191,7 @@ function createWatchTask(dt: IDynamicTaskOption): ITask {
         return tk;
     };
 
-    return new DynamicTask({ order: dt.order, oper: dt.oper, group: dt.group, assert: dt }, factory);
+    return new DynamicTask({ name: dt.name, order: dt.order, oper: dt.oper, group: dt.group, assert: dt }, factory);
 }
 
 /**

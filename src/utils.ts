@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { TaskSource, TaskString, Operation, ITaskDecorator, ITaskInfo, Src, IEnvOption } from './TaskConfig';
+import { TaskSource, TaskString, Operation, ITaskDecorator, ITaskInfo, Src, ITaskContext } from './TaskConfig';
 import { readdirSync, lstatSync } from 'fs';
 import * as path from 'path';
 /**
@@ -36,8 +36,8 @@ export function files(directory: string, express?: ((fileName: string) => boolea
  * @param {IEnvOption} [env]
  * @returns
  */
-export function taskSourceVal(src: TaskSource, oper: Operation, env?: IEnvOption) {
-    return _.isFunction(src) ? src(oper, env) : (src || '');
+export function taskSourceVal(src: TaskSource, ctx: ITaskContext) {
+    return _.isFunction(src) ? src(ctx) : (src || '');
 }
 
 /**
@@ -45,12 +45,11 @@ export function taskSourceVal(src: TaskSource, oper: Operation, env?: IEnvOption
  * 
  * @export
  * @param {TaskString} name
- * @param {Operation} oper runtime Operation
- * @param {IEnvOption} [env]
+ * @param {ITaskContext} ctx
  * @returns
  */
-export function taskStringVal(name: TaskString, oper: Operation, env?: IEnvOption) {
-    return _.isFunction(name) ? name(oper, env) : (name || '');
+export function taskStringVal(name: TaskString, ctx: ITaskContext) {
+    return _.isFunction(name) ? name(ctx) : (name || '');
 }
 
 

@@ -107,7 +107,22 @@ describe('decorator:', () => {
 
         // console.log(seq);
         expect(seq.length).eq(8);
-        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch,TestTaskC,TestTaskW,test-clean-TestTaskC-watch')
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch,TestTaskC,TestTaskW,test-clean-TestTaskC-owatch')
+    })
+
+    it('findTasks from module with Operation.build | Operation.test | Operation.watch, build watch test cmd auto watch task with option name', () => {
+
+        let tasks = findTasks(model, { oper: Operation.build | Operation.test | Operation.watch });
+
+        expect(tasks.length).eq(8);
+        let seq = toSequence(gulp, tasks, bindingConfig({
+            env: { watch: true, test: true },
+            option: { src: 'src', dist: 'lib', watch: true, name: 'my' }
+        }));
+
+        // console.log(seq);
+        expect(seq.length).eq(8);
+        expect(seq.join(',')).eq('my-test-clean,my-TestTaskB,my-TestTaskE,my-test-tscompile,my-test-watch,my-TestTaskC,my-TestTaskW,my-test-clean-my-TestTaskC-owatch')
     })
 
     it('findTasks from module with Operation.build | Operation.test | Operation.watch, release cmd', () => {

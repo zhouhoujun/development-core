@@ -187,7 +187,30 @@ describe('generateTask', () => {
         let tseq = registerTask(btks, { watch: true });
         // console.log(tseq);
 
-        expect(tseq.join(',')).eq('bgtest,bgtest-watch');
+        expect(tseq.join(',')).eq('bgtest,bgtest-twatch');
+    });
+
+    it('generate build tasks with auto watch with option name', () => {
+        let btks = generateTask({
+            name: 'bgtest', src: 'test/**/*spec.ts', order: 1,
+            watch: true,
+            oper: Operation.build,
+            pipe(src) {
+                return src.pipe(mocha())
+                    .once('error', () => {
+                        process.exit(1);
+                    });
+            }
+        }, { oper: Operation.build | Operation.watch });
+
+        expect(btks.length).eq(2);
+
+        let tseq = registerTask(btks, { watch: true }, { watch: true, name: 'test'});
+        // console.log(tseq);
+
+        expect(tseq.join(',')).eq('test-bgtest,test-bgtest-twatch,test-bgtest-owatch');
     });
 
 });
+
+
