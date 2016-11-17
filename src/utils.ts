@@ -69,19 +69,22 @@ function contains(arr1: string[], arr2: string[]) {
  */
 export function convertOper(decor: ITaskDecorator, def = Operation.default) {
     decor = decor || {};
-    if (decor.watch) {
-        decor.oper = (decor.oper || def) | Operation.watch;
-    }
-    if (decor.e2e) {
-        decor.oper = (decor.oper || def) | Operation.e2e;
-    }
-    if (decor.test) {
-        decor.oper = (decor.oper || def) | Operation.test;
-    }
+    // // todo  compatibility
+    // if (decor['watch']) {
+    //     decor.oper = (decor.oper || def) | Operation.watch;
+    // }
+    // if (decor['e2e']) {
+    //     decor.oper = (decor.oper || def) | Operation.e2e;
+    // }
+    // if (decor['test']) {
+    //     decor.oper = (decor.oper || def) | Operation.test;
+    // }
+    // // ----
 
     decor.oper = decor.oper || def;
     return decor;
 }
+
 function convertMatchOper(match: ITaskDecorator) {
     if ((match.oper & Operation.test) && !(match.oper & Operation.release)) {
         match.oper = match.oper | Operation.build;

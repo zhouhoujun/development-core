@@ -1,7 +1,7 @@
 import 'mocha';
 import { expect } from 'chai';
 import * as gulp from 'gulp';
-import { findTasks, Operation, bindingConfig, toSequence, findTaskDefines } from '../src';
+import { findTasks, Operation, bindingConfig, toSequence, findTaskDefines, taskSequenceWatch } from '../src';
 
 
 describe('decorator:', () => {
@@ -20,7 +20,6 @@ describe('decorator:', () => {
         // console.log(tasks);
 
         let seq = toSequence(gulp, tasks, bindingConfig({
-            oper: Operation.build,
             env: {},
             option: { src: 'src', dist: 'lib' }
         }));
@@ -39,7 +38,6 @@ describe('decorator:', () => {
 
         expect(tasks.length).eq(5);
         let seq = toSequence(gulp, tasks, bindingConfig({
-            oper: Operation.build,
             env: {},
             option: { src: 'src', dist: 'lib' }
         }));
@@ -50,48 +48,95 @@ describe('decorator:', () => {
 
     })
 
-    it('findTasks from module with Operation.test | Operation.watch', () => {
+    it('findTasks from module with Operation.test | Operation.watch, build cmd', () => {
 
         let tasks = findTasks(model, { oper: Operation.test | Operation.watch });
 
         expect(tasks.length).eq(8);
         let seq = toSequence(gulp, tasks, bindingConfig({
-            oper: Operation.build,
             env: {},
             option: { src: 'src', dist: 'lib' }
         }));
 
         // console.log(seq);
-        expect(seq.length).eq(6);
-        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch,TestTaskC')
+        expect(seq.length).eq(7);
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch,TestTaskC,TestTaskW')
 
     })
 
-    it('findTasks from module with Operation.build | Operation.test | Operation.watch', () => {
+    it('findTasks from module with Operation.build | Operation.test | Operation.watch, build cmd', () => {
 
         let tasks = findTasks(model, { oper: Operation.build | Operation.test | Operation.watch });
 
         expect(tasks.length).eq(8);
         let seq = toSequence(gulp, tasks, bindingConfig({
-            oper: Operation.build,
             env: {},
             option: { src: 'src', dist: 'lib' }
         }));
 
         // console.log(seq);
-        expect(seq.length).eq(6);
-        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch,TestTaskC')
+        expect(seq.length).eq(7);
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch,TestTaskC,TestTaskW')
+
+    })
+
+    it('findTasks from module with Operation.build | Operation.watch, build cmd auto watch task', () => {
+
+        let tasks = findTasks(model, { oper: Operation.build | Operation.watch });
+
+        expect(tasks.length).eq(6);
+        let seq = toSequence(gulp, tasks, bindingConfig({
+            env: {},
+            option: { src: 'src', dist: 'lib', watch: true }
+        }));
+
+        // console.log(seq);
+        expect(seq.length).eq(5);
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch')
+    })
+
+    it('findTasks from module with Operation.build | Operation.test | Operation.watch, build watch test cmd auto watch task', () => {
+
+        let tasks = findTasks(model, { oper: Operation.build | Operation.test | Operation.watch });
+
+        expect(tasks.length).eq(8);
+        let seq = toSequence(gulp, tasks, bindingConfig({
+            env: { watch: true, test: true },
+            option: { src: 'src', dist: 'lib', watch: true }
+        }));
+
+        // console.log(seq);
+        expect(seq.length).eq(8);
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch,TestTaskC,TestTaskW,test-clean-TestTaskC-watch')
+    })
+
+    it('findTasks from module with Operation.build | Operation.test | Operation.watch, release cmd', () => {
+
+        let tasks = findTasks(model, { oper: Operation.build | Operation.test | Operation.watch });
+
+        expect(tasks.length).eq(8);
+        let ctx = bindingConfig({
+            env: { release: true },
+            option: { src: 'src', dist: 'lib' }
+        });
+
+        expect(ctx.oper).eq(Operation.release);
+
+        let seq = toSequence(gulp, tasks, ctx);
+
+        // console.log(seq);
+        expect(seq.length).eq(5);
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch')
 
     })
 
 
     it('findTasks from module with Operation and env', () => {
 
-        let tasks = findTasks(model, { oper: Operation.build, watch: true });
+        let tasks = findTasks(model, { oper: Operation.build | Operation.watch });
 
         // expect(tasks.length).eq(6);
         let seq = toSequence(gulp, tasks, bindingConfig({
-            oper: Operation.build,
             env: { watch: true },
             option: { src: 'src', dist: 'lib' }
         }));
@@ -126,7 +171,6 @@ describe('decorator:', () => {
 
         let tk = tasks[0];
         tk.setup(bindingConfig({
-            oper: Operation.build,
             env: {},
             option: { src: 'src', dist: 'lib' }
         }), gulp);
@@ -143,7 +187,6 @@ describe('decorator:', () => {
 
         let tk = tasks[0];
         tk.setup(bindingConfig({
-            oper: Operation.build,
             env: {},
             option: { name: 'mytest', src: 'src', dist: 'lib' }
         }), gulp);

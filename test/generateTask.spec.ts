@@ -23,13 +23,12 @@ import * as gulp from 'gulp';
 describe('generateTask', () => {
 
     let tasks: IDynamicTaskOption[];
-    let registerTask: ((tks: ITask[], oper: Operation, env: IEnvOption) => Src[]);
+    let registerTask: ((tks: ITask[], env: IEnvOption) => Src[]);
 
     beforeEach(() => {
-        registerTask = (tks, oper, env) => {
+        registerTask = (tks, env) => {
             let config = bindingConfig({
                 env: env,
-                oper: oper,
                 option: { src: 'src', dist: 'lib' }
             });
             let taskseq = toSequence(gulp, tks, config);
@@ -74,7 +73,7 @@ describe('generateTask', () => {
         expect(tks).to.not.undefined;
         expect(tks.length).to.equals(2);
 
-        let tseq = registerTask(tks, Operation.build, {});
+        let tseq = registerTask(tks, {});
         // console.log(tseq);
 
         expect(tseq).to.not.null;
@@ -84,13 +83,13 @@ describe('generateTask', () => {
 
 
     it('generate build tasks with watch', () => {
-        let tks = generateTask(tasks, { oper: Operation.build, watch: true });
+        let tks = generateTask(tasks, { oper: Operation.build | Operation.watch });
 
         expect(tks).to.not.null;
         expect(tks).to.not.undefined;
         expect(tks.length).to.equals(3);
 
-        let tseq = registerTask(tks, Operation.build, { watch: true });
+        let tseq = registerTask(tks, { watch: true });
         // console.log(tseq);
 
         expect(tseq).to.not.null;
@@ -100,24 +99,24 @@ describe('generateTask', () => {
     });
 
     it('generate test tasks', () => {
-        let tks = generateTask(tasks, { oper: Operation.test, watch: true });
+        let tks = generateTask(tasks, { oper: Operation.test | Operation.watch });
 
         expect(tks.length).to.equals(3);
 
-        let tseq = registerTask(tks, Operation.test, { watch: true });
+        let tseq = registerTask(tks, { watch: true, test: true });
         // console.log(tseq);
 
         expect(tseq.join(',')).eq('test-clean,test-tscompile,test-watch');
     });
 
     it('generate release tasks', () => {
-        let tks = generateTask(tasks, { oper: Operation.release, watch: true });
+        let tks = generateTask(tasks, { oper: Operation.release | Operation.watch });
 
         expect(tks).to.not.null;
         expect(tks).to.not.undefined;
         expect(tks.length).to.equals(4);
 
-        let tseq = registerTask(tks, Operation.release, { watch: true });
+        let tseq = registerTask(tks, { watch: true, release: true });
         // console.log(tseq);
 
         expect(tseq).to.not.null;

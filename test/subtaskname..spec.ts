@@ -11,7 +11,6 @@ describe('sub task name', () => {
     it('no option name', () => {
 
         let ctx = bindingConfig({
-            oper: Operation.build,
             env: { root: root },
             option: { src: 'src', dist: 'lib' }
         });
@@ -25,7 +24,6 @@ describe('sub task name', () => {
     it('with option name', () => {
 
         let ctx = bindingConfig({
-            oper: Operation.build,
             env: { root: root },
             option: { name: 'appname', src: 'src', dist: 'lib' }
         });

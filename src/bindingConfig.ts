@@ -17,7 +17,7 @@ import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefi
  */
 export function bindingConfig(cfg: ITaskConfig): ITaskContext {
 
-    let oper = (cfg.oper || 0) | currentOperation(cfg.env);
+    let oper = currentOperation(cfg.env);
 
     let context: ITaskContext = <ITaskContext>{
         oper: oper,

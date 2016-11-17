@@ -44,7 +44,12 @@ export enum Operation {
     /**
      * default operation.
      */
-    default = Operation.build | Operation.release | Operation.deploy
+    default = Operation.build | Operation.release | Operation.deploy,
+
+    /**
+     * define watch Operation (Operation.build | Operation.test | Operation.e2e | Operation.watch)
+     */
+    defaultWatch = Operation.build | Operation.test | Operation.e2e | Operation.watch
 }
 
 /**
@@ -119,30 +124,6 @@ export interface ITaskDecorator extends IOperate {
      * @memberOf ITaskInfo
      */
     match?(another: ITaskDecorator);
-
-    /**
-     * well be remove, please use Operation.watch instead. is watch task or not. 
-     * 
-     * @type {boolean | string}
-     * @memberOf ITaskInfo
-     */
-    watch?: boolean | string;
-
-    /**
-     * well be remove, please use Operation.test instead. is test or not.
-     * 
-     * @type {(boolean | string)}
-     * @memberOf ITaskInfo
-     */
-    test?: boolean | string;
-
-    /**
-     * well be remove, please use Operation.e2e instead. is e2e test or not.
-     * 
-     * @type {(boolean | string)}
-     * @memberOf ITaskInfo
-     */
-    e2e?: boolean | string;
 }
 
 /**
@@ -377,6 +358,13 @@ export interface IAssertDist {
      */
     cleanSrc?: TaskSource;
 
+    /**
+     * auto create task to watch this source.
+     * 
+     * @type {(boolean | Array<string | WatchCallback>)}
+     * @memberOf IAssertDist
+     */
+    watch?: boolean | Array<string | WatchCallback>;
 
     /**
      * the watch src file filter string. default 'src'.
@@ -798,13 +786,6 @@ export interface IContextDefine {
  * @interface ITaskConfig
  */
 export interface ITaskConfig {
-    /**
-     * run operation
-     * 
-     * @type {Operation}
-     * @memberOf ITaskConfig
-     */
-    oper?: Operation;
     /**
      * custom global data cache.
      */

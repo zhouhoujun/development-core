@@ -179,8 +179,7 @@ export class TestTaskD implements ITask {
 
 
 @task({
-    oper: Operation.build | Operation.test,
-    watch: true
+    oper: Operation.build | Operation.test | Operation.watch,
 })
 export class TestTaskW implements ITask {
     getInfo(): ITaskInfo { return this.info; }
