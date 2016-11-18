@@ -46,7 +46,7 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
  ```ts
 
  // module A
-import {PipeTask, IPipe, PipeTask, IAssertDist, taskdefine, bindingConfig, IDynamicTaskOption, Operation, ITaskOption, IEnvOption, ITaskContext, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from 'development-core';
+import {PipeTask, IPipe, PipeTask, IAsserts, IAssertDist, taskdefine, bindingConfig, Operation, IEnvOption, ITaskContext, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from 'development-core';
 
 @task
 export class TestPipeTask implements PipeTask {
@@ -137,11 +137,29 @@ export class TestDynamicTask implements IDynamicTasks {
 @taskdefine
 export class TaskDefine implements ITaskDefine {
     public fags = 'define';
-    loadConfig(option: ITaskOption, env: IEnvOption): ITaskContext {
+    loadConfig(option: IAsserts, env: IEnvOption): ITaskContext {
         return bindingConfig({
             option: option,
             env: env
         });
+    }
+}
+
+@taskdefine
+export class WebDefine implements IContextDefine {
+    getContext(config: ITaskConfig): ITaskContext {
+        // register default asserts.
+        config.option.asserts = _.extend({
+            ts: 'development-assert-ts',
+            js: 'development-assert-js'
+        }, config.option.asserts);
+
+
+        return bindingConfig(config);
+    }
+
+    tasks(ctx: ITaskContext): Promise<ITask[]> {
+        return ctx.findTasks(webTasks);
     }
 }
 
