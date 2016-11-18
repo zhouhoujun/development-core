@@ -4,7 +4,7 @@ import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
 import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
-import { matchTaskGroup, matchTaskInfo, taskStringVal, taskSourceVal } from './utils';
+import { matchTaskGroup, matchTaskInfo, taskStringVal } from './utils';
 import { PipeTask } from './PipeTask';
 
 type factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => TaskResult;

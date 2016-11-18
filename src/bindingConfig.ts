@@ -60,12 +60,16 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
             } else {
                 name = deft;
             }
-            let parentName = taskStringVal(cfg.option.name, context);
-            if (parentName) {
-                if (name.indexOf(parentName + '-') === 0) {
+            let optName = taskStringVal(cfg.option.name, context);
+            if (optName) {
+                if (name.indexOf(optName + '-') === 0) {
                     return name;
                 }
-                return `${parentName}-${name}`;
+                // avoid soma name.
+                if (name && optName !== name) {
+                    return `${optName}-${name}`;
+                }
+                return optName;
             } else {
                 return name;
             }
