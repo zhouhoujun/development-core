@@ -80,7 +80,9 @@ export class TestTaskA implements ITask {
     }
 }
 
-@task()
+@task({
+    order: total => total - 1, // last order.
+})
 export class TestTaskE implements ITask {
     private info:ITaskInfo;
     constructor() {
@@ -160,6 +162,7 @@ export class TestTaskB implements ITask {
 
 
 @task({
+    order: total => total + 1, // last order.
     oper: Operation.build | Operation.test
 })
 export class TestTaskC implements ITask {
