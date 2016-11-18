@@ -1,6 +1,6 @@
 {
   "name": "development-core",
-  "version": "0.8.14",
+  "version": "0.8.15",
   "description": "development tools, generate gulp tasks, gulp task manager, run tasks in sequence via Promise",
   "main": "./lib/index.js",
   "typings": "./lib/index",
