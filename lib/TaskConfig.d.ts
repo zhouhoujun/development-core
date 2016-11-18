@@ -759,14 +759,6 @@ export interface ITaskContext extends ITaskConfig {
      * @memberOf ITaskContext
      */
     toRootPath(pathstr: string): string;
-    /**
-     * active work pipe option from context.
-     *
-     * @param {(op: IPipeOption) => void} express
-     *
-     * @memberOf ITaskContext
-     */
-    pipeOption(express: (op: IPipeOption) => void): any;
 }
 /**
  * event option

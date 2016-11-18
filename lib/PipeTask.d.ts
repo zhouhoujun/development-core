@@ -139,6 +139,19 @@ export declare abstract class PipeTask implements IPipeTask {
      */
     output(ctx: ITaskContext, dist: IAssertDist, gulp?: Gulp): OutputPipe[];
     /**
+     *  custom pipe Promise.
+     *
+     * @protected
+     * @param {ITransform} source
+     * @param {ITaskContext} ctx
+     * @param {IAssertDist} dist
+     * @param {Gulp} gulp
+     * @returns
+     *
+     * @memberOf PipeTask
+     */
+    protected customPipe(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp): ITransform | Promise<ITransform>;
+    /**
      * get option.
      *
      * @protected
@@ -201,19 +214,6 @@ export declare abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     protected output2Promise(source: ITransform, context: ITaskContext, dist: IAssertDist, gulp: Gulp, output?: OutputPipe[]): Promise<{}[]>;
-    /**
-     *  custom pipe Promise.
-     *
-     * @protected
-     * @param {ITransform} source
-     * @param {ITaskContext} ctx
-     * @param {IAssertDist} dist
-     * @param {Gulp} gulp
-     * @returns
-     *
-     * @memberOf PipeTask
-     */
-    protected customPipe(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp): ITransform | Promise<ITransform>;
     /**
      * each one source stream works.
      *

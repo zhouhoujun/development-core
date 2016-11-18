@@ -228,7 +228,7 @@ export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
     });
     return run.catch(err => {
         console.error(chalk.red(err));
-        process.exit(0);
+        // process.exit(0);
     });
 }
 

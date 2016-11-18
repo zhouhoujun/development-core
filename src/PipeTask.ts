@@ -136,16 +136,25 @@ export abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     source(ctx: ITaskContext, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource> {
-        let option = ctx.option;
-        let source: TransformSource | Promise<TransformSource> = null;
-        ctx.pipeOption((op) => {
-            if (!source) {
-                source = _.isFunction(option.source) ? option.source(ctx, dist, gulp) : option.source;
-            }
-        });
+        // let source: TransformSource | Promise<TransformSource> = null;
+        // ctx.pipeOption((op) => {
+        //     if (!source && op.source) {
+        //         source = _.isFunction(op.source) ? op.source(ctx, dist, gulp) : op.source;
+        //     }
+        // });
 
-        if (source) {
-            return source;
+        // if (source) {
+        //     return source;
+        // }
+        // return gulp.src(ctx.getSrc(this.getInfo()));
+
+        let option = ctx.option;
+        if (option.source) {
+            return _.isFunction(option.source) ? option.source(ctx, dist, gulp) : option.source;
+        }
+        let loader = <IPipeOption>option['loader'];
+        if (loader && option.source) {
+            return _.isFunction(loader.source) ? loader.source(ctx, dist, gulp) : loader.source;
         }
         return gulp.src(ctx.getSrc(this.getInfo()));
     }
@@ -163,12 +172,29 @@ export abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     pipes(ctx: ITaskContext, dist: IAssertDist, gulp?: Gulp): Pipe[] {
-        let pipes: Pipe[] = [];
-        ctx.pipeOption((op) => {
-            let opps = _.isFunction(op.pipes) ? op.pipes(ctx, dist, gulp) : _.filter(<Pipe[]>op.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
-            pipes.concat(opps)
-        });
-        return pipes;
+        // let pipes: Pipe[] = [];
+        // ctx.pipeOption((op) => {
+        //     let opps = _.isFunction(op.pipes) ? op.pipes(ctx, dist, gulp) : _.filter(<Pipe[]>op.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
+        //     if (opps && opps.length > 0) {
+        //         pipes = pipes.concat(opps)
+        //     }
+        // });
+        // return pipes;
+
+        let option = ctx.option;
+        let pipes: Pipe[] = null;
+        let loader = <IPipeOption>option['loader'];
+        if (loader && _.isFunction(loader.pipes)) {
+            pipes = _.isFunction(loader.pipes) ? loader.pipes(ctx, option, gulp) : _.filter(<Pipe[]>loader.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
+        }
+
+        if (option.pipes) {
+            let opps = _.isFunction(option.pipes) ? option.pipes(ctx, option, gulp) : _.filter(<Pipe[]>option.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
+            if (opps && opps.length > 0) {
+                pipes = pipes ? pipes.concat(opps) : opps;
+            }
+        }
+        return pipes || [];
     }
 
     /**
@@ -182,28 +208,90 @@ export abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     output(ctx: ITaskContext, dist: IAssertDist, gulp?: Gulp): OutputPipe[] {
-        let pipes: OutputPipe[] = [];
-        ctx.pipeOption((op) => {
-            if (pipes == null) {
-                return;
-            }
-            if (op.output == null) {
-                pipes = null;
-            } else {
-                let out = _.isFunction(op.output) ? op.output(ctx, dist, gulp) : _.filter(<OutputPipe[]>op.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
-                pipes = pipes.concat(out);
-            }
-        });
+        // let pipes: OutputPipe[] = [];
+        // ctx.pipeOption((op) => {
+        //     if (pipes === null) {
+        //         return;
+        //     }
+        //     if (op.output === null) {
+        //         pipes = null;
+        //     } else {
+        //         let outs = _.isFunction(op.output) ? op.output(ctx, dist, gulp) : _.filter(<OutputPipe[]>op.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
+        //         if (outs && outs.length > 0) {
+        //             pipes = pipes.concat(outs);
+        //         }
+        //     }
+        // });
 
-        if (pipes === null) {
+        // if (pipes === null) {
+        //     return [(stream) => stream];
+        // }
+
+        // if (pipes.length > 0) {
+        //     return pipes;
+        // }
+
+        // return [(stream) => stream.pipe(gulp.dest(ctx.getDist(dist)))]
+
+
+        let option = ctx.option;
+        let pipes: OutputPipe[] = null;
+        let loader = <IPipeOption>option['loader'];
+        if (loader && !_.isString(loader) && !_.isArray(loader)) {
+            if (loader.output) {
+                pipes = _.isFunction(loader.output) ? loader.output(ctx, option, gulp) : _.filter(<OutputPipe[]>loader.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
+            } else if (loader.output === null) {
+                return [(stream) => stream];
+            }
+        }
+        if (option.output) {
+            let opps = _.isFunction(option.output) ? option.output(ctx, option, gulp) : _.filter(<OutputPipe[]>option.output, p => _.isFunction(p) || (p.name && p.name === dist.name));
+            if (opps && opps.length > 0) {
+                pipes = pipes ? pipes.concat(opps) : opps;
+            }
+        } else if (option.output === null) {
             return [(stream) => stream];
         }
 
-        if (pipes.length > 0) {
-            return pipes;
+        return pipes || [(stream) => stream.pipe(gulp.dest(ctx.getDist(dist)))]
+    }
+
+    /**
+     *  custom pipe Promise.
+     * 
+     * @protected
+     * @param {ITransform} source
+     * @param {ITaskContext} ctx
+     * @param {IAssertDist} dist
+     * @param {Gulp} gulp
+     * @returns
+     * 
+     * @memberOf PipeTask
+     */
+    protected customPipe(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp) {
+        // let prsrc: Promise<ITransform> = null;
+        // ctx.pipeOption((op) => {
+        //     if (op.pipe) {
+        //         prsrc = prsrc ? prsrc.then(stream => this.cpipe2Promise(stream, op, ctx, dist, gulp))
+        //             : this.cpipe2Promise(source, op, ctx, dist, gulp);
+        //     }
+        // }, false);
+
+        // return prsrc || source;
+
+        let cfgopt = ctx.option;
+        let loader = <IPipeOption>cfgopt['loader'];
+        let prsrc: Promise<ITransform>;
+        if (cfgopt.pipe) {
+            prsrc = this.cpipe2Promise(source, cfgopt, ctx, dist, gulp);
+        }
+        if (loader && !_.isString(loader) && !_.isArray(loader) && loader.pipe) {
+            prsrc = prsrc ?
+                prsrc.then(stream => this.cpipe2Promise(stream, loader, ctx, dist, gulp))
+                : this.cpipe2Promise(source, loader, ctx, dist, gulp);
         }
 
-        return [(stream) => stream.pipe(gulp.dest(ctx.getDist(dist)))]
+        return prsrc || source;
     }
 
     /**
@@ -376,32 +464,6 @@ export abstract class PipeTask implements IPipeTask {
                     });
                 }));
             })
-    }
-
-
-    /**
-     *  custom pipe Promise.
-     * 
-     * @protected
-     * @param {ITransform} source
-     * @param {ITaskContext} ctx
-     * @param {IAssertDist} dist
-     * @param {Gulp} gulp
-     * @returns
-     * 
-     * @memberOf PipeTask
-     */
-    protected customPipe(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp) {
-        let prsrc: Promise<ITransform> = null;
-        ctx.pipeOption((op) => {
-            if (op.pipe) {
-                prsrc = prsrc ?
-                    prsrc.then(stream => this.cpipe2Promise(stream, op, ctx, dist, gulp))
-                    : this.cpipe2Promise(source, op, ctx, dist, gulp);
-            }
-        });
-
-        return prsrc || source;
     }
 
     /**
