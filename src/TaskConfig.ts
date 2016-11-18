@@ -203,10 +203,6 @@ export type TaskSource = Src | ((ctx?: ITaskContext) => Src);
  */
 export type TaskString = string | ((ctx?: ITaskContext) => string);
 
-/**
- * task option.
- */
-export type TaskOption = ITaskOption | IAsserts | IDynamicTaskOption | Array<ITaskOption | IAsserts | IDynamicTaskOption>;
 
 /**
  * transform interface.
@@ -416,14 +412,37 @@ export interface IAssertDist {
 }
 
 
+/**
+ * custom pipe.
+ * 
+ * @export
+ * @interface ICustomPipe
+ */
+export interface ICustomPipe {
+    /**
+     * custom stream pipe.
+     * 
+     * @param {ITransform} gulpsrc
+     * @param {ITaskContext} context
+     * @param {IAssertDist} [dist]
+     * @param {Gulp} [gulp]
+     * @param {TaskCallback} [callback]
+     * @returns {(ITransform | Promise<ITransform> | void)}
+     * 
+     * @memberOf ICustomPipe
+    * */
+    pipe?(gulpsrc: ITransform, context: ITaskContext, dist?: IAssertDist, gulp?: Gulp, callback?: TaskCallback): ITransform | Promise<ITransform> | void;
+
+}
 
 /**
  * pipe works.
  * 
  * @export
  * @interface IPipeOption
+ * @extends {ICustomPipe}
  */
-export interface IPipeOption {
+export interface IPipeOption extends ICustomPipe {
     /**
      * task source stream config.
      * 
@@ -449,28 +468,6 @@ export interface IPipeOption {
 }
 
 
-/**
- * custom pipe.
- * 
- * @export
- * @interface ICustomPipe
- */
-export interface ICustomPipe {
-    /**
-     * custom stream pipe.
-     * 
-     * @param {ITransform} gulpsrc
-     * @param {ITaskContext} context
-     * @param {IAssertDist} [dist]
-     * @param {Gulp} [gulp]
-     * @param {TaskCallback} [callback]
-     * @returns {(ITransform | Promise<ITransform> | void)}
-     * 
-     * @memberOf ICustomPipe
-    * */
-    pipe?(gulpsrc: ITransform, context: ITaskContext, dist?: IAssertDist, gulp?: Gulp, callback?: TaskCallback): ITransform | Promise<ITransform> | void;
-
-}
 
 /**
  * dynamic gulp task.
@@ -528,144 +525,6 @@ export interface IDynamicTasks {
     tasks(): IDynamicTaskOption[];
 }
 
-/**
- * task loader option.
- * 
- * @export
- * @interface ILoaderOption
- * @extends {IPipeOption}
- */
-export interface ILoaderOption extends IPipeOption, ICustomPipe {
-
-    /**
-     * loader type, default module.
-     * 
-     * @type {string}
-     * @memberOf ILoaderOption
-     */
-    type?: string;
-    /**
-     * module name or url
-     * 
-     * @type {string | Object}
-     * @memberOf ILoaderOption
-     */
-    module?: string | Object;
-
-    /**
-     * config module name or url.
-     * 
-     * @type {string | Object}
-     * @memberOf ILoaderOption
-     */
-    configModule?: string | Object;
-
-    /**
-     * config module name or url.
-     * 
-     * @type {string | Object}
-     * @memberOf ILoaderOption
-     */
-    taskModule?: string | Object;
-
-    /**
-     * custom task define
-     * 
-     * 
-     * @memberOf ILoaderOption
-     */
-    taskDefine?: ITaskDefine;
-
-    /**
-     * context define.
-     * 
-     * @type {IContextDefine}
-     * @memberOf ILoaderOption
-     */
-    contextDefine?: IContextDefine;
-}
-
-/**
- * loader to load tasks from directory.
- * 
- * @export
- * @interface DirLoaderOption
- * @extends {ILoaderOption}
- */
-export interface IDirLoaderOption extends ILoaderOption {
-    /**
-     * loader dir
-     * 
-     * @type {TaskSource}
-     * @memberOf ILoaderOption
-     */
-    dir?: TaskSource
-    /**
-     * config in directory. 
-     * 
-     * @type {string}
-     * @memberOf DirLoaderOption
-     */
-    dirConfigFile?: string;
-}
-
-/**
- * the option for loader dynamic build task.
- * 
- * @export
- * @interface IDynamicLoaderOption
- * @extends {ILoaderOption}
- */
-export interface IDynamicLoaderOption extends ILoaderOption {
-    /**
-     * dynamic task
-     * 
-     * @type {(IDynamicTaskOption | IDynamicTaskOption[])}
-     * @memberOf IDynamicLoaderOption
-     */
-    dynamicTasks?: IDynamicTaskOption | IDynamicTaskOption[];
-}
-
-
-export type customLoader = (context: ITaskContext) => ITask[] | Promise<ITask[]>;
-
-/**
- * task loader option.
- * 
- * @export
- * @interface TaskLoaderOption
- */
-export interface ITaskLoaderOption {
-    /**
-     * task loader
-     * 
-     * @type {(string | customLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[])}
-     * @memberOf ITaskLoaderOption
-     */
-    loader?: string | customLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[];
-
-}
-
-
-export interface ISubTaskOption {
-    /**
-     * sub tasks.
-     * 
-     * @type {TaskOption}
-     * @memberOf ISubTaskOption
-     */
-    tasks?: TaskOption;
-
-    /**
-     * set sub task order in this task sequence.
-     * 
-     * @type {Order}
-     * @memberOf ISubTaskOption
-     */
-    subTaskOrder?: Order;
-
-}
-
 
 /**
  * IAsserts to be dealt with.
@@ -674,15 +533,14 @@ export interface ISubTaskOption {
  * @interface IAsserts
  * @extends {IAssertDist}
  */
-export interface IAsserts extends IAssertDist, ITaskLoaderOption, IPipeOption, ICustomPipe {
-
+export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
     /**
      * tasks to deal with IAsserts.
      * 
-     * @type {IMap<Src | TaskOption>}
+     * @type {IMap<Src | IAsserts | IDynamicTaskOption[]>}
      * @memberOf IAsserts
      */
-    asserts?: IMap<Src | TaskOption>;
+    asserts?: IMap<Src | IAsserts | IDynamicTaskOption[]>;
 
     /**
      * set IAsserts task order in this task sequence.
@@ -694,31 +552,6 @@ export interface IAsserts extends IAssertDist, ITaskLoaderOption, IPipeOption, I
 }
 
 
-/**
- * task option setting.
- * 
- * @export
- * @interface ITaskOption
- * @extends {IAsserts}
- * @extends {ITaskLoaderOption}
- */
-export interface ITaskOption extends IAsserts, ISubTaskOption {
-    /**
-     * task loader must setting.
-     * 
-     * @type {(string | customLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[])}
-     * @memberOf ITaskOption
-     */
-    loader: string | customLoader | ILoaderOption | IDynamicTaskOption | IDynamicTaskOption[];
-
-    /**
-     * the src file filter string. default 'src'.
-     * 
-     * @type {TaskSource}
-     * @memberOf ITaskOption
-     */
-    src: TaskSource;
-}
 
 /**
  * custom modules task load define.
@@ -731,12 +564,12 @@ export interface ITaskDefine {
     /**
      * load config in modules
      * 
-     * @param {ITaskOption} option
+     * @param {IAsserts} option
      * @returns {ITaskContext}
      * 
      * @memberOf ITaskDefine
      */
-    loadConfig(option: ITaskOption, env: IEnvOption): ITaskConfig
+    loadConfig(option: IAsserts, env: IEnvOption): ITaskConfig
 
     /**
      * load task in modules.
@@ -804,7 +637,7 @@ export interface ITaskConfig {
      * @type {IAsserts}
      * @memberOf ITaskConfig
      */
-    option: IAsserts | ITaskOption;
+    option: IAsserts;
 
     /**
      * add task result to task sequence. default implement in bindingConfig.
@@ -1000,7 +833,16 @@ export interface ITaskContext extends ITaskConfig {
      * 
      * @memberOf ITaskContext
      */
-    toRootPath(pathstr: string): string
+    toRootPath(pathstr: string): string;
+
+    /**
+     * active work pipe option from context.
+     * 
+     * @param {(op: IPipeOption) => void} express
+     * 
+     * @memberOf ITaskContext
+     */
+    pipeOption(express: (op: IPipeOption) => void);
 }
 
 /**

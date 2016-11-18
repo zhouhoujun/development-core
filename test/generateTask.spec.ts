@@ -1,7 +1,7 @@
 import 'mocha';
 import { expect, assert } from 'chai';
 
-import { IDynamicTaskOption, TaskOption, Operation, ITask, Src, IEnvOption } from '../src/TaskConfig';
+import { IDynamicTaskOption, IAsserts, Operation, ITask, Src, IEnvOption } from '../src/TaskConfig';
 import { generateTask, } from '../src/generateTask';
 import { toSequence } from '../src/taskSequence';
 import { bindingConfig } from '../src/bindingConfig';
@@ -23,10 +23,10 @@ import * as gulp from 'gulp';
 describe('generateTask', () => {
 
     let tasks: IDynamicTaskOption[];
-    let registerTask: ((tks: ITask[], env: IEnvOption, option?: TaskOption) => Src[]);
+    let registerTask: ((tks: ITask[], env: IEnvOption, option?: IAsserts) => Src[]);
 
     beforeEach(() => {
-        registerTask = (tks, env, option?: TaskOption) => {
+        registerTask = (tks, env, option?: IAsserts) => {
             let config = bindingConfig({
                 env: env,
                 option: _.extend({ src: 'src', dist: 'lib' }, option || {})

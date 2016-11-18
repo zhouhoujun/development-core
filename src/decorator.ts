@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import * as _ from 'lodash';
 import * as chalk from 'chalk';
-import { ITask, ITaskDecorator, ITaskOption, ITaskConfig, IContextDefine, ITaskDefine, Src, IDynamicTasks } from './TaskConfig';
+import { ITask, ITaskDecorator, ITaskConfig, IContextDefine, ITaskDefine, Src, IDynamicTasks } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { bindingConfig } from './bindingConfig';
 import { matchTaskGroup, matchTaskInfo } from './utils';
@@ -243,7 +243,8 @@ export function findTaskDefineInModule(md: string | Object): Promise<IContextDef
         return Promise.resolve(tsdef);
     } else {
         // console.error('can not found task config builder method in module {0}.', mdl);
-        return Promise.reject('can not found task define.');
+        console.log(chalk.yellow('can not found task define in module.'));
+        return Promise.resolve(null);
     }
 }
 
@@ -327,7 +328,7 @@ export function findTasksInDir(dirs: Src, match?: ITaskDecorator): Promise<ITask
 export function taskDefine2Context(tdef: ITaskDefine): IContextDefine {
     let context: any = _.extend({}, tdef);
     context['getContext'] = (cfg: ITaskConfig) => {
-        return bindingConfig(tdef.loadConfig(<ITaskOption>cfg.option, cfg.env));
+        return bindingConfig(tdef.loadConfig(cfg.option, cfg.env));
     };
 
     context['tasks'] = tdef.loadTasks ? (context) => tdef.loadTasks(context) : null;

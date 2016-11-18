@@ -115,7 +115,7 @@ export declare abstract class PipeTask implements IPipeTask {
      *
      * @memberOf PipeTask
      */
-    source(context: ITaskContext, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource>;
+    source(ctx: ITaskContext, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource>;
     /**
      * task pipe works.
      *
@@ -126,7 +126,7 @@ export declare abstract class PipeTask implements IPipeTask {
      *
      * @memberOf PipeTask
      */
-    pipes(context: ITaskContext, dist: IAssertDist, gulp?: Gulp): Pipe[];
+    pipes(ctx: ITaskContext, dist: IAssertDist, gulp?: Gulp): Pipe[];
     /**
      * output pipes.
      *
@@ -206,20 +206,20 @@ export declare abstract class PipeTask implements IPipeTask {
      *
      * @protected
      * @param {ITransform} source
-     * @param {ITaskContext} context
+     * @param {ITaskContext} ctx
      * @param {IAssertDist} dist
      * @param {Gulp} gulp
      * @returns
      *
      * @memberOf PipeTask
      */
-    protected customPipe(source: ITransform, context: ITaskContext, dist: IAssertDist, gulp: Gulp): ITransform | Promise<ITransform>;
+    protected customPipe(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp): ITransform | Promise<ITransform>;
     /**
      * each one source stream works.
      *
      * @protected
      * @param {ITransform} source
-     * @param {ITaskContext} context
+     * @param {ITaskContext} ctx
      * @param {IAssertDist} option
      * @param {Gulp} gulp
      * @param {Pipe[]} [pipes]
@@ -228,7 +228,7 @@ export declare abstract class PipeTask implements IPipeTask {
      *
      * @memberOf PipeTask
      */
-    protected working(source: ITransform, context: ITaskContext, option: IAssertDist, gulp: Gulp, pipes?: Pipe[], output?: OutputPipe[]): Promise<void | {}[]>;
+    protected working(source: ITransform, ctx: ITaskContext, option: IAssertDist, gulp: Gulp, pipes?: Pipe[], output?: OutputPipe[]): Promise<void | {}[]>;
     /**
      * execute task working
      *
