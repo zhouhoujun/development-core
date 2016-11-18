@@ -301,7 +301,6 @@ export abstract class PipeTask implements IPipeTask {
                     return Promise.resolve(p.toTransform(ctx, dist, gulp))
                         .then(trs => {
                             trs.order = p.order;
-                            // trs.oper = p.order;
                             return trs;
                         });
                 }
@@ -309,12 +308,14 @@ export abstract class PipeTask implements IPipeTask {
         }))
             .then(tans => {
                 let len = tans.length;
-                tans = _.orderBy(_.filter(tans, t => t), t => {
+                tans = _.orderBy(_.filter(tans, t => t), (t: ITransform) => {
                     if (_.isArray(t)) {
                         return len;
                     } else {
                         if (_.isNumber(t.order)) {
                             return t.order;
+                        } else if (_.isFunction(t.order)) {
+                            return t.order(len);
                         }
                         return len;
                     }

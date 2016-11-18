@@ -18,13 +18,15 @@ export function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext): Src[]
         return seq;
     }
 
-    tasks = _.orderBy(tasks, t => {
+    tasks = _.orderBy(tasks, (t: ITask) => {
         if (_.isArray(t)) {
             return len;
         } else {
             let info = t.getInfo();
             if (_.isNumber(info.order)) {
                 return info.order;
+            } else if (_.isFunction(info.order)) {
+                return info.order(len);
             }
             return len;
         }
@@ -153,11 +155,18 @@ export function addToSequence(taskSequence: Src[], rst: ITaskInfo) {
         return taskSequence;
     }
     if (rst.taskName) {
-        if (_.isNumber(rst.order) && rst.order >= 0 && rst.order < taskSequence.length) {
-            taskSequence.splice(rst.order, 0, rst.taskName);
-            return taskSequence;
+        let order = taskSequence.length;
+        if (_.isNumber(rst.order)) {
+            order = rst.order;
+        } else if (_.isFunction(rst.order)) {
+            order = rst.order(order)
         }
-        taskSequence.push(rst.taskName);
+
+        if (order >= 0 && order < taskSequence.length) {
+            taskSequence.splice(order, 0, rst.taskName);
+        } else {
+            taskSequence.push(rst.taskName);
+        }
     }
     return taskSequence;
 }

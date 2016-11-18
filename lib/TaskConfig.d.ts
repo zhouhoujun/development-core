@@ -61,6 +61,10 @@ export interface IMap<T> {
     [K: string]: T;
 }
 /**
+ * Order type.
+ */
+export declare type Order = number | ((total: number) => number);
+/**
  * src
  */
 export declare type Src = string | string[];
@@ -89,10 +93,10 @@ export interface IOperate {
     /**
      * order index.
      *
-     * @type {number}
+     * @type {Order}
      * @memberOf IOperate
      */
-    order?: number;
+    order?: Order;
 }
 /**
  * task decorator info.
@@ -593,10 +597,10 @@ export interface ISubTaskOption {
     /**
      * set sub task order in this task sequence.
      *
-     * @type {number}
+     * @type {Order}
      * @memberOf ISubTaskOption
      */
-    subTaskOrder?: number;
+    subTaskOrder?: Order;
 }
 /**
  * IAsserts to be dealt with.
@@ -616,10 +620,10 @@ export interface IAsserts extends IAssertDist, ITaskLoaderOption, IPipeOption, I
     /**
      * set IAsserts task order in this task sequence.
      *
-     * @type {number}
+     * @type {Order}
      * @memberOf IAsserts
      */
-    assertsOrder?: number;
+    assertsOrder?: Order;
 }
 /**
  * task option setting.
