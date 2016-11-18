@@ -879,11 +879,11 @@ export interface ITaskContext extends ITaskConfig {
      * generate sub task name. default implement in bindingConfig.
      * 
      * @param {string | ITaskInfo} task
-     * @param {string} [defaultName]
+     * @param {string} [ext] ext name.
      * 
      * @memberOf ITaskContext
      */
-    subTaskName(task: string | ITaskInfo, defaultName?: string);
+    subTaskName(task: string | ITaskInfo, ext?: string);
 
     /**
      * custom print help.

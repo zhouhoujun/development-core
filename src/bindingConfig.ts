@@ -44,7 +44,7 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
 
         findTaskDefineInDir: findTaskDefineInDir.bind(this),
 
-        subTaskName(task, deft = '') {
+        subTaskName(task, ext = '') {
             let name = '';
             // let oper = context.oper;
             if (_.isString(task)) {
@@ -57,9 +57,8 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
                 if (!name && task.assert && task.assert.name) {
                     name = taskStringVal(task.assert.name, context)
                 }
-            } else {
-                name = deft;
             }
+
             let optName = taskStringVal(cfg.option.name, context);
             if (optName) {
                 if (name.indexOf(optName + '-') === 0) {
@@ -67,11 +66,11 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
                 }
                 // avoid soma name.
                 if (name && optName !== name) {
-                    return `${optName}-${name}`;
+                    return `${optName}-${name}` + ext;
                 }
-                return optName;
+                return optName + ext;
             } else {
-                return name;
+                return name + ext;
             }
         },
 
