@@ -106,7 +106,7 @@ export class TestDynamicTask implements IDynamicTasks {
                 ]
             },
             {
-                name: 'test-test', src: 'test/**/*spec.ts', order: 1,
+                name: 'test-test', src: 'test/**/*spec.ts', order: total => { console.log('total:', total); return 1 / total; },
                 oper: Operation.test | Operation.release | Operation.deploy,
                 pipe(src) {
                     return src.pipe(mocha())
@@ -135,7 +135,7 @@ export class TaskDefine implements ITaskDefine {
 
 
 @task({
-    order: 1
+    order: total => 1 / total
 })
 export class TestTaskB implements ITask {
     getInfo(): ITaskInfo { return this.info; }

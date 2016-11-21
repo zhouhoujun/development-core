@@ -1,4 +1,4 @@
-import { TaskSource, TaskString, Operation, ITaskDecorator, ITaskInfo, Src, ITaskContext } from './TaskConfig';
+import { TaskSource, TaskString, Operation, Order, ITaskDecorator, ITaskInfo, Src, ITaskContext } from './TaskConfig';
 /**
  * filter fileName in directory.
  *
@@ -8,6 +8,16 @@ import { TaskSource, TaskString, Operation, ITaskDecorator, ITaskInfo, Src, ITas
  * @returns {string[]}
  */
 export declare function files(directory: string, express?: ((fileName: string) => boolean)): string[];
+/**
+ * sorting via order.
+ *
+ * @export
+ * @template T
+ * @param {T[]} sequence
+ * @param {(item: T) => Order} orderBy
+ * @returns
+ */
+export declare function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order): T[];
 /**
  * task src, string or array string.
  *

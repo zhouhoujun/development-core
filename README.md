@@ -43,6 +43,13 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
 
  decorator not support function now, so refactor ITask interface.
 
+ v.9.1: refactor order,  to set value  between 0 and 1.  to make sure right order config easy. default value 0.5;
+ case order value lt than 0 will assign 0;
+ case order value gt than 1,
+ ```js
+ order = (order % sequence.length) / sequence.length;
+ ```
+
  ```ts
 
  // module A
@@ -81,7 +88,7 @@ export class TestTaskA implements ITask {
 }
 
 @task({
-    order: total => total - 1, // last order.
+    order: 1, // last order.
 })
 export class TestTaskE implements ITask {
     private info:ITaskInfo;
@@ -118,7 +125,7 @@ export class TestDynamicTask implements IDynamicTasks {
                 ]
             },
             {
-                name: 'test-test', src: 'test/**/*spec.ts', order: 1,
+                name: 'test-test', src: 'test/**/*spec.ts', order: total => 1 / total, //second.
                 oper: Operation.test | Operation.release | Operation.deploy,
                 pipe(src) {
                     return src.pipe(mocha())
@@ -165,7 +172,7 @@ export class WebDefine implements IContextDefine {
 
 
 @task({
-    order: 1
+    order: 0.1
 })
 export class TestTaskB implements ITask {
     getInfo(): ITaskInfo { return this.info; }
@@ -180,7 +187,7 @@ export class TestTaskB implements ITask {
 
 
 @task({
-    order: total => total + 1, // last order.
+    order: total => 1, // last order.
     oper: Operation.build | Operation.test
 })
 export class TestTaskC implements ITask {
@@ -327,7 +334,7 @@ let ctx = bindingConfig({
                 {
                     name: 'tscompile'
                     oper: Operation.build,
-                    order: 1,
+                    order: 0.1,
                     toTransform: ()=> tslint(),
                 },
             ],

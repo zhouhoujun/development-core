@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import { Gulp } from 'gulp';
 import * as chalk from 'chalk';
 import { Src, ITaskInfo, ITaskContext, ITask, Operation } from './TaskConfig';
+import { sortOrder } from './utils';
 /**
  * convert setup task result to run sequence src.
  * 
@@ -17,20 +18,7 @@ export function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext): Src[]
     if (len < 1) {
         return seq;
     }
-
-    tasks = _.orderBy(tasks, (t: ITask) => {
-        if (_.isArray(t)) {
-            return len;
-        } else {
-            let info = t.getInfo();
-            if (_.isNumber(info.order)) {
-                return info.order;
-            } else if (_.isFunction(info.order)) {
-                return info.order(len);
-            }
-            return len;
-        }
-    });
+    tasks = sortOrder<ITask>(tasks, t => t.getInfo().order);
 
     let hasWatchtasks = [];
     _.each(tasks, t => {
@@ -160,6 +148,14 @@ export function addToSequence(taskSequence: Src[], rst: ITaskInfo) {
             order = rst.order;
         } else if (_.isFunction(rst.order)) {
             order = rst.order(order)
+        }
+
+        if (_.isNumber(order)) {
+            if (order > 0 && order < 1) {
+                order = order * taskSequence.length;
+            } else if (order > taskSequence.length) {
+                order = (order % taskSequence.length);
+            }
         }
 
         if (order >= 0 && order < taskSequence.length) {

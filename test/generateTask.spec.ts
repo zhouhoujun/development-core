@@ -52,7 +52,7 @@ describe('generateTask', () => {
                 ]
             },
             {
-                name: 'test-test', src: 'test/**/*spec.ts', order: 1,
+                name: 'test-test', src: 'test/**/*spec.ts', order: total => 1 / total,
                 oper: Operation.test | Operation.release | Operation.deploy,
                 pipe(src) {
                     return src.pipe(mocha())
@@ -121,9 +121,7 @@ describe('generateTask', () => {
 
         expect(tseq).to.not.null;
         expect(tseq.length).to.eq(4);
-        expect(tseq[0]).to.eq('test-clean');
-        expect(tseq[1]).to.eq('test-test');
-        expect(tseq[3]).to.eq('test-watch');
+        expect(tseq.join(',')).eq('test-clean,test-test,test-tscompile,test-watch');
     });
 
 
@@ -171,7 +169,7 @@ describe('generateTask', () => {
 
     it('generate build tasks with auto watch', () => {
         let btks = generateTask({
-            name: 'bgtest', src: 'test/**/*spec.ts', order: 1,
+            name: 'bgtest', src: 'test/**/*spec.ts', order: total => 1 / total,
             watch: true,
             oper: Operation.build,
             pipe(src) {
@@ -192,7 +190,7 @@ describe('generateTask', () => {
 
     it('generate build tasks with auto watch with option name', () => {
         let btks = generateTask({
-            name: 'bgtest', src: 'test/**/*spec.ts', order: 1,
+            name: 'bgtest', src: 'test/**/*spec.ts', order: total => 0.1,
             watch: true,
             oper: Operation.build,
             pipe(src) {
@@ -205,7 +203,7 @@ describe('generateTask', () => {
 
         expect(btks.length).eq(2);
 
-        let tseq = registerTask(btks, { watch: true }, { watch: true, name: 'test'});
+        let tseq = registerTask(btks, { watch: true }, { watch: true, name: 'test' });
         // console.log(tseq);
 
         expect(tseq.join(',')).eq('test-bgtest,test-bgtest-twatch,test-bgtest-owatch');

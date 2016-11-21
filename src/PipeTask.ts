@@ -1,6 +1,6 @@
 import { Gulp } from 'gulp';
 import { TransformSource, IAssertDist, ITaskInfo, TaskResult, ITaskContext, IOperate, ICustomPipe, Pipe, OutputPipe, ITask, ITransform, IPipeOption } from './TaskConfig';
-import { taskStringVal } from './utils';
+import { taskStringVal, sortOrder } from './utils';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 import * as _ from 'lodash';
@@ -390,20 +390,9 @@ export abstract class PipeTask implements IPipeTask {
                 }
             }
         }))
-            .then(tans => {
-                let len = tans.length;
-                tans = _.orderBy(_.filter(tans, t => t), (t: ITransform) => {
-                    if (_.isArray(t)) {
-                        return len;
-                    } else {
-                        if (_.isNumber(t.order)) {
-                            return t.order;
-                        } else if (_.isFunction(t.order)) {
-                            return t.order(len);
-                        }
-                        return len;
-                    }
-                });
+            .then(tanseq => {
+
+                let tans = sortOrder<ITransform>(tanseq, it => it.order);
 
                 _.each(tans, stream => {
                     if (!this.match(stream, name, ctx)) {

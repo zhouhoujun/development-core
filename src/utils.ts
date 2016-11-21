@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { TaskSource, TaskString, Operation, ITaskDecorator, ITaskInfo, Src, ITaskContext } from './TaskConfig';
+import { TaskSource, TaskString, Operation, Order, ITaskDecorator, ITaskInfo, Src, ITaskContext } from './TaskConfig';
 import { readdirSync, lstatSync } from 'fs';
 import * as path from 'path';
 /**
@@ -25,6 +25,40 @@ export function files(directory: string, express?: ((fileName: string) => boolea
         }
     });
     return res;
+}
+
+/**
+ * sorting via order.
+ * 
+ * @export
+ * @template T
+ * @param {T[]} sequence
+ * @param {(item: T) => Order} orderBy
+ * @returns
+ */
+export function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order) {
+    return _.orderBy(_.filter(sequence, t => t), (t: T) => {
+
+        if (_.isArray(t)) {
+            return 0.5;
+        } else {
+            let order = orderBy(t);
+
+            if (_.isFunction(order)) {
+                order = order(sequence.length);
+            } else if (!_.isNumber(order)) {
+                order = 0.5;
+            }
+
+            if (order > 1) {
+                return (order % sequence.length) / sequence.length;
+            } else if (order < 0) {
+                order = 0;
+            }
+
+            return order;
+        }
+    });
 }
 
 /**
