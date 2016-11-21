@@ -148,7 +148,7 @@ export function addToSequence(taskSequence: Src[], rst: ITaskInfo) {
         if (_.isNumber(rst.order)) {
             order = rst.order;
         } else if (_.isFunction(rst.order)) {
-            order = rst.order(order)
+            order = rst.order(len)
         }
 
         if (_.isNumber(order)) {

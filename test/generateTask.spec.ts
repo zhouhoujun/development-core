@@ -3,7 +3,7 @@ import { expect, assert } from 'chai';
 
 import { IDynamicTaskOption, IAsserts, Operation, ITask, Src, IEnvOption } from '../src/TaskConfig';
 import { generateTask, } from '../src/generateTask';
-import { toSequence } from '../src/taskSequence';
+import { toSequence, addToSequence } from '../src/taskSequence';
 import { bindingConfig } from '../src/bindingConfig';
 let root = __dirname;
 
@@ -208,6 +208,79 @@ describe('generateTask', () => {
 
         expect(tseq.join(',')).eq('test-bgtest,test-bgtest-twatch,test-bgtest-owatch');
     });
+
+
+    it('one item sequence add test', () => {
+        let tseq = ['test'];
+        addToSequence(tseq, { taskName: 'mytest', order: tl => 1 / tl });
+        expect(tseq.join(',')).eq('test,mytest');
+
+        tseq = ['test'];
+        addToSequence(tseq, { taskName: 'mytest', order: 0 });
+        expect(tseq.join(',')).eq('mytest,test');
+    });
+
+    it('two item sequence add test 0', () => {
+        let tseq = ['test1', 'test2'];
+        addToSequence(tseq, { taskName: 'mytest', order: 0 });
+
+        expect(tseq.join(',')).eq('mytest,test1,test2');
+    });
+
+    it('two item sequence add test 1', () => {
+        let tseq = ['test1', 'test2'];
+        addToSequence(tseq, { taskName: 'mytest', order: tl => 1 / tl });
+
+        expect(tseq.join(',')).eq('test1,mytest,test2');
+    });
+
+    it('two item sequence add test 2', () => {
+        let tseq = ['test1', 'test2'];
+        addToSequence(tseq, { taskName: 'mytest', order: tl => 2 / tl });
+
+        expect(tseq.join(',')).eq('test1,test2,mytest');
+    });
+
+    it('two item sequence add test 3', () => {
+        let tseq = ['test1', 'test2'];
+        addToSequence(tseq, { taskName: 'mytest', order: tl => 3 / tl });
+
+        expect(tseq.join(',')).eq('test1,test2,mytest');
+    });
+
+    it('two item sequence add test 4', () => {
+        let tseq = ['test1', 'test2'];
+        addToSequence(tseq, { taskName: 'mytest', order: tl => 4 / tl });
+
+        expect(tseq.join(',')).not.eq('test1,test2,mytest');
+    });
+
+
+    it('generate build tasks with auto watch with option name and add sequence', () => {
+        let btks = generateTask({
+            name: 'bgtest', src: 'test/**/*spec.ts', order: total => 0.1,
+            watch: true,
+            oper: Operation.build,
+            pipe(src) {
+                return src.pipe(mocha())
+                    .once('error', () => {
+                        process.exit(1);
+                    });
+            }
+        }, { oper: Operation.build | Operation.watch });
+
+        expect(btks.length).eq(2);
+
+        let tseq = registerTask(btks, { watch: true }, { watch: true, name: 'test' });
+        // console.log(tseq);
+
+        expect(tseq.join(',')).eq('test-bgtest,test-bgtest-twatch,test-bgtest-owatch');
+
+        addToSequence(tseq, { taskName: 'mytest', order: tl => 1 / tl });
+
+        expect(tseq.join(',')).eq('test-bgtest,mytest,test-bgtest-twatch,test-bgtest-owatch');
+    });
+
 
 });
 
