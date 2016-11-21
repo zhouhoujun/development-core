@@ -143,7 +143,8 @@ export function addToSequence(taskSequence: Src[], rst: ITaskInfo) {
         return taskSequence;
     }
     if (rst.taskName) {
-        let order = taskSequence.length;
+        let order = 1;
+        let len = taskSequence.length + 1;
         if (_.isNumber(rst.order)) {
             order = rst.order;
         } else if (_.isFunction(rst.order)) {
@@ -152,10 +153,15 @@ export function addToSequence(taskSequence: Src[], rst: ITaskInfo) {
 
         if (_.isNumber(order)) {
             if (order > 0 && order < 1) {
-                order = order * taskSequence.length;
-            } else if (order > taskSequence.length) {
-                order = (order % taskSequence.length);
+                order = Math.round(order * len);
+            } else if (order === 1) {
+                order = len;
+            } else if (order > len) {
+                order = Math.round(order % len);
             }
+        }
+        if (order < 0) {
+            order = 0;
         }
 
         if (order >= 0 && order < taskSequence.length) {
