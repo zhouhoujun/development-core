@@ -3,6 +3,22 @@
 /// <reference types="chai" />
 import { Gulp, WatchEvent, WatchCallback, TaskCallback } from 'gulp';
 /**
+ * mutil source stream pipe task run way.
+ *
+ * @export
+ * @enum {number}
+ */
+export declare enum RunWay {
+    /**
+     * run mutil source stream by sequence.
+     */
+    sequence = 1,
+    /**
+     * run mutil source stream by parallel.
+     */
+    parallel = 2,
+}
+/**
  * project development build operation.
  *
  * @export

@@ -1,7 +1,7 @@
 {
   "name": "development-core",
-  "version": "0.9.2",
-  "description": "development tools, generate gulp tasks, gulp task manager, run tasks in sequence via Promise",
+  "version": "0.9.3",
+  "description": "development tools, generate gulp tasks, gulp task manager, run tasks in sequence via Promise. useful gulp task util: zipSequence, runSequence, runTaskSequence, toSequence, flattenSequence.",
   "main": "./lib/index.js",
   "typings": "./lib/index",
   "scripts": {
@@ -17,9 +17,17 @@
     "development",
     "tool",
     "gulp",
+    "promise",
+    "generate",
+    "task manager",
+    "zipSequence",
+    "flattenSequence",
+    "runSequence",
+    "runTaskSequence",
+    "toSequence",
     "typescript",
-    "node",
-    "babel"
+    "metadata",
+    "node"
   ],
   "author": "houjun",
   "license": "MIT",

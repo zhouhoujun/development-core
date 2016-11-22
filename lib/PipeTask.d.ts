@@ -1,6 +1,6 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { TransformSource, IAssertDist, ITaskInfo, TaskResult, ITaskContext, IOperate, ICustomPipe, Pipe, OutputPipe, ITask, ITransform } from './TaskConfig';
+import { TransformSource, RunWay, IAssertDist, ITaskInfo, TaskResult, ITaskContext, IOperate, ICustomPipe, Pipe, OutputPipe, ITask, ITransform } from './TaskConfig';
 /**
  * pipe task.
  *
@@ -57,22 +57,6 @@ export interface IPipeTask extends ITask {
      * @memberOf IPipeTask
      */
     execute(context: ITaskContext, gulp: Gulp): Promise<any>;
-}
-/**
- * mutil source stream pipe task run way.
- *
- * @export
- * @enum {number}
- */
-export declare enum RunWay {
-    /**
-     * run mutil source stream by sequence.
-     */
-    sequence = 1,
-    /**
-     * run mutil source stream by parallel.
-     */
-    parallel = 2,
 }
 /**
  * Task base class.

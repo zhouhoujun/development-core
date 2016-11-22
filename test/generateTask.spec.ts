@@ -3,7 +3,7 @@ import { expect, assert } from 'chai';
 
 import { IDynamicTaskOption, IAsserts, Operation, ITask, Src, IEnvOption } from '../src/TaskConfig';
 import { generateTask, } from '../src/generateTask';
-import { toSequence, addToSequence } from '../src/taskSequence';
+import { toSequence, addToSequence, flattenSequence, zipSequence } from '../src/taskSequence';
 import { bindingConfig } from '../src/bindingConfig';
 let root = __dirname;
 
@@ -209,6 +209,22 @@ describe('generateTask', () => {
         expect(tseq.join(',')).eq('test-bgtest,test-bgtest-twatch,test-bgtest-owatch');
     });
 
+});
+
+describe('addToSequence', () => {
+
+    let registerTask: ((tks: ITask[], env: IEnvOption, option?: IAsserts) => Src[]);
+
+    beforeEach(() => {
+        registerTask = (tks, env, option?: IAsserts) => {
+            let config = bindingConfig({
+                env: env,
+                option: _.extend({ src: 'src', dist: 'lib' }, option || {})
+            });
+            let taskseq = toSequence(gulp, tks, config);
+            return taskseq;
+        }
+    });
 
     it('one item sequence add test', () => {
         let tseq = ['test'];
@@ -281,7 +297,62 @@ describe('generateTask', () => {
         expect(tseq.join(',')).eq('test-bgtest,mytest,test-bgtest-twatch,test-bgtest-owatch');
     });
 
+});
 
+
+describe('zipTask', () => {
+
+    it('one item sequence', () => {
+        let tseq = ['test'];
+        let name = zipSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        expect(name).eq('test');
+    });
+
+    it('one array one item sequence', () => {
+        let tseq = [['test']];
+        let name = zipSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        expect(name).eq('test');
+    });
+
+    it('many item sequence', () => {
+        let tseq = ['test', 'test1', 'test2'];
+        let name = zipSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        expect(name).eq('test-test2-seq');
+    });
+
+    it('many array many item sequence', () => {
+        let tseq = [['s', 't'], 'test', 'test1', 'test2', ['end1', 'end2']];
+        let name = zipSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        expect(name).eq('s-end2-seq');
+    });
+});
+
+
+describe('flattenSequence', () => {
+
+    it('one item sequence', () => {
+        let tseq = ['test'];
+        let seq = flattenSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        expect(seq.join(',')).eq('test');
+    });
+
+    it('one array one item sequence', () => {
+        let tseq = [['test']];
+        let seq = flattenSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        expect(seq.join(',')).eq('test');
+    });
+
+    it('many item sequence', () => {
+        let tseq = ['test', 'test1', 'test2'];
+        let seq = flattenSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        expect(seq.join(',')).eq('test,test1,test2');
+    });
+
+    it('many array many item sequence', () => {
+        let tseq = [['s', 't'], 'test', 'test1', 'test2', ['end1', 'end2']];
+        let seq = flattenSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        expect(seq.join(',')).eq('s-t-paral,test,test1,test2,end1-end2-paral');
+    });
 });
 
 

@@ -23,6 +23,26 @@ export declare function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext
  */
 export declare function taskSequenceWatch(gulp: Gulp, tasks: Src[], ctx: ITaskContext, express?: (str: string) => boolean): string;
 /**
+ * zip tasks to a single task.
+ *
+ * @export
+ * @param {Gulp} gulp
+ * @param {string[]} tasks tasks sequence
+ * @param {ITaskContext} ctx
+ * @returns {string}
+ */
+export declare function zipTask(gulp: Gulp, tasks: Src[], ctx: ITaskContext): string;
+/**
+ * flatten task Sequence.
+ *
+ * @export
+ * @param {Gulp} gulp
+ * @param {Src[]} tasks
+ * @param {ITaskContext} ctx
+ * @returns {string[]}
+ */
+export declare function flattenSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext): string[];
+/**
  * add task to task sequence.
  *
  * @export

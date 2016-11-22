@@ -61,8 +61,13 @@ function registerTasks(ctx: ITaskContext, tasks: Src) {
         registerGlobals(ctx, tasks);
     }
 }
-function registerGlobals(ctx: ITaskContext, task: string) {
 
+function hasRegistered(ctx: ITaskContext, task: string) {
+    ctx.globals.tasks = ctx.globals.tasks || {};
+    return (ctx.globals.tasks[task]) ? true : false;
+}
+
+function registerGlobals(ctx: ITaskContext, task: string) {
     if (ctx.globals.tasks[task]) {
         console.error(chalk.red('has same task:'), chalk.cyan(task));
         process.exit(0);
@@ -87,32 +92,9 @@ export function taskSequenceWatch(gulp: Gulp, tasks: Src[], ctx: ITaskContext, e
         let wats = [];
         let name = '';
         if (_.isBoolean(ctx.option.watch)) {
-            let toWatchSeq = filterTaskSequence(tasks, express)
-
-            if (toWatchSeq.length > 1) {
-                let first = _.first(toWatchSeq);
-                first = _.isArray(first) ? _.first(first) : first;
-                let last = _.last(toWatchSeq);
-                last = _.isArray(last) ? _.last(last) : last;
-                name = `${first}-${last}`;
-                let taskname = name + '-seq';
-                gulp.task(taskname, () => {
-                    return runSequence(gulp, toWatchSeq);
-                });
-                wats.push(taskname);
-            } else if (toWatchSeq.length === 1) {
-                let first = _.first(toWatchSeq);
-                if (_.isArray(first)) {
-                    let fs = _.first(first);
-                    let ls = _.last(first);
-                    name = `${fs}-${ls}`;
-                    wats = first;
-                } else if (first) {
-                    name = first;
-                    wats.push(first);
-                }
-            }
-
+            let toWatchSeq = filterTaskSequence(tasks, express);
+            name = zipSequence(gulp, toWatchSeq, ctx);
+            name && wats.push(name);
         } else {
             wats = ctx.option.watch;
         }
@@ -128,6 +110,87 @@ export function taskSequenceWatch(gulp: Gulp, tasks: Src[], ctx: ITaskContext, e
         }
     }
     return '';
+}
+
+function registerZipTask(gulp: Gulp, name: string, tasks: Src[], ctx: ITaskContext) {
+    let i = 0;
+    let taskname = name;
+    while (hasRegistered(ctx, taskname) && i < 50) {
+        taskname = name + i;
+        console.log('try register name: ', chalk.cyan(taskname));
+        i++;
+    }
+    if (i >= 50) {
+        console.error(chalk.red('has same task:'), chalk.cyan(name), 'too many times.');
+        return '';
+    }
+
+    registerGlobals(ctx, taskname);
+    gulp.task(taskname, () => {
+        return runSequence(gulp, tasks);
+    });
+    return taskname;
+}
+
+/**
+ * zip tasks to a single task.
+ * 
+ * @export
+ * @param {Gulp} gulp
+ * @param {string[]} tasks tasks sequence
+ * @param {ITaskContext} ctx
+ * @returns {string}
+ */
+export function zipSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext): string {
+    if (tasks.length > 1) {
+        let first = _.first(tasks);
+        first = _.isArray(first) ? _.first(first) : first;
+        let last = _.last(tasks);
+        last = _.isArray(last) ? _.last(last) : last;
+        let name = `${first}-${last}-seq`;
+        return registerZipTask(gulp, name, tasks, ctx);
+
+    } else if (tasks.length === 1) {
+        let first = _.first(tasks);
+        if (_.isArray(first)) {
+            if (first.length > 1) {
+                let fs = _.first(first);
+                let ls = _.last(first);
+                let name = `${fs}-${ls}-paral`;
+                return registerZipTask(gulp, name, tasks, ctx);
+            } else {
+                return _.first(first) || '';
+            }
+        } else {
+            return first || '';
+        }
+    }
+
+    return '';
+}
+
+/**
+ * flatten task Sequence.
+ * 
+ * @export
+ * @param {Gulp} gulp
+ * @param {Src[]} tasks
+ * @param {ITaskContext} ctx
+ * @returns {string[]}
+ */
+export function flattenSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext): string[] {
+    let result: string[] = [];
+    _.each(tasks, tk => {
+        if (_.isArray(tk)) {
+            let zipSrc: Src[] = (_.some(tk, t => _.isArray(t))) ? tk : [tk];
+            let taskname = zipSequence(gulp, zipSrc, ctx);
+            taskname && result.push(taskname);
+        } else {
+            result.push(tk);
+        }
+    });
+
+    return result;
 }
 
 /**

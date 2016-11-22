@@ -107,7 +107,7 @@ describe('decorator:', () => {
 
         // console.log(seq);
         expect(seq.length).eq(8);
-        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch,TestTaskC,TestTaskW,test-clean-TestTaskC-owatch')
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile,test-watch,TestTaskC,TestTaskW,test-clean-TestTaskC-seq-owatch')
     })
 
     it('findTasks from module with Operation.build | Operation.test | Operation.watch, build watch test cmd auto watch task with option name', () => {
@@ -122,7 +122,7 @@ describe('decorator:', () => {
 
         // console.log(seq);
         expect(seq.length).eq(8);
-        expect(seq.join(',')).eq('my-test-clean,my-TestTaskB,my-TestTaskE,my-test-tscompile,my-test-watch,my-TestTaskC,my-TestTaskW,my-test-clean-my-TestTaskC-owatch')
+        expect(seq.join(',')).eq('my-test-clean,my-TestTaskB,my-TestTaskE,my-test-tscompile,my-test-watch,my-TestTaskC,my-TestTaskW,my-test-clean-my-TestTaskC-seq-owatch')
     })
 
     it('findTasks from module with Operation.build | Operation.test | Operation.watch, release cmd', () => {
