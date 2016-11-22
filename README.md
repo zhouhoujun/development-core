@@ -6,7 +6,9 @@ Please file issues and pull requests against that repo.
 This package use to develop kit for project development via gulp tasks.
 
 
-Development core can generate tasks, run task in sequence via Promise.
+`development-core`, generate gulp tasks, gulp task manager, run tasks in sequence via Promise. useful gulp task util: zipSequence, runSequence, runTaskSequence, toSequence, flattenSequence.
+core of `development-tool`.
+
 
 
 ## Install
@@ -45,10 +47,7 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
 
  v.9.1: refactor order,  to set value  between 0 and 1.  to make sure right order config easy. default value 0.5;
  case order value lt than 0 will assign 0;
- case order value gt than 1,
- ```js
- order = (order % sequence.length) / sequence.length;
- ```
+ case order value gt than 1, `order = (order % sequence.length) / sequence.length;`
 
  ```ts
 
@@ -170,9 +169,14 @@ export class WebDefine implements IContextDefine {
     }
 }
 
+```
+
+## create task with order
+
+```ts
 
 @task({
-    order: 0.1
+    order: total => 1 / total, // second order.
 })
 export class TestTaskB implements ITask {
     getInfo(): ITaskInfo { return this.info; }
@@ -187,7 +191,7 @@ export class TestTaskB implements ITask {
 
 
 @task({
-    order: total => 1, // last order.
+    order: 1, // last order.
     oper: Operation.build | Operation.test
 })
 export class TestTaskC implements ITask {
@@ -202,6 +206,7 @@ export class TestTaskC implements ITask {
 }
 
 @task({
+    order:0, //first order.
     oper: Operation.release | Operation.deploy
 })
 export class TestTaskD implements ITask {
@@ -215,7 +220,7 @@ export class TestTaskD implements ITask {
     }
 }
 
-
+//default order value 0.5
 @task({
     oper: Operation.build | Operation.test,
     watch: true
