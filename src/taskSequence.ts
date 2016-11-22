@@ -1,8 +1,11 @@
 import * as _ from 'lodash';
 import { Gulp } from 'gulp';
 import * as chalk from 'chalk';
-import { Src, ITaskInfo, ITaskContext, ITask, Operation } from './TaskConfig';
+import { Src, RunWay, ITaskInfo, ITaskContext, ITask, Operation } from './TaskConfig';
 import { sortOrder } from './utils';
+
+
+export type ZipTaskName = (name: string, runWay?: RunWay, ctx?: ITaskContext) => string
 /**
  * convert setup task result to run sequence src.
  * 
@@ -10,9 +13,10 @@ import { sortOrder } from './utils';
  * @param {Gulp} gulp
  * @param {ITask[]} tasks
  * @param {ITaskContext} ctx
+ * @param {ZipTaskName} [zipName]
  * @returns {Src[]}
  */
-export function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext): Src[] {
+export function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext, zipName?: ZipTaskName): Src[] {
     let seq: Src[] = [];
     let len = tasks.length;
     if (len < 1) {
@@ -44,7 +48,7 @@ export function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext): Src[]
             return hasWatchtasks.indexOf(it) < 0;
         }
         return true;
-    });
+    }, zipName);
     if (watchname) {
         registerTasks(ctx, watchname);
         seq.push(watchname);
@@ -84,16 +88,17 @@ function registerGlobals(ctx: ITaskContext, task: string) {
  * @param {Src[]} tasks
  * @param {ITaskContext} ctx
  * @param {(str: string) => boolean} [express]
- * @returns
+ * @param {ZipTaskName} [zipName]
+ * @returns {string}
  */
-export function taskSequenceWatch(gulp: Gulp, tasks: Src[], ctx: ITaskContext, express?: (str: string) => boolean) {
+export function taskSequenceWatch(gulp: Gulp, tasks: Src[], ctx: ITaskContext, express?: (str: string) => boolean, zipName?: ZipTaskName): string {
     // create watch task.
     if ((ctx.oper & Operation.watch) && ctx.option.watch) {
         let wats = [];
         let name = '';
         if (_.isBoolean(ctx.option.watch)) {
             let toWatchSeq = filterTaskSequence(tasks, express);
-            name = zipSequence(gulp, toWatchSeq, ctx);
+            name = zipSequence(gulp, toWatchSeq, ctx, zipName);
             name && wats.push(name);
         } else {
             wats = ctx.option.watch;
@@ -137,17 +142,19 @@ function registerZipTask(gulp: Gulp, name: string, tasks: Src[], ctx: ITaskConte
  * 
  * @export
  * @param {Gulp} gulp
- * @param {string[]} tasks tasks sequence
+ * @param {Src[]} tasks
  * @param {ITaskContext} ctx
+ * @param {ZipTaskName} [zipName]
  * @returns {string}
  */
-export function zipSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext): string {
+export function zipSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext, zipName?: ZipTaskName): string {
     if (tasks.length > 1) {
         let first = _.first(tasks);
         first = _.isArray(first) ? _.first(first) : first;
         let last = _.last(tasks);
         last = _.isArray(last) ? _.last(last) : last;
-        let name = `${first}-${last}-seq`;
+        let name = `${first}-${last}`;
+        name = zipName ? zipName(name, RunWay.sequence, ctx) : name + '-seq';
         return registerZipTask(gulp, name, tasks, ctx);
 
     } else if (tasks.length === 1) {
@@ -156,7 +163,8 @@ export function zipSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext): string
             if (first.length > 1) {
                 let fs = _.first(first);
                 let ls = _.last(first);
-                let name = `${fs}-${ls}-paral`;
+                let name = `${fs}-${ls}`;
+                name = zipName ? zipName(name, RunWay.parallel, ctx) : name + '-paral';
                 return registerZipTask(gulp, name, tasks, ctx);
             } else {
                 return _.first(first) || '';
@@ -176,14 +184,15 @@ export function zipSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext): string
  * @param {Gulp} gulp
  * @param {Src[]} tasks
  * @param {ITaskContext} ctx
+ * @param {ZipTaskName} [zipName]
  * @returns {string[]}
  */
-export function flattenSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext): string[] {
+export function flattenSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext, zipName?: ZipTaskName): string[] {
     let result: string[] = [];
     _.each(tasks, tk => {
         if (_.isArray(tk)) {
             let zipSrc: Src[] = (_.some(tk, t => _.isArray(t))) ? tk : [tk];
-            let taskname = zipSequence(gulp, zipSrc, ctx);
+            let taskname = zipSequence(gulp, zipSrc, ctx, zipName);
             taskname && result.push(taskname);
         } else {
             result.push(tk);
@@ -347,12 +356,13 @@ function startTask(gulp: Gulp, task: Src): Promise<any> {
  * @param {Gulp} gulp
  * @param {(ITask[] | Promise<ITask[]>)} tasks
  * @param {ITaskContext} ctx
+ * @param {ZipTaskName} [zipName]
  * @returns {Promise<any>}
  */
-export function runTaskSequence(gulp: Gulp, tasks: ITask[] | Promise<ITask[]>, ctx: ITaskContext): Promise<any> {
+export function runTaskSequence(gulp: Gulp, tasks: ITask[] | Promise<ITask[]>, ctx: ITaskContext, zipName?: ZipTaskName): Promise<any> {
     return Promise.resolve(tasks)
         .then(tasks => {
-            let taskseq = toSequence(gulp, tasks, ctx);
+            let taskseq = toSequence(gulp, tasks, ctx, zipName);
             return runSequence(gulp, taskseq);
         });
 }
