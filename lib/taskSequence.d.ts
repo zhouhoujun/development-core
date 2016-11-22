@@ -31,7 +31,7 @@ export declare function taskSequenceWatch(gulp: Gulp, tasks: Src[], ctx: ITaskCo
  * @param {ITaskContext} ctx
  * @returns {string}
  */
-export declare function zipTask(gulp: Gulp, tasks: Src[], ctx: ITaskContext): string;
+export declare function zipSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext): string;
 /**
  * flatten task Sequence.
  *
