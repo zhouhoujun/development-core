@@ -138,12 +138,15 @@ describe('generateTask', () => {
             }
         }, { oper: Operation.test | Operation.watch });
 
-        expect(tks.length).eq(2);
+        expect(tks.length).eq(1);
 
-        let tseq = registerTask(tks, { release: true });
+        let tseq1 = registerTask(tks, { watch: true });
+        expect(tseq1.join(',')).eq('gtest,gtest-twatch');
+
+        let tseq2 = registerTask(tks, { release: true });
         // console.log(tseq);
 
-        expect(tseq.join(',')).eq('');
+        expect(tseq2.join(',')).eq('');
     });
 
     it('generate build test tasks with auto watch', () => {
@@ -180,7 +183,27 @@ describe('generateTask', () => {
             }
         }, { oper: Operation.build | Operation.watch });
 
-        expect(btks.length).eq(2);
+        expect(btks.length).eq(1);
+
+        let tseq = registerTask(btks, { watch: true });
+        // console.log(tseq);
+
+        expect(tseq.join(',')).eq('bgtest,bgtest-twatch');
+    });
+
+    it('generate build tasks with auto watch by Operation autoWatch', () => {
+        let btks = generateTask({
+            name: 'bgtest', src: 'test/**/*spec.ts', order: total => 1 / total,
+            oper: Operation.build | Operation.autoWatch,
+            pipe(src) {
+                return src.pipe(mocha())
+                    .once('error', () => {
+                        process.exit(1);
+                    });
+            }
+        }, { oper: Operation.build | Operation.watch });
+
+        expect(btks.length).eq(1);
 
         let tseq = registerTask(btks, { watch: true });
         // console.log(tseq);
@@ -191,8 +214,7 @@ describe('generateTask', () => {
     it('generate build tasks with auto watch with option name', () => {
         let btks = generateTask({
             name: 'bgtest', src: 'test/**/*spec.ts', order: total => 0.1,
-            watch: true,
-            oper: Operation.build,
+            oper: Operation.build | Operation.autoWatch,
             pipe(src) {
                 return src.pipe(mocha())
                     .once('error', () => {
@@ -201,7 +223,7 @@ describe('generateTask', () => {
             }
         }, { oper: Operation.build | Operation.watch });
 
-        expect(btks.length).eq(2);
+        expect(btks.length).eq(1);
 
         let tseq = registerTask(btks, { watch: true }, { watch: true, name: 'test' });
         // console.log(tseq);
@@ -285,7 +307,7 @@ describe('addToSequence', () => {
             }
         }, { oper: Operation.build | Operation.watch });
 
-        expect(btks.length).eq(2);
+        expect(btks.length).eq(1);
 
         let tseq = registerTask(btks, { watch: true }, { watch: true, name: 'test' });
         // console.log(tseq);

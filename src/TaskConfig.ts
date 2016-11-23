@@ -60,6 +60,11 @@ export enum Operation {
     watch = 1 << 7,
 
     /**
+     * auto create watch
+     */
+    autoWatch = 1 << 8,
+
+    /**
      * default operation.
      */
     default = Operation.build | Operation.release | Operation.deploy,
@@ -555,10 +560,10 @@ export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
     /**
      * tasks to deal with IAsserts.
      * 
-     * @type {IMap<Src | IAsserts | IDynamicTaskOption[]>}
+     * @type {IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>}
      * @memberOf IAsserts
      */
-    asserts?: IMap<Src | IAsserts | IDynamicTaskOption[]>;
+    asserts?: IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>;
 
     /**
      * set IAsserts task order in this task sequence.

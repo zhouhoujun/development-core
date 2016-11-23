@@ -103,14 +103,18 @@ export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], m
             return;
         }
 
-        taskseq.push(createTask(dt));
-        if (dt.watch && match && (match.oper & Operation.watch)) {
-            taskseq.push(createWatchTask({
-                oper: Operation.defaultWatch,
-                name: (ctx) => ctx.subTaskName(dt) + '-twatch',
-                watchTasks: (ctx) => [ctx.subTaskName(dt)]
-            }));
+        if (dt.watch && !(dt.oper & Operation.watch)) {
+            dt.oper = dt.oper | Operation.autoWatch;
         }
+        taskseq.push(createTask(dt));
+
+        // if (dt.watch && match && (match.oper & Operation.watch)) {
+        //     taskseq.push(createWatchTask({
+        //         oper: Operation.defaultWatch,
+        //         name: (ctx) => ctx.subTaskName(dt) + '-twatch',
+        //         watchTasks: (ctx) => [ctx.subTaskName(dt)]
+        //     }));
+        // }
     });
 
     return taskseq;

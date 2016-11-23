@@ -30,12 +30,25 @@ export function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext, zipNam
         if (info.oper & ctx.oper) {
             let tname = t.setup(ctx, gulp);
             if (tname) {
+                // is watch task.
                 if ((info.oper & Operation.watch)) {
                     hasWatchtasks.push(tname);
                 }
                 registerTasks(ctx, tname);
-
                 seq.push(tname);
+                // autoWatch
+                if ((ctx.oper & Operation.watch) && (info.oper & Operation.autoWatch)) {
+                    let wname = tname + '-twatch';
+                    registerTasks(ctx, wname);
+                    gulp.task(wname, () => {
+                        let src = ctx.getSrc(info);
+                        console.log('watch, src:', chalk.cyan.call(chalk, src));
+                        gulp.watch(src, _.isArray(tname) ? tname : [<string>tname]);
+                    });
+
+                    hasWatchtasks.push(wname);
+                    seq.push(wname);
+                }
             }
         }
     });

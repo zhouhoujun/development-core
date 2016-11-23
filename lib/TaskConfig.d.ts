@@ -58,6 +58,10 @@ export declare enum Operation {
      */
     watch = 128,
     /**
+     * auto create watch
+     */
+    autoWatch = 256,
+    /**
      * default operation.
      */
     default = 25,
@@ -504,10 +508,10 @@ export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
     /**
      * tasks to deal with IAsserts.
      *
-     * @type {IMap<Src | IAsserts | IDynamicTaskOption[]>}
+     * @type {IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>}
      * @memberOf IAsserts
      */
-    asserts?: IMap<Src | IAsserts | IDynamicTaskOption[]>;
+    asserts?: IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>;
     /**
      * set IAsserts task order in this task sequence.
      *
