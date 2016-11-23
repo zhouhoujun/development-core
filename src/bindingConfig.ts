@@ -29,7 +29,7 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
 
         fileFilter: files,
         runSequence: runSequence,
-        addToSequence: cfg.addToSequence || addToSequence,
+        addToSequence: cfg.addToSequence || ((seq, rt) => addToSequence(seq, rt, context)),
         generateTask(tasks, match?) {
             return generateTask(tasks, _.extend(createDefaultMatch(context), match || {}));
         },

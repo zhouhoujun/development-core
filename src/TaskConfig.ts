@@ -86,10 +86,22 @@ export interface IMap<T> {
     [K: string]: T;
 }
 
+export interface IOrder {
+    /**
+     * the value to sort sequence.
+     * 
+     * @type {number}
+     * @memberOf IOrder
+     */
+    value: number;
+    runWay?: RunWay;
+}
+
+
 /**
  * Order type.
  */
-export type Order = number | ((total: number, ctx?: ITaskContext) => number);
+export type Order = number | IOrder | ((total: number, ctx?: ITaskContext) => number | IOrder);
 
 /**
  * src
@@ -499,7 +511,7 @@ export interface IPipeOption extends ICustomPipe {
  * @interface IDynamicTaskOption
  * @extends {IAssertDist}
  */
-export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPipe, ITaskInfo {
+export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPipe, ITaskInfo, IOperate {
     /**
      * IAsserts extends name. for register dynamic task.
      * 

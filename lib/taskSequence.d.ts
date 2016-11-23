@@ -53,9 +53,10 @@ export declare function flattenSequence(gulp: Gulp, tasks: Src[], ctx: ITaskCont
  * @export
  * @param {Src[]} taskSequence
  * @param {ITaskInfo} rst
- * @returns
+ * @param {ITaskContext} [ctx]
+ * @returns {Src[]}
  */
-export declare function addToSequence(taskSequence: Src[], rst: ITaskInfo): (string | string[])[];
+export declare function addToSequence(taskSequence: Src[], rst: ITaskInfo, ctx?: ITaskContext): Src[];
 /**
  * run task sequence.
  *

@@ -88,7 +88,7 @@ export class TestTaskA implements ITask {
 
 @task({
     // build env task. when env.watch equals to true, auto create watch to this task.
-    oper: Operation.build | Operation.autoWatch, 
+    oper: Operation.build | Operation.autoWatch,
     order: 1, // last order.
 })
 export class TestTaskE implements ITask {
@@ -194,6 +194,7 @@ export class TestTaskB implements ITask {
 }
 
 
+
 @task({
     order: 1, // last order.
     oper: Operation.build | Operation.test
@@ -224,6 +225,7 @@ export class TestTaskD implements ITask {
     }
 }
 
+
 @task({
     order: (total, ctx) => (ctx.oper & Operation.release)?  1 / total : 4 / total,
     oper: Operation.build | Operation.test
@@ -236,6 +238,36 @@ export class TestTaskW implements ITask {
         // todo...
 
         return ctx.subTaskName('TestTaskW');
+    }
+}
+
+// run tasks  by parallel which value is same as 0.2
+@task({
+    order: <IOrder> { value: 0.2, runWay: RunWay.parallel  }
+})
+export class TestTaskB implements ITask {
+    getInfo(): ITaskInfo { return this.info; }
+    constructor(private info: ITaskInfo) {
+    }
+    setup(ctx: ITaskContext, gulp): TaskResult {
+        // todo...
+
+        return ctx.subTaskName('TestTaskor1');
+    }
+}
+
+// run this task by parallel which value is same as 0.25 and in test env.
+@task({
+    order: (total, ctx) => ctx.env.test ? { value: 0.25, runWay: RunWay.parallel } : 1,
+})
+export class TestTaskB implements ITask {
+    getInfo(): ITaskInfo { return this.info; }
+    constructor(private info: ITaskInfo) {
+    }
+    setup(ctx: ITaskContext, gulp): TaskResult {
+        // todo...
+
+        return ctx.subTaskName('TestTaskor2');
     }
 }
 

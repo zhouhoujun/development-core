@@ -375,9 +375,9 @@ export abstract class PipeTask implements IPipeTask {
         }))
             .then(tanseq => {
 
-                let tans = sortOrder<ITransform>(tanseq, it => it.order, ctx);
+                let tans = sortOrder<ITransform>(tanseq, it => it.order, ctx, true);
 
-                _.each(tans, stream => {
+                _.each(tans, (stream: ITransform) => {
                     if (!this.match(stream, name, ctx)) {
                         return;
                     }
@@ -433,6 +433,10 @@ export abstract class PipeTask implements IPipeTask {
                         } else {
                             resolve();
                         }
+                    }).then(result => {
+                        output.removeAllListeners('error');
+                        output.removeAllListeners('end');
+                        return result;
                     });
                 }));
             })

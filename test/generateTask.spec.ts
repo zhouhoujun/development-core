@@ -1,7 +1,7 @@
 import 'mocha';
 import { expect, assert } from 'chai';
 
-import { IDynamicTaskOption, IAsserts, Operation, ITask, Src, IEnvOption } from '../src/TaskConfig';
+import { IOrder, IDynamicTaskOption, IAsserts, Operation, ITask, Src, IEnvOption, RunWay } from '../src/TaskConfig';
 import { generateTask, } from '../src/generateTask';
 import { toSequence, addToSequence, flattenSequence, zipSequence } from '../src/taskSequence';
 import { bindingConfig } from '../src/bindingConfig';
@@ -229,6 +229,42 @@ describe('generateTask', () => {
         // console.log(tseq);
 
         expect(tseq.join(',')).eq('test-bgtest,test-bgtest-twatch,test-bgtest-owatch');
+    });
+
+
+    it('generate build tasks with paralle order', () => {
+        let btks = generateTask([{
+            name: 'bgtest', src: 'test/**/*spec.ts', order: total => 0.1,
+            oper: Operation.build | Operation.autoWatch,
+            pipe(src) {
+                return src.pipe(mocha())
+                    .once('error', () => {
+                        process.exit(1);
+                    });
+            }
+        },
+        {
+            name: 'testp1',
+            src: '*.ts',
+            order: <IOrder>{ value: 1, runWay: RunWay.parallel },
+            pipes: []
+        },
+        {
+            name: 'testp2',
+            src: '*.js',
+            order: <IOrder>{ value: 1, runWay: RunWay.parallel },
+            pipes: []
+        }
+        ], { oper: Operation.build | Operation.watch });
+
+        expect(btks.length).eq(3);
+
+        let tseq = registerTask(btks, { watch: true }, { watch: true, name: 'test' });
+        expect(tseq.length).eq(4);
+        // console.log(tseq);
+        expect(_.isArray(tseq[2])).to.true;
+        expect((<string[]>tseq[2]).length).eq(2);
+        expect((<string[]>tseq[2]).join(',')).eq('test-testp1,test-testp2');
     });
 
 });

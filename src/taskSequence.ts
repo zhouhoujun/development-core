@@ -22,34 +22,22 @@ export function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext, zipNam
     if (len < 1) {
         return seq;
     }
-    tasks = sortOrder<ITask>(tasks, t => t.getInfo().order, ctx);
+    let taskseq = sortOrder<ITask>(tasks, t => t.getInfo().order, ctx);
 
     let hasWatchtasks = [];
-    _.each(tasks, t => {
-        let info = t.getInfo();
-        if (info.oper & ctx.oper) {
-            let tname = t.setup(ctx, gulp);
-            if (tname) {
-                // is watch task.
-                if ((info.oper & Operation.watch)) {
-                    hasWatchtasks.push(tname);
-                }
-                registerTasks(ctx, tname);
-                seq.push(tname);
-                // autoWatch
-                if ((ctx.oper & Operation.watch) && (info.oper & Operation.autoWatch)) {
-                    let wname = tname + '-twatch';
-                    registerTasks(ctx, wname);
-                    gulp.task(wname, () => {
-                        let src = ctx.getSrc(info);
-                        console.log('watch, src:', chalk.cyan.call(chalk, src));
-                        gulp.watch(src, _.isArray(tname) ? tname : [<string>tname]);
-                    });
-
-                    hasWatchtasks.push(wname);
-                    seq.push(wname);
-                }
+    let callback = watch => hasWatchtasks.push(watch);
+    _.each(taskseq, tk => {
+        if (_.isArray(tk)) {
+            let pallSeq: Src[] = [];
+            _.each(tk, t => {
+                pallSeq.push(setupTask(gulp, t, ctx, callback));
+            });
+            let ps: Src = flattenSequence(gulp, pallSeq, ctx, zipName);
+            if (ps && ps.length > 0) {
+                seq.push(ps);
             }
+        } else {
+            seq = seq.concat(setupTask(gulp, tk, ctx, callback));
         }
     });
 
@@ -67,6 +55,40 @@ export function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext, zipNam
         seq.push(watchname);
     }
 
+    return seq;
+}
+
+function setupTask(gulp: Gulp, t: ITask, ctx: ITaskContext, callback: (name: Src) => void): string[] {
+    let seq: string[] = [];
+    let info = t.getInfo();
+    if (info.oper & ctx.oper) {
+        let tname = t.setup(ctx, gulp);
+        if (tname) {
+            // is watch task.
+            if ((info.oper & Operation.watch)) {
+                callback(tname);
+            }
+            registerTasks(ctx, tname);
+            if (_.isArray(tname)) {
+                seq = tname;
+            } else {
+                seq.push(tname);
+            }
+            // autoWatch
+            if ((ctx.oper & Operation.watch) && (info.oper & Operation.autoWatch)) {
+                let wname = tname + '-twatch';
+                registerTasks(ctx, wname);
+                gulp.task(wname, () => {
+                    let src = ctx.getSrc(info);
+                    console.log('watch, src:', chalk.cyan.call(chalk, src));
+                    gulp.watch(src, _.isArray(tname) ? tname : [<string>tname]);
+                });
+
+                callback(wname);
+                seq.push(wname);
+            }
+        }
+    }
     return seq;
 }
 
@@ -221,9 +243,10 @@ export function flattenSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext, zip
  * @export
  * @param {Src[]} taskSequence
  * @param {ITaskInfo} rst
- * @returns
+ * @param {ITaskContext} [ctx]
+ * @returns {Src[]}
  */
-export function addToSequence(taskSequence: Src[], rst: ITaskInfo) {
+export function addToSequence(taskSequence: Src[], rst: ITaskInfo, ctx?: ITaskContext): Src[] {
     if (!rst) {
         return taskSequence;
     }
@@ -233,7 +256,10 @@ export function addToSequence(taskSequence: Src[], rst: ITaskInfo) {
         if (_.isNumber(rst.order)) {
             order = rst.order;
         } else if (_.isFunction(rst.order)) {
-            order = rst.order(len)
+            let val = rst.order(len, ctx);
+            order = _.isNumber(val) ? val : val.value
+        } else if (rst.order && _.isNumber(rst.order.value)) {
+            order = rst.order.value;
         }
 
         if (_.isNumber(order)) {
@@ -293,7 +319,7 @@ function filterTaskSequence(seq: Src[], express?: (str: string) => boolean): Src
  */
 export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
     tasks = filterTaskSequence(tasks);
-    console.log('run tasks : ', chalk.cyan(<any>tasks));
+    console.log(chalk.cyan('run tasks : '), tasks);
     let run = new Promise((resolve, reject) => {
         let ps: Promise<any> = null;
         if (tasks && tasks.length > 0) {
@@ -339,10 +365,15 @@ function startTask(gulp: Gulp, task: Src): Promise<any> {
             reject(err);
         };
         taskStop = (e: any) => {
-            tskmap[e.task] = true;
+            if (tskmap[e.task] === false) {
+                tskmap[e.task] = true;
+            }
             if (!_.some(_.values(tskmap), it => !it)) {
                 reslove();
             }
+        }
+        if (gulp['setMaxListeners']) {
+            gulp['setMaxListeners'](100);
         }
         gulp.on('task_stop', taskStop)
             .on('task_err', taskErr);
@@ -361,6 +392,38 @@ function startTask(gulp: Gulp, task: Src): Promise<any> {
             // process.exit(0);
         });
 }
+
+
+// function start(gulp: Gulp, taskname: string): Promise<any> {
+//     let taskErr = null, taskStop = null;
+//     return new Promise((reslove, reject) => {
+//         taskErr = (err) => {
+//             process.exit(err);
+//             console.error(chalk.red(err));
+//             reject(err);
+//         };
+//         taskStop = (e: any) => {
+//             if (e.task === taskname) {
+//                 reslove();
+//             }
+//         }
+//         gulp.on('task_stop', taskStop)
+//             .on('task_err', taskErr);
+//         gulp.start(taskname);
+//     })
+//         .then(() => {
+//             if (gulp['removeListener']) {
+//                 gulp['removeListener']('task_stop', taskStop);
+//                 gulp['removeListener']('task_err', taskErr);
+//             }
+//         }, err => {
+//             if (gulp['removeListener']) {
+//                 gulp['removeListener']('task_stop', taskStop);
+//                 gulp['removeListener']('task_err', taskErr);
+//             }
+//             // process.exit(0);
+//         });
+// }
 
 /**
  * run task sequence

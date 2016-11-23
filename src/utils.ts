@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { TaskSource, TaskString, Operation, Order, ITaskDecorator, ITaskInfo, Src, ITaskContext } from './TaskConfig';
+import { IMap, RunWay, TaskSource, TaskString, Operation, Order, ITaskDecorator, ITaskInfo, Src, ITaskContext } from './TaskConfig';
 import { readdirSync, lstatSync } from 'fs';
 import * as path from 'path';
 /**
@@ -34,32 +34,51 @@ export function files(directory: string, express?: ((fileName: string) => boolea
  * @template T
  * @param {T[]} sequence
  * @param {(item: T) => Order} orderBy
- * @param {ITaskContext} [ctx]
- * @returns {T[]}
+ * @param {ITaskContext} ctx
+ * @param {boolean} [forceSequence=false]
+ * @returns {(Array<T | T[]>)}
  */
-export function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order, ctx: ITaskContext): T[] {
-    return _.orderBy(_.filter(sequence, t => t), (t: T) => {
-
+export function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order, ctx: ITaskContext, forceSequence = false): Array<T | T[]> {
+    let parall: IMap<T[]> = {};
+    let rseq: Array<T | T[]> = _.orderBy(_.filter(sequence, t => t), (t: T) => {
         if (_.isArray(t)) {
             return 0.5;
         } else {
             let order = orderBy(t);
-
             if (_.isFunction(order)) {
                 order = order(sequence.length, ctx);
-            } else if (!_.isNumber(order)) {
+            } else if (!_.isNumber(order) && !order) {
                 order = 0.5;
             }
 
-            if (order > 1) {
-                return (order % sequence.length) / sequence.length;
-            } else if (order < 0) {
-                order = 0;
+            let orderVal: number;
+            if (_.isNumber(order)) {
+                orderVal = order;
+            } else {
+                if (!forceSequence && order.runWay === RunWay.parallel) {
+                    parall[order.value] = parall[order.value] || [];
+                    parall[order.value].push(t);
+                }
+                orderVal = order.value;
             }
 
-            return order;
+            if (orderVal > 1) {
+                return (orderVal % sequence.length) / sequence.length;
+            } else if (orderVal < 0) {
+                orderVal = 0;
+            }
+
+            return orderVal;
         }
     });
+    if (!forceSequence) {
+        _.each(_.values(parall), pals => {
+            let first = _.first(pals);
+            rseq.splice(rseq.indexOf(first), pals.length, pals);
+        });
+    }
+
+    return rseq;
 }
 
 /**
