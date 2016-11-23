@@ -87,6 +87,8 @@ export class TestTaskA implements ITask {
 }
 
 @task({
+    // build env task. when env.watch equals to true, auto create watch to this task.
+    oper: Operation.build | Operation.autoWatch, 
     order: 1, // last order.
 })
 export class TestTaskE implements ITask {
@@ -173,10 +175,12 @@ export class WebDefine implements IContextDefine {
 
 ## create task with order
 
+default order value 0.5
+
 ```ts
 
 @task({
-    order: total => 1 / total, // second order.
+    order: total => 1 / total // second order.
 })
 export class TestTaskB implements ITask {
     getInfo(): ITaskInfo { return this.info; }
@@ -206,7 +210,7 @@ export class TestTaskC implements ITask {
 }
 
 @task({
-    order:0, //first order.
+    order: 0, //first order.
     oper: Operation.release | Operation.deploy
 })
 export class TestTaskD implements ITask {
@@ -220,10 +224,9 @@ export class TestTaskD implements ITask {
     }
 }
 
-//default order value 0.5
 @task({
-    oper: Operation.build | Operation.test,
-    watch: true
+    order: (total, ctx) => (ctx.oper & Operation.release)?  1 / total : 4 / total,
+    oper: Operation.build | Operation.test
 })
 export class TestTaskW implements ITask {
     getInfo(): ITaskInfo { return this.info; }

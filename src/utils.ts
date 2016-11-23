@@ -34,9 +34,10 @@ export function files(directory: string, express?: ((fileName: string) => boolea
  * @template T
  * @param {T[]} sequence
  * @param {(item: T) => Order} orderBy
- * @returns
+ * @param {ITaskContext} [ctx]
+ * @returns {T[]}
  */
-export function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order) {
+export function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order, ctx: ITaskContext): T[] {
     return _.orderBy(_.filter(sequence, t => t), (t: T) => {
 
         if (_.isArray(t)) {
@@ -45,7 +46,7 @@ export function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order) {
             let order = orderBy(t);
 
             if (_.isFunction(order)) {
-                order = order(sequence.length);
+                order = order(sequence.length, ctx);
             } else if (!_.isNumber(order)) {
                 order = 0.5;
             }

@@ -89,7 +89,7 @@ export interface IMap<T> {
 /**
  * Order type.
  */
-export type Order = number | ((total: number) => number);
+export type Order = number | ((total: number, ctx?: ITaskContext) => number);
 
 /**
  * src

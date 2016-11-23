@@ -375,7 +375,7 @@ export abstract class PipeTask implements IPipeTask {
         }))
             .then(tanseq => {
 
-                let tans = sortOrder<ITransform>(tanseq, it => it.order);
+                let tans = sortOrder<ITransform>(tanseq, it => it.order, ctx);
 
                 _.each(tans, stream => {
                     if (!this.match(stream, name, ctx)) {

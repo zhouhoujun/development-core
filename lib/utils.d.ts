@@ -15,9 +15,10 @@ export declare function files(directory: string, express?: ((fileName: string) =
  * @template T
  * @param {T[]} sequence
  * @param {(item: T) => Order} orderBy
- * @returns
+ * @param {ITaskContext} [ctx]
+ * @returns {T[]}
  */
-export declare function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order): T[];
+export declare function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order, ctx: ITaskContext): T[];
 /**
  * task src, string or array string.
  *

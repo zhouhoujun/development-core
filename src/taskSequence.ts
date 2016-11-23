@@ -22,7 +22,7 @@ export function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext, zipNam
     if (len < 1) {
         return seq;
     }
-    tasks = sortOrder<ITask>(tasks, t => t.getInfo().order);
+    tasks = sortOrder<ITask>(tasks, t => t.getInfo().order, ctx);
 
     let hasWatchtasks = [];
     _.each(tasks, t => {
