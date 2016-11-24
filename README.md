@@ -7,7 +7,7 @@ This package use to develop kit for project development via gulp tasks.
 
 
 `development-core`, generate gulp tasks, gulp task manager, run tasks in sequence via Promise. useful gulp task util: zipSequence, runSequence, runTaskSequence, toSequence, flattenSequence.
-core of `development-tool`.
+core of [`development-tool`](https://www.npmjs.com/package/development-tool).
 
 
 
