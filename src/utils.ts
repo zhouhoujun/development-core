@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import { IMap, RunWay, TaskSource, TaskString, Operation, Order, ITaskDecorator, ITaskInfo, Src, ITaskContext } from './TaskConfig';
 import { readdirSync, lstatSync } from 'fs';
 import * as path from 'path';
+const globby = require('globby');
 /**
  * filter fileName in directory.
  * 
@@ -10,21 +11,31 @@ import * as path from 'path';
  * @param {((fileName: string) => boolean)} [express]
  * @returns {string[]}
  */
-export function files(directory: string, express?: ((fileName: string) => boolean)): string[] {
-    let res: string[] = [];
-    express = express || ((fn) => true);
-    _.each(readdirSync(directory), fname => {
-        let filePn = directory + '/' + fname;
-        var fst = lstatSync(filePn);
-        if (!fst.isDirectory()) {
-            if (express(filePn)) {
-                res.push(filePn)
+export function files(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]> {
+    // let res: string[] = [];
+    // express = express || ((fn) => true);
+    // _.each(readdirSync(directory), fname => {
+    //     let filePn = directory + '/' + fname;
+    //     var fst = lstatSync(filePn);
+    //     if (!fst.isDirectory()) {
+    //         if (express(filePn)) {
+    //             res.push(filePn)
+    //         }
+    //     } else {
+    //         res = res.concat(files(filePn, express))
+    //     }
+    // });
+    // return res;
+    return Promise.resolve(globby(express))
+        .then((files: string[]) => {
+            if (filter) {
+                files = _.filter(files, filter)
             }
-        } else {
-            res = res.concat(files(filePn, express))
-        }
-    });
-    return res;
+            if (mapping) {
+                files = _.map(files, mapping);
+            }
+            return files;
+        })
 }
 
 /**

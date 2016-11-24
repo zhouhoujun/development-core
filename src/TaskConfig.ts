@@ -810,13 +810,14 @@ export interface ITaskContext extends ITaskConfig {
     /**
      * filter file in directory.  default implement in bindingConfig.
      * 
-     * @param {string} directory
-     * @param {((fileName: string) => boolean)} [express]
-     * @returns {string[]}
+     * @param {Src} express
+     * @param {(fileName: string) => boolean} [filter]
+     * @param {(filename: string) => string} [mapping]
+     * @returns {Promise<string[]>}
      * 
      * @memberOf ITaskContext
      */
-    fileFilter(directory: string, express?: ((fileName: string) => boolean)): string[];
+    fileFilter(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string):  Promise<string[]>;
     /**
      * filter file in directory.  default implement in bindingConfig.
      * 
