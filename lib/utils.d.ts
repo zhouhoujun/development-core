@@ -7,7 +7,7 @@ import { TaskSource, TaskString, Operation, Order, ITaskDecorator, ITaskInfo, Sr
  * @param {((fileName: string) => boolean)} [express]
  * @returns {string[]}
  */
-export declare function files(directory: string, express?: ((fileName: string) => boolean)): string[];
+export declare function files(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]>;
 /**
  * sorting via order.
  *
