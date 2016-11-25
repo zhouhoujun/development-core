@@ -1,6 +1,6 @@
 import { Gulp } from 'gulp';
 import { TransformSource, RunWay, IAssertDist, ITaskInfo, TaskResult, ITaskContext, IOperate, ICustomPipe, Pipe, OutputPipe, ITask, ITransform, IPipeOption } from './TaskConfig';
-import { taskStringVal, sortOrder } from './utils';
+import { sortOrder } from './utils';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 import * as _ from 'lodash';
@@ -247,7 +247,7 @@ export abstract class PipeTask implements IPipeTask {
         if (!p) {
             return false;
         }
-        if (p.name && !name.endsWith(taskStringVal(p.name, context))) {
+        if (p.name && !name.endsWith(context.toStr(p.name))) {
             return false;
         }
 

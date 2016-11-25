@@ -584,6 +584,17 @@ export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
      * @memberOf IAsserts
      */
     assertsOrder?: Order;
+
+    /**
+     * custom control how to match tasks.
+     * 
+     * @param {ITaskInfo} task
+     * @param {ITaskInfo} match
+     * @returns {boolean}
+     * 
+     * @memberOf IAsserts
+     */
+    match?(task: ITaskInfo, match: ITaskInfo): boolean;
 }
 
 
@@ -695,7 +706,29 @@ export interface ITaskConfig {
      * 
      * @memberOf ITaskContext
      */
-    runTasks?(tasks?: Src[], assertTasks?: ITaskInfo, subGroupTask?: ITaskInfo, ): Src[];
+    runTasks?(tasks?: Src[], assertTasks?: ITaskInfo, subGroupTask?: ITaskInfo): Src[];
+
+    /**
+     * custom print help.
+     * 
+     * @param {string} lang
+     * 
+     * @memberOf ITaskContext
+     */
+    printHelp?(lang: string): void;
+
+
+    /**
+     * custom context factory.
+     * 
+     * @param {ITaskConfig} cfg
+     * @param {ITaskContext} [parent]
+     * @returns {ITaskContext}
+     * 
+     * @memberOf ITaskConfig
+     */
+    createContext?(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext;
+
 }
 
 
@@ -731,7 +764,7 @@ export interface ITaskContext extends ITaskConfig {
      * 
      * @memberOf ITaskContext
      */
-    match?(task: ITaskInfo, match: ITaskInfo): boolean;
+    matchCompare(task: ITaskInfo, match: ITaskInfo): boolean;
 
     /**
      * get Src of current state.   default implement in bindingConfig.
@@ -772,7 +805,7 @@ export interface ITaskContext extends ITaskConfig {
      * 
      * @memberOf ITaskContext
      */
-    printHelp?(lang: string): void;
+    printHelp(lang: string): void;
 
     /**
      * find  task in module. default implement in bindingConfig.
@@ -804,7 +837,7 @@ export interface ITaskContext extends ITaskConfig {
      * 
      * @memberOf ITaskContext
      */
-    findTaskDefine?(module: string | Object): Promise<ITaskDefine>;
+    findTaskDefine(module: string | Object): Promise<ITaskDefine>;
     /**
      * find taskdefine in directories.  default implement in bindingConfig.
      * 
@@ -825,7 +858,7 @@ export interface ITaskContext extends ITaskConfig {
      * 
      * @memberOf ITaskContext
      */
-    fileFilter(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string):  Promise<string[]>;
+    fileFilter(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]>;
     /**
      * filter file in directory.  default implement in bindingConfig.
      * 
@@ -888,6 +921,26 @@ export interface ITaskContext extends ITaskConfig {
      * @memberOf ITaskContext
      */
     toDistPath(pathstr: string): string;
+
+    /**
+     * to src
+     * 
+     * @param {any} TaskSource
+     * @returns {Src}
+     * 
+     * @memberOf ITaskContext
+     */
+    toSrc(source: TaskSource): Src;
+
+    /**
+     * to string.
+     * 
+     * @param {TaskString} name
+     * @returns {string}
+     * 
+     * @memberOf ITaskContext
+     */
+    toStr(name: TaskString): string;
 }
 
 /**

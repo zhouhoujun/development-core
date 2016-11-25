@@ -1,13 +1,4 @@
-import { TaskSource, TaskString, Operation, Order, ITaskDecorator, ITaskInfo, Src, ITaskContext } from './TaskConfig';
-/**
- * filter fileName in directory.
- *
- * @export
- * @param {string} directory
- * @param {((fileName: string) => boolean)} [express]
- * @returns {string[]}
- */
-export declare function files(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]>;
+import { Operation, Order, ITaskDecorator, Src, ITaskContext } from './TaskConfig';
 /**
  * sorting via order.
  *
@@ -20,25 +11,6 @@ export declare function files(express: Src, filter?: (fileName: string) => boole
  * @returns {(Array<T | T[]>)}
  */
 export declare function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order, ctx: ITaskContext, forceSequence?: boolean): Array<T | T[]>;
-/**
- * task src, string or array string.
- *
- * @export
- * @param {TaskSource} src
- * @param {Operation} oper runtime Operation
- * @param {IEnvOption} [env]
- * @returns
- */
-export declare function taskSourceVal(src: TaskSource, ctx: ITaskContext): string | string[];
-/**
- * task string.
- *
- * @export
- * @param {TaskString} name
- * @param {ITaskContext} ctx
- * @returns
- */
-export declare function taskStringVal(name: TaskString, ctx: ITaskContext): string;
 /**
  * convert old version Operation to new version Operation
  *
@@ -58,15 +30,15 @@ export declare function convertOper(decor: ITaskDecorator, def?: Operation): ITa
  */
 export declare function someOper(oper1: Operation, oper2: Operation): boolean;
 /**
- * match task via task info.
+ * match
  *
  * @export
- * @param {ITaskDecorator} decor
+ * @param {ITaskDecorator} tinfo
  * @param {ITaskDecorator} match
+ * @param {ITaskContext} [ctx]
  * @returns
  */
-export declare function matchTaskInfo(decor: ITaskDecorator, match: ITaskDecorator): any;
-export declare function matchTaskGroup(tinfo: ITaskInfo, match: ITaskInfo): boolean;
+export declare function matchCompare(tinfo: ITaskDecorator, match: ITaskDecorator, ctx?: ITaskContext): boolean;
 /**
  * convert path to absolute path.
  *

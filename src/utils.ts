@@ -1,42 +1,7 @@
 import * as _ from 'lodash';
-import { IMap, RunWay, TaskSource, TaskString, Operation, Order, ITaskDecorator, ITaskInfo, Src, ITaskContext } from './TaskConfig';
-import { readdirSync, lstatSync } from 'fs';
+import { IMap, RunWay, Operation, Order, ITaskDecorator, ITaskInfo, Src, ITaskContext } from './TaskConfig';
 import * as path from 'path';
-const globby = require('globby');
-/**
- * filter fileName in directory.
- * 
- * @export
- * @param {string} directory
- * @param {((fileName: string) => boolean)} [express]
- * @returns {string[]}
- */
-export function files(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]> {
-    // let res: string[] = [];
-    // express = express || ((fn) => true);
-    // _.each(readdirSync(directory), fname => {
-    //     let filePn = directory + '/' + fname;
-    //     var fst = lstatSync(filePn);
-    //     if (!fst.isDirectory()) {
-    //         if (express(filePn)) {
-    //             res.push(filePn)
-    //         }
-    //     } else {
-    //         res = res.concat(files(filePn, express))
-    //     }
-    // });
-    // return res;
-    return Promise.resolve(globby(express))
-        .then((files: string[]) => {
-            if (filter) {
-                files = _.filter(files, filter)
-            }
-            if (mapping) {
-                files = _.map(files, mapping);
-            }
-            return files;
-        })
-}
+
 
 /**
  * sorting via order.
@@ -90,31 +55,6 @@ export function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order, ctx: IT
     }
 
     return rseq;
-}
-
-/**
- * task src, string or array string.
- * 
- * @export
- * @param {TaskSource} src
- * @param {Operation} oper runtime Operation
- * @param {IEnvOption} [env]
- * @returns
- */
-export function taskSourceVal(src: TaskSource, ctx: ITaskContext) {
-    return _.isFunction(src) ? src(ctx) : (src || '');
-}
-
-/**
- * task string.
- * 
- * @export
- * @param {TaskString} name
- * @param {ITaskContext} ctx
- * @returns
- */
-export function taskStringVal(name: TaskString, ctx: ITaskContext) {
-    return _.isFunction(name) ? name(ctx) : (name || '');
 }
 
 
@@ -179,6 +119,31 @@ export function someOper(oper1: Operation, oper2: Operation) {
     return (oper1 & oper2) > 0;
 }
 
+
+/**
+ * match
+ * 
+ * @export
+ * @param {ITaskDecorator} tinfo
+ * @param {ITaskDecorator} match
+ * @param {ITaskContext} [ctx]
+ * @returns
+ */
+export function matchCompare(tinfo: ITaskDecorator, match: ITaskDecorator, ctx?: ITaskContext) {
+    if (ctx) {
+        return ctx.matchCompare(tinfo, match);
+    } else {
+        if (!matchTaskInfo(tinfo, match)) {
+            return false;
+        }
+
+        if (!matchTaskGroup(tinfo, match)) {
+            return false;
+        }
+        return true;
+    }
+}
+
 /**
  * match task via task info.
  * 
@@ -187,7 +152,7 @@ export function someOper(oper1: Operation, oper2: Operation) {
  * @param {ITaskDecorator} match
  * @returns
  */
-export function matchTaskInfo(decor: ITaskDecorator, match: ITaskDecorator) {
+function matchTaskInfo(decor: ITaskDecorator, match: ITaskDecorator) {
 
     match = convertOper(match, Operation.build);
     decor = convertOper(decor);
@@ -249,7 +214,7 @@ export function matchTaskInfo(decor: ITaskDecorator, match: ITaskDecorator) {
     return true;
 }
 
-export function matchTaskGroup(tinfo: ITaskInfo, match: ITaskInfo): boolean {
+function matchTaskGroup(tinfo: ITaskInfo, match: ITaskInfo): boolean {
     if (tinfo.group && match && match.group) {
         if (_.isString(match.group)) {
             if (_.isString(tinfo.group) && tinfo.group !== match.group) {

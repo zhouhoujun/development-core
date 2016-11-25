@@ -1,6 +1,6 @@
 /// <reference types="chai" />
 import 'reflect-metadata';
-import { ITask, ITaskDecorator, IContextDefine, ITaskDefine, Src } from './TaskConfig';
+import { ITask, ITaskDecorator, ITaskContext, IContextDefine, ITaskDefine, Src } from './TaskConfig';
 /**
  * task decorator.
  *
@@ -24,9 +24,10 @@ export declare function dynamicTask<T extends Function>(target?: (new <T>() => T
  * @export
  * @param {*} target
  * @param {ITaskDecorator} [match]
+ * @param {ITaskContext} [ctx]
  * @returns {ITask[]}
  */
-export declare function findTasks(target: any, match?: ITaskDecorator): ITask[];
+export declare function findTasks(target: any, match?: ITaskDecorator, ctx?: ITaskContext): ITask[];
 /**
  * decorator task define implements IContextDefine.
  *
@@ -64,9 +65,10 @@ export declare function findTaskDefineInModule(md: string | Object): Promise<ICo
  * @export
  * @param {(string | Object)} md
  * @param {ITaskDecorator} [match]
+ * @param {ITaskContext} [ctx]
  * @returns {Promise<ITask[]>}
  */
-export declare function findTasksInModule(md: string | Object, match?: ITaskDecorator): Promise<ITask[]>;
+export declare function findTasksInModule(md: string | Object, match?: ITaskDecorator, ctx?: ITaskContext): Promise<ITask[]>;
 /**
  * find one task define in directories.
  *
@@ -81,9 +83,10 @@ export declare function findTaskDefineInDir(dirs: Src): Promise<IContextDefine>;
  * @export
  * @param {Src} dirs
  * @param {ITaskDecorator} [match]
+ * @param {ITaskContext} [ctx]
  * @returns {Promise<ITask[]>}
  */
-export declare function findTasksInDir(dirs: Src, match?: ITaskDecorator): Promise<ITask[]>;
+export declare function findTasksInDir(dirs: Src, match?: ITaskDecorator, ctx?: ITaskContext): Promise<ITask[]>;
 /**
  * task define context convert.
  *

@@ -109,7 +109,6 @@ function hasRegistered(ctx: ITaskContext, task: string) {
 function registerGlobals(ctx: ITaskContext, task: string) {
     if (ctx.globals.tasks[task]) {
         console.error(chalk.red('has same task:'), chalk.cyan(task));
-        process.exit(0);
     } else {
         ctx.globals.tasks[task] = task;
     }

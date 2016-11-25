@@ -4,7 +4,7 @@ import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
 import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
-import { matchTaskGroup, matchTaskInfo, taskStringVal } from './utils';
+import { matchCompare } from './utils';
 import { PipeTask } from './PipeTask';
 
 type factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => TaskResult;
@@ -50,7 +50,7 @@ class DynamicPipeTask extends PipeTask {
     }
 
     protected getOption(ctx: ITaskContext) {
-        this.name = this.name || taskStringVal(this.dt.name, ctx);
+        this.name = this.name || ctx.toStr(this.dt.name);
         return this.dt || ctx.option;
     }
 
@@ -86,20 +86,18 @@ class DynamicPipeTask extends PipeTask {
  * @export
  * @param {(IDynamicTaskOption | IDynamicTaskOption[])} tasks
  * @param {ITaskInfo} [match]
+ * @param {ITaskContext} [ctx]
  * @returns {ITask[]}
  */
-export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[] {
+export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo, ctx?: ITaskContext): ITask[] {
     let taskseq: ITask[] = [];
     _.each(_.isArray(tasks) ? tasks : [tasks], dt => {
 
         if (dt.watchTasks) {
             dt.oper = (dt.oper || Operation.default) | Operation.watch;
         }
-        if (!matchTaskInfo(dt, match)) {
-            return;
-        }
 
-        if (!matchTaskGroup(dt, match)) {
+        if (!matchCompare(dt, match, ctx)) {
             return;
         }
 
@@ -108,13 +106,6 @@ export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], m
         }
         taskseq.push(createTask(dt));
 
-        // if (dt.watch && match && (match.oper & Operation.watch)) {
-        //     taskseq.push(createWatchTask({
-        //         oper: Operation.defaultWatch,
-        //         name: (ctx) => ctx.subTaskName(dt) + '-twatch',
-        //         watchTasks: (ctx) => [ctx.subTaskName(dt)]
-        //     }));
-        // }
     });
 
     return taskseq;

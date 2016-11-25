@@ -1,10 +1,10 @@
 import 'reflect-metadata';
 import * as _ from 'lodash';
 import * as chalk from 'chalk';
-import { ITask, ITaskDecorator, ITaskConfig, IContextDefine, ITaskDefine, Src, IDynamicTasks } from './TaskConfig';
+import { ITask, ITaskDecorator, ITaskContext, ITaskConfig, IContextDefine, ITaskDefine, Src, IDynamicTasks } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { bindingConfig } from './bindingConfig';
-import { matchTaskGroup, matchTaskInfo } from './utils';
+import { matchCompare } from './utils';
 import { existsSync } from 'fs';
 const requireDir = require('require-dir');
 
@@ -50,15 +50,18 @@ export function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITas
     }
 }
 
+
+
 /**
  * find tasks in Object module.
  * 
  * @export
  * @param {*} target
  * @param {ITaskDecorator} [match]
+ * @param {ITaskContext} [ctx]
  * @returns {ITask[]}
  */
-export function findTasks(target: any, match?: ITaskDecorator): ITask[] {
+export function findTasks(target: any, match?: ITaskDecorator, ctx?: ITaskContext): ITask[] {
     let tasks: ITask[] = [];
     if (!target) {
         return tasks;
@@ -67,11 +70,8 @@ export function findTasks(target: any, match?: ITaskDecorator): ITask[] {
         if (target['__task']) {
             let tinfo: ITaskDecorator = target['__task'];
             tinfo = _.isBoolean(tinfo) ? {} : tinfo;
-            if (!matchTaskInfo(tinfo, match)) {
-                return tasks;
-            }
 
-            if (!matchTaskGroup(tinfo, match)) {
+            if (!matchCompare(tinfo, match, ctx)) {
                 return tasks;
             }
 
@@ -84,11 +84,7 @@ export function findTasks(target: any, match?: ITaskDecorator): ITask[] {
         } else if (target['__dynamictask']) {
             let tinfo: ITaskDecorator = target['__dynamictask'];
 
-            if (!matchTaskInfo(tinfo, match)) {
-                return tasks;
-            }
-
-            if (!matchTaskGroup(tinfo, match)) {
+            if (!matchCompare(tinfo, match, ctx)) {
                 return tasks;
             }
 
@@ -97,11 +93,11 @@ export function findTasks(target: any, match?: ITaskDecorator): ITask[] {
                 // tk.group = tk.group || tinfo.group;
                 return tk;
             });
-            tasks = tasks.concat(generateTask(dyts, match));
+            tasks = tasks.concat(generateTask(dyts, match, ctx));
         }
     } else if (_.isArray(target)) {
         _.each(target, sm => {
-            tasks.concat(findTasks(sm, match));
+            tasks.concat(findTasks(sm, match, ctx));
         });
     } else {
         _.each(_.keys(target), key => {
@@ -109,7 +105,7 @@ export function findTasks(target: any, match?: ITaskDecorator): ITask[] {
                 return;
             }
             console.log(chalk.grey('find task from :'), chalk.cyan(key));
-            tasks = tasks.concat(findTasks(target[key], match));
+            tasks = tasks.concat(findTasks(target[key], match, ctx));
         });
     }
 
@@ -254,15 +250,16 @@ export function findTaskDefineInModule(md: string | Object): Promise<IContextDef
  * @export
  * @param {(string | Object)} md
  * @param {ITaskDecorator} [match]
+ * @param {ITaskContext} [ctx]
  * @returns {Promise<ITask[]>}
  */
-export function findTasksInModule(md: string | Object, match?: ITaskDecorator): Promise<ITask[]> {
+export function findTasksInModule(md: string | Object, match?: ITaskDecorator, ctx?: ITaskContext): Promise<ITask[]> {
     let mdls;
     try {
         if (_.isString(md)) {
-            mdls = findTasks(require(md), match);
+            mdls = findTasks(require(md), match, ctx);
         } else {
-            mdls = findTasks(md, match);
+            mdls = findTasks(md, match, ctx);
         }
     } catch (err) {
         return Promise.reject(err);
@@ -301,14 +298,15 @@ export function findTaskDefineInDir(dirs: Src): Promise<IContextDefine> {
  * @export
  * @param {Src} dirs
  * @param {ITaskDecorator} [match]
+ * @param {ITaskContext} [ctx]
  * @returns {Promise<ITask[]>}
  */
-export function findTasksInDir(dirs: Src, match?: ITaskDecorator): Promise<ITask[]> {
+export function findTasksInDir(dirs: Src, match?: ITaskDecorator, ctx?: ITaskContext): Promise<ITask[]> {
     return Promise.all(_.map(_.isArray(dirs) ? dirs : [dirs], dir => {
         console.log(chalk.grey('begin load task from dir'), chalk.cyan(dir));
         try {
             let mdl = requireDir(dir, { recurse: true });
-            return Promise.resolve(findTasks(mdl, match));
+            return Promise.resolve(findTasks(mdl, match, ctx));
         } catch (err) {
             return Promise.reject(err);
         }

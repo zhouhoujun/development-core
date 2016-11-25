@@ -1,125 +1,191 @@
 import * as _ from 'lodash';
-import { IAssertDist, IEnvOption, Operation, ITaskContext, ITaskConfig, ITaskInfo, Src, IPipeOption } from './TaskConfig';
+import { Gulp } from 'gulp';
+import { ITask, ITaskDefine, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { runSequence, addToSequence } from './taskSequence';
-import { files, taskStringVal, taskSourceVal, absoluteSrc, absolutePath } from './utils';
+import { matchCompare, absoluteSrc, absolutePath } from './utils';
 import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefineInDir } from './decorator';
 
-
-
+const globby = require('globby');
 
 /**
- * binding Config to implement default func.
+ * binding Config, create task context.
  * 
  * @export
  * @param {ITaskConfig} cfg
+ * @param {ITaskContext} [parent]
  * @returns {ITaskContext}
  */
-export function bindingConfig(cfg: ITaskConfig): ITaskContext {
-
-    let oper = currentOperation(cfg.env);
-
-    let context: ITaskContext = <ITaskContext>{
-        oper: oper,
-
-        env: cfg.env,
-        globals: cfg.globals || {},
-        option: cfg.option,
-        runTasks: cfg.runTasks,
-
-        fileFilter: files,
-        runSequence: runSequence,
-        addToSequence: cfg.addToSequence || ((seq, rt) => addToSequence(seq, rt, context)),
-        generateTask(tasks, match?) {
-            return generateTask(tasks, _.extend(createDefaultMatch(context), match || {}));
-        },
-        findTasks(mdl, match?) {
-            return findTasksInModule(mdl, _.extend(createDefaultMatch(context), match || {}));
-        },
-        findTasksInDir(dirs, match?) {
-            return findTasksInDir(dirs, _.extend(createDefaultMatch(context), match || {}));
-        },
-
-        findTaskDefine: findTaskDefineInModule.bind(this),
-
-        findTaskDefineInDir: findTaskDefineInDir.bind(this),
-
-        subTaskName(task, ext = '') {
-            let name = '';
-            // let oper = context.oper;
-            if (_.isString(task)) {
-                name = task;
-            } else if (task && task !== context.option) {
-                // oper = task.oper || context.oper;
-                if (task.name) {
-                    name = taskStringVal(task.name, context)
-                }
-                if (!name && task.assert && task.assert.name) {
-                    name = taskStringVal(task.assert.name, context)
-                }
-            }
-
-            let optName = taskStringVal(cfg.option.name, context);
-            if (optName) {
-                if (name.indexOf(optName + '-') === 0) {
-                    return name;
-                }
-                // avoid soma name.
-                if (name && optName !== name) {
-                    return `${optName}-${name}` + ext;
-                }
-                return optName + ext;
-            } else {
-                return name + ext;
-            }
-        },
-
-        getSrc(task: ITaskInfo, relative = false): Src {
-            let src: Src;
-            let oper = task ? (task.oper || context.oper) : context.oper;
-            if (task && task.assert) {
-                src = taskSourceVal(getAssertSrc(task.assert, oper), context)
-            }
-            if (!src) {
-                src = taskSourceVal(getAssertSrc(cfg.option, oper), context)
-            }
-            return (relative !== false) ? src : absoluteSrc(cfg.env.root, src);
-        },
-
-        getDist(task: ITaskInfo, relative = false) {
-            let dist;
-            // let oper = task ? (task.oper || context.oper) : context.oper;
-            if (task && task.assert) {
-                dist = getCurrentDist(task.assert, context);
-            }
-            dist = dist || getCurrentDist(context.option, context);
-
-            return (relative !== false) ? dist : absolutePath(cfg.env.root, dist);
-        },
-
-        toRootSrc(src: Src): Src {
-            return absoluteSrc(cfg.env.root, src);
-        },
-        toRootPath(pathstr: string): string {
-            return absolutePath(cfg.env.root, pathstr);
-        },
-        toDistPath(pathstr: string): string {
-            return absolutePath(context.getDist(), pathstr);
-        }
-    };
-
-    return context;
+export function bindingConfig(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext {
+    if (cfg.createContext) {
+        return cfg.createContext(cfg, parent);
+    }
+    return new TaskContext(cfg, parent);
 }
 
-let createDefaultMatch = (ctx: ITaskContext) => {
-    let match: ITaskInfo = { oper: ctx.oper };
-    if (ctx.match) {
-        match.match = (anothor: ITaskInfo) => {
-            return ctx.match(match, anothor);
+/**
+ * global data.
+ */
+let globals = {};
+
+/**
+ * TaskContext
+ * 
+ * @export
+ * @class TaskContext
+ * @implements {ITaskContext}
+ */
+export class TaskContext implements ITaskContext {
+    public oper: Operation;
+    public option: IAsserts;
+    public env: IEnvOption;
+    public globals: any;
+    constructor(private cfg: ITaskConfig, public parent?: ITaskContext) {
+        this.env = cfg.env;
+        this.oper = currentOperation(cfg.env);
+        this.option = cfg.option;
+        this.globals = cfg.globals || globals;
+    }
+
+    matchCompare(task: ITaskInfo, match: ITaskInfo): boolean {
+        if (this.option.match) {
+            return this.option.match(task, match);
+        }
+        return matchCompare(task, match);
+    }
+
+    getSrc(task?: ITaskInfo, relative = false): Src {
+        let src: Src;
+        let ctx = this;
+        let oper = task ? (task.oper || ctx.oper) : ctx.oper;
+        if (task && task.assert) {
+            src = taskSourceVal(getAssertSrc(task.assert, oper), ctx)
+        }
+        if (!src) {
+            src = taskSourceVal(getAssertSrc(ctx.option, oper), ctx)
+        }
+        return (relative !== false) ? src : absoluteSrc(ctx.env.root, src);
+    }
+
+    getDist(task?: ITaskInfo, relative = false) {
+        let dist;
+        let ctx = this;
+        // let oper = task ? (task.oper || context.oper) : context.oper;
+        if (task && task.assert) {
+            dist = getCurrentDist(task.assert, ctx);
+        }
+        dist = dist || getCurrentDist(ctx.option, ctx);
+
+        return (relative !== false) ? dist : absolutePath(ctx.env.root, dist);
+    }
+
+    subTaskName(task, ext = '') {
+        let ctx = this;
+        let name = '';
+        // let oper = context.oper;
+        if (_.isString(task)) {
+            name = task;
+        } else if (task && task !== ctx.option) {
+            // oper = task.oper || context.oper;
+            if (task.name) {
+                name = taskStringVal(task.name, ctx)
+            }
+            if (!name && task.assert && task.assert.name) {
+                name = taskStringVal(task.assert.name, ctx)
+            }
+        }
+
+        let optName = taskStringVal(ctx.option.name, ctx);
+        if (optName) {
+            if (name.indexOf(optName + '-') === 0) {
+                return name;
+            }
+            // avoid soma name.
+            if (name && optName !== name) {
+                return `${optName}-${name}` + ext;
+            }
+            return optName + ext;
+        } else {
+            return name + ext;
         }
     }
-    return match;
+
+    printHelp(lang: string): void {
+        if (this.cfg.printHelp) {
+            this.cfg.printHelp(lang);
+        }
+    }
+
+    findTasks(module: string | Object, match?: ITaskInfo): Promise<ITask[]> {
+        let ctx = this;
+        return findTasksInModule(module, _.extend({ oper: ctx.oper }, match || {}), this);
+    }
+
+    findTasksInDir(dirs: Src, match?: ITaskInfo): Promise<ITask[]> {
+        let ctx = this;
+        return findTasksInDir(dirs, _.extend({ oper: ctx.oper }, match || {}), this);
+    }
+
+    findTaskDefine(module: string | Object): Promise<ITaskDefine> {
+        return findTaskDefineInModule(module);
+    }
+
+    findTaskDefineInDir(dirs: Src): Promise<ITaskDefine> {
+        return findTaskDefineInDir(dirs);
+    }
+
+
+    fileFilter(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]> {
+        return files(express, filter, mapping);
+    }
+
+    runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
+        return runSequence(gulp, tasks);
+    }
+
+    generateTask(tasks, match?) {
+        let ctx = this;
+        return generateTask(tasks, _.extend({ oper: ctx.oper }, match || {}), this);
+    }
+
+    addToSequence(sequence: Src[], task: ITaskInfo): Src[] {
+        if (this.cfg.addToSequence) {
+            return this.cfg.addToSequence(sequence, task);
+        }
+        return addToSequence(sequence, task, this);
+    }
+
+    toRootSrc(src: Src): Src {
+        return absoluteSrc(this.cfg.env.root, src);
+    }
+
+    toRootPath(pathstr: string): string {
+        return absolutePath(this.cfg.env.root, pathstr);
+    }
+
+    toDistPath(pathstr: string): string {
+        return absolutePath(this.getDist(), pathstr);
+    }
+
+    toSrc(source: TaskSource): Src {
+        return taskSourceVal(source, this);
+    }
+
+    toStr(name: TaskString): string {
+        return taskStringVal(name, this);
+    }
 }
+
+
+// let createDefaultMatch = (ctx: ITaskContext) => {
+//     let match: ITaskInfo = { oper: ctx.oper };
+//     if (ctx.match) {
+//         match.match = (anothor: ITaskInfo) => {
+//             return ctx.match(match, anothor);
+//         }
+//     }
+//     return match;
+// }
 
 
 /**
@@ -203,4 +269,51 @@ function getCurrentDist(ds: IAssertDist, ctx: ITaskContext) {
     }
 
     return dist;
+}
+
+
+/**
+ * filter fileName in directory.
+ * 
+ * @export
+ * @param {string} directory
+ * @param {((fileName: string) => boolean)} [express]
+ * @returns {string[]}
+ */
+export function files(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]> {
+    return Promise.resolve(globby(express))
+        .then((files: string[]) => {
+            if (filter) {
+                files = _.filter(files, filter)
+            }
+            if (mapping) {
+                files = _.map(files, mapping);
+            }
+            return files;
+        })
+}
+
+/**
+ * task src, string or array string.
+ * 
+ * @export
+ * @param {TaskSource} src
+ * @param {Operation} oper runtime Operation
+ * @param {IEnvOption} [env]
+ * @returns
+ */
+export function taskSourceVal(src: TaskSource, ctx: ITaskContext) {
+    return _.isFunction(src) ? src(ctx) : (src || '');
+}
+
+/**
+ * task string.
+ * 
+ * @export
+ * @param {TaskString} name
+ * @param {ITaskContext} ctx
+ * @returns
+ */
+export function taskStringVal(name: TaskString, ctx: ITaskContext) {
+    return _.isFunction(name) ? name(ctx) : (name || '');
 }
