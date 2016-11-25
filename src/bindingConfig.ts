@@ -102,25 +102,10 @@ export function bindingConfig(cfg: ITaskConfig): ITaskContext {
         },
         toRootPath(pathstr: string): string {
             return absolutePath(cfg.env.root, pathstr);
+        },
+        toDistPath(pathstr: string): string {
+            return absolutePath(context.getDist(), pathstr);
         }
-
-        // pipeOption(express, route = true) {
-        //     if (context.option) {
-        //         let option = context.option;
-        //         if (!route && option.pipe || option.pipes || option.source || option.output) {
-        //             express(option);
-        //         }
-        //         if (option['loader'] && !_.isString(option['loader']) && !_.isArray(option['loader'])) {
-        //             let opt = <IPipeOption>option['loader'];
-        //             if (opt.pipe || opt.pipes || opt.source || opt.output) {
-        //                 express(opt);
-        //             }
-        //         }
-        //         if (route && option.pipe || option.pipes || option.source || option.output) {
-        //             express(option);
-        //         }
-        //     }
-        // }
     };
 
     return context;

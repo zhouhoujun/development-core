@@ -707,6 +707,14 @@ export interface ITaskConfig {
  */
 export interface ITaskContext extends ITaskConfig {
     /**
+     * parent context.
+     * 
+     * @type {ITaskContext}
+     * @memberOf ITaskContext
+     */
+    parent?: ITaskContext;
+
+    /**
      * run operation
      * 
      * @type {Operation}
@@ -871,15 +879,15 @@ export interface ITaskContext extends ITaskConfig {
      */
     toRootPath(pathstr: string): string;
 
-    // /**
-    //  * active work pipe option from context.
-    //  * 
-    //  * @param {(op: IPipeOption) => void} express
-    //  * @param {boolean} [route]
-    //  * 
-    //  * @memberOf ITaskContext
-    //  */
-    // pipeOption(express: (op: IPipeOption) => void, route?: boolean);
+    /**
+     * join pathstr to absolute path src with dist root. 
+     * 
+     * @param {string} pathstr
+     * @returns {string}
+     * 
+     * @memberOf ITaskContext
+     */
+    toDistPath(pathstr: string): string;
 }
 
 /**

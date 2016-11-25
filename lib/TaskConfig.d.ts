@@ -640,6 +640,13 @@ export interface ITaskConfig {
  */
 export interface ITaskContext extends ITaskConfig {
     /**
+     * parent context.
+     *
+     * @type {ITaskContext}
+     * @memberOf ITaskContext
+     */
+    parent?: ITaskContext;
+    /**
      * run operation
      *
      * @type {Operation}
@@ -790,6 +797,15 @@ export interface ITaskContext extends ITaskConfig {
      * @memberOf ITaskContext
      */
     toRootPath(pathstr: string): string;
+    /**
+     * join pathstr to absolute path src with dist root.
+     *
+     * @param {string} pathstr
+     * @returns {string}
+     *
+     * @memberOf ITaskContext
+     */
+    toDistPath(pathstr: string): string;
 }
 /**
  * event option
