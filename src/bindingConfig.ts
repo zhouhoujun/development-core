@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Gulp } from 'gulp';
-import { ITask, ITaskDefine, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString } from './TaskConfig';
+import { ITask, ITaskDefine, TaskResult, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { runSequence, addToSequence } from './taskSequence';
 import { matchCompare, absoluteSrc, absolutePath } from './utils';
@@ -40,6 +40,7 @@ export class TaskContext implements ITaskContext {
     public option: IAsserts;
     public env: IEnvOption;
     public globals: any;
+    protected setupTasks: ITask[] = [];
     constructor(private cfg: ITaskConfig, public parent?: ITaskContext) {
         this.env = cfg.env;
         this.oper = currentOperation(cfg.env);
@@ -173,6 +174,26 @@ export class TaskContext implements ITaskContext {
 
     toStr(name: TaskString): string {
         return taskStringVal(name, this);
+    }
+
+    private packages = {};
+    getPackage(filename?: TaskString): any {
+        filename = filename || this.cfg.packageFile;
+        let name = this.toRootPath(this.toStr(filename) || 'package.json');
+        if (!this.packages[name]) {
+            this.packages[name] = require(name);
+        }
+        return this.packages[name]
+    }
+
+    setup(task: ITask, gulp?: Gulp): TaskResult {
+        let rs = task.setup(this, gulp);
+        this.setupTasks.push(task);
+        return rs;
+    }
+
+    registerTasks(express?: (item: ITask) => boolean): ITask[] {
+        return express ? _.filter(this.setupTasks, express) : this.setupTasks;
     }
 }
 

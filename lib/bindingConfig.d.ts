@@ -1,7 +1,7 @@
 /// <reference types="chai" />
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { ITask, ITaskDefine, IEnvOption, Operation, ITaskContext, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString } from './TaskConfig';
+import { ITask, ITaskDefine, TaskResult, IEnvOption, Operation, ITaskContext, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString } from './TaskConfig';
 /**
  * binding Config, create task context.
  *
@@ -44,6 +44,9 @@ export declare class TaskContext implements ITaskContext {
     toDistPath(pathstr: string): string;
     toSrc(source: TaskSource): Src;
     toStr(name: TaskString): string;
+    private packages;
+    getPackage(filename?: TaskString): any;
+    setup(task: ITask, gulp?: Gulp): TaskResult;
 }
 /**
  * get current env Operation.

@@ -717,7 +717,13 @@ export interface ITaskConfig {
      */
     printHelp?(lang: string): void;
 
-
+    /**
+     * package filename.
+     * 
+     * @type {string}
+     * @memberOf ITaskConfig
+     */
+    packageFile?: string;
     /**
      * custom context factory.
      * 
@@ -941,6 +947,37 @@ export interface ITaskContext extends ITaskConfig {
      * @memberOf ITaskContext
      */
     toStr(name: TaskString): string;
+
+    /**
+     * get package config. default root path file 'package.json'
+     * 
+     * @param {TaskString} [filename]
+     * @returns {*}
+     * 
+     * @memberOf ITaskContext
+     */
+    getPackage(filename?: TaskString): any;
+
+    /**
+     * setup task for this context.
+     * 
+     * @param {ITask} task
+     * @param {Gulp} [gulp]
+     * @returns {TaskResult}
+     * 
+     * @memberOf ITaskContext
+     */
+    setup(task: ITask, gulp?: Gulp): TaskResult;
+
+    /**
+     * find and filter tasks in this context.
+     * 
+     * @param {(item: ITask) => boolean} [express]
+     * @returns {ITask[]}
+     * 
+     * @memberOf ITaskContext
+     */
+    registerTasks(express?: (item: ITask) => boolean): ITask[]
 }
 
 /**
