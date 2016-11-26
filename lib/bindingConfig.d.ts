@@ -25,6 +25,7 @@ export declare class TaskContext implements ITaskContext {
     option: IAsserts;
     env: IEnvOption;
     globals: any;
+    protected setupTasks: ITask[];
     constructor(cfg: ITaskConfig, parent?: ITaskContext);
     matchCompare(task: ITaskInfo, match: ITaskInfo): boolean;
     getSrc(task?: ITaskInfo, relative?: boolean): Src;
@@ -47,6 +48,7 @@ export declare class TaskContext implements ITaskContext {
     private packages;
     getPackage(filename?: TaskString): any;
     setup(task: ITask, gulp?: Gulp): TaskResult;
+    registerTasks(express?: (item: ITask) => boolean): ITask[];
 }
 /**
  * get current env Operation.

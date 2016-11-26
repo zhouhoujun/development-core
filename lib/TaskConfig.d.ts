@@ -881,12 +881,12 @@ export interface ITaskContext extends ITaskConfig {
     /**
      * find and filter tasks in this context.
      *
-     * @param {(((item: ITask) => void | boolean))} [express]
+     * @param {(item: ITask) => boolean} [express]
      * @returns {ITask[]}
      *
-     * @memberOf IContext
+     * @memberOf ITaskContext
      */
-    filterTasks?(express?: ((item: ITask) => void | boolean)): ITask[];
+    registerTasks(express?: (item: ITask) => boolean): ITask[];
 }
 /**
  * event option
