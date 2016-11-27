@@ -5,7 +5,7 @@ import { generateTask } from './generateTask';
 import { runSequence, addToSequence } from './taskSequence';
 import { matchCompare, absoluteSrc, absolutePath } from './utils';
 import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefineInDir } from './decorator';
-
+import * as path from 'path';
 const globby = require('globby');
 
 /**
@@ -176,6 +176,10 @@ export class TaskContext implements ITaskContext {
         return taskStringVal(name, this);
     }
 
+    toUrl(pathstr: string, relativePath?: string): string {
+        return (relativePath ? path.relative(pathstr, relativePath) : pathstr).replace(/\\/g, '/').replace(/^\//g, '');
+    }
+
     private packages = {};
     getPackage(filename?: TaskString): any {
         filename = filename || this.cfg.packageFile;
@@ -196,17 +200,6 @@ export class TaskContext implements ITaskContext {
         return express ? _.filter(this.setupTasks, express) : this.setupTasks;
     }
 }
-
-
-// let createDefaultMatch = (ctx: ITaskContext) => {
-//     let match: ITaskInfo = { oper: ctx.oper };
-//     if (ctx.match) {
-//         match.match = (anothor: ITaskInfo) => {
-//             return ctx.match(match, anothor);
-//         }
-//     }
-//     return match;
-// }
 
 
 /**

@@ -949,6 +949,17 @@ export interface ITaskContext extends ITaskConfig {
     toStr(name: TaskString): string;
 
     /**
+     * to relative url.
+     * 
+     * @param {string} pathstr
+     * @param {string} [relativePath]
+     * @returns {string}
+     * 
+     * @memberOf ITaskContext
+     */
+    toUrl(pathstr: string, relativePath?: string): string
+
+    /**
      * get package config. default root path file 'package.json'
      * 
      * @param {TaskString} [filename]

@@ -45,6 +45,7 @@ export declare class TaskContext implements ITaskContext {
     toDistPath(pathstr: string): string;
     toSrc(source: TaskSource): Src;
     toStr(name: TaskString): string;
+    toUrl(pathstr: string, relativePath?: string): string;
     private packages;
     getPackage(filename?: TaskString): any;
     setup(task: ITask, gulp?: Gulp): TaskResult;
