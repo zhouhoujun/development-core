@@ -896,7 +896,16 @@ export interface ITaskContext extends ITaskConfig {
      *
      * @memberOf ITaskContext
      */
-    registerTasks(express?: (item: ITask) => boolean): ITask[];
+    tasks(express?: (item: ITask) => boolean): ITask[];
+    registerTasks?(express?: (item: ITask) => boolean): ITask[];
+    /**
+     * get all global tasks registered in gulp.
+     *
+     * @returns {string[]}
+     *
+     * @memberOf ITaskContext
+     */
+    globalTasks(): string[];
 }
 /**
  * event option

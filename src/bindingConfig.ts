@@ -196,8 +196,16 @@ export class TaskContext implements ITaskContext {
         return rs;
     }
 
-    registerTasks(express?: (item: ITask) => boolean): ITask[] {
+    tasks(express?: (item: ITask) => boolean): ITask[] {
         return express ? _.filter(this.setupTasks, express) : this.setupTasks;
+    }
+
+    registerTasks(express?: (item: ITask) => boolean): ITask[] {
+        return this.tasks(express);
+    }
+
+    globalTasks(): string[] {
+        return _.keys(this.globals.tasks || {});
     }
 }
 

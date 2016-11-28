@@ -49,7 +49,9 @@ export declare class TaskContext implements ITaskContext {
     private packages;
     getPackage(filename?: TaskString): any;
     setup(task: ITask, gulp?: Gulp): TaskResult;
+    tasks(express?: (item: ITask) => boolean): ITask[];
     registerTasks(express?: (item: ITask) => boolean): ITask[];
+    globalTasks(): string[];
 }
 /**
  * get current env Operation.
