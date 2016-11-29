@@ -156,6 +156,10 @@ export class TaskContext implements ITaskContext {
         return addToSequence(sequence, task, this);
     }
 
+    getRootPath() {
+        return this.env.root;
+    }
+
     toRootSrc(src: Src): Src {
         return absoluteSrc(this.cfg.env.root, src);
     }

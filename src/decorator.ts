@@ -51,7 +51,79 @@ export function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITas
 }
 
 
+type Taskitem = ITask | ITask[];
 
+function findTaskset(tasks: Map<any, Taskitem>, target: any, match?: ITaskDecorator, ctx?: ITaskContext) {
+
+    if (!target) {
+        return;
+    }
+    if (_.isFunction(target)) {
+        if (target['__task']) {
+            let tinfo: ITaskDecorator = target['__task'];
+            tinfo = _.isBoolean(tinfo) ? {} : tinfo;
+
+            if (!matchCompare(tinfo, match, ctx)) {
+                return;
+            }
+            if (tasks.has(target)) {
+                return;
+            }
+
+            let task: ITask = new target(tinfo);
+            if (task.setInfo) {
+                task.setInfo(tinfo);
+            }
+
+            tasks.set(target, task);
+
+        } else if (target['__dynamictask']) {
+            let tinfo: ITaskDecorator = target['__dynamictask'];
+
+            if (!matchCompare(tinfo, match, ctx)) {
+                return;
+            }
+
+            if (tasks.has(target)) {
+                return;
+            }
+
+            let dyts = _.map((<IDynamicTasks>new target()).tasks(), tk => {
+                tk = _.extend(_.clone(tinfo), tk);
+                // tk.group = tk.group || tinfo.group;
+                return tk;
+            });
+            tasks.set(target, generateTask(dyts, match, ctx));
+        }
+    } else if (_.isArray(target)) {
+        _.each(target, sm => {
+            findTaskset(tasks, sm, match, ctx);
+        });
+    } else {
+        _.each(_.keys(target), key => {
+            if (!key || !target[key] || /^[0-9]+$/.test(key)) {
+                return;
+            }
+            console.log(chalk.grey('find task from :'), chalk.cyan(key));
+            findTaskset(tasks, target[key], match, ctx);
+        });
+    }
+}
+
+
+function findTaskMap(target: any, match?: ITaskDecorator, ctx?: ITaskContext, map?: Map<any, Taskitem>): ITask[] {
+    map = map || new Map<any, Taskitem>();
+    findTaskset(map, target, match, ctx);
+    let tasks: ITask[] = [];
+    map.forEach((it: Taskitem) => {
+        if (_.isArray(it)) {
+            tasks = tasks.concat(it);
+        } else {
+            tasks.push(it);
+        }
+    });
+    return tasks;
+}
 /**
  * find tasks in Object module.
  * 
@@ -62,54 +134,7 @@ export function dynamicTask<T extends Function>(target?: (new <T>() => T) | ITas
  * @returns {ITask[]}
  */
 export function findTasks(target: any, match?: ITaskDecorator, ctx?: ITaskContext): ITask[] {
-    let tasks: ITask[] = [];
-    if (!target) {
-        return tasks;
-    }
-    if (_.isFunction(target)) {
-        if (target['__task']) {
-            let tinfo: ITaskDecorator = target['__task'];
-            tinfo = _.isBoolean(tinfo) ? {} : tinfo;
-
-            if (!matchCompare(tinfo, match, ctx)) {
-                return tasks;
-            }
-
-            let task: ITask = new target(tinfo);
-            if (task.setInfo) {
-                task.setInfo(tinfo);
-            }
-
-            tasks.push(task);
-        } else if (target['__dynamictask']) {
-            let tinfo: ITaskDecorator = target['__dynamictask'];
-
-            if (!matchCompare(tinfo, match, ctx)) {
-                return tasks;
-            }
-
-            let dyts = _.map((<IDynamicTasks>new target()).tasks(), tk => {
-                tk = _.extend(_.clone(tinfo), tk);
-                // tk.group = tk.group || tinfo.group;
-                return tk;
-            });
-            tasks = tasks.concat(generateTask(dyts, match, ctx));
-        }
-    } else if (_.isArray(target)) {
-        _.each(target, sm => {
-            tasks.concat(findTasks(sm, match, ctx));
-        });
-    } else {
-        _.each(_.keys(target), key => {
-            if (!key || !target[key] || /^[0-9]+$/.test(key)) {
-                return;
-            }
-            console.log(chalk.grey('find task from :'), chalk.cyan(key));
-            tasks = tasks.concat(findTasks(target[key], match, ctx));
-        });
-    }
-
-    return tasks;
+    return findTaskMap(target, match, ctx);
 }
 
 /**
@@ -280,7 +305,7 @@ export function findTaskDefineInDir(dirs: Src): Promise<IContextDefine> {
     return Promise.race<IContextDefine>(_.map(_.isArray(dirs) ? dirs : [dirs], dir => {
         return new Promise<IContextDefine>((resolve, reject) => {
             if (existsSync(dir)) {
-                let mdl = requireDir(dir);
+                let mdl = requireDir(dir, { duplicates: true, camelcase: true, recurse: true });
                 if (mdl) {
                     let def = findTaskDefine(mdl);
                     if (def) {
@@ -302,11 +327,12 @@ export function findTaskDefineInDir(dirs: Src): Promise<IContextDefine> {
  * @returns {Promise<ITask[]>}
  */
 export function findTasksInDir(dirs: Src, match?: ITaskDecorator, ctx?: ITaskContext): Promise<ITask[]> {
+    let map = new Map<any, Taskitem>();
     return Promise.all(_.map(_.isArray(dirs) ? dirs : [dirs], dir => {
         console.log(chalk.grey('begin load task from dir'), chalk.cyan(dir));
         try {
-            let mdl = requireDir(dir, { recurse: true });
-            return Promise.resolve(findTasks(mdl, match, ctx));
+            let mdl = requireDir(dir, { duplicates: true, camelcase: true, recurse: true });
+            return Promise.resolve(findTaskMap(mdl, match, ctx, map));
         } catch (err) {
             return Promise.reject(err);
         }

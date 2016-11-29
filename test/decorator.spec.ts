@@ -1,8 +1,8 @@
 import 'mocha';
 import { expect } from 'chai';
 import * as gulp from 'gulp';
-import { findTasks, Operation, bindingConfig, toSequence, findTaskDefines, taskSequenceWatch } from '../src';
-
+import { findTasks, findTasksInDir, Operation, bindingConfig, toSequence, findTaskDefines, taskSequenceWatch } from '../src';
+import * as path from 'path';
 
 describe('decorator:', () => {
 
@@ -208,6 +208,64 @@ describe('decorator:', () => {
 
         expect(tk.getInfo().taskName).eq('mytest-pipetask');
 
-    })
+    });
+
+    it('find tasks in dir', async () => {
+        let tasks = await findTasksInDir(path.join(__dirname, './tasks'), { oper: Operation.build });
+
+        expect(tasks.length).eq(5);
+        let seq = toSequence(gulp, tasks, bindingConfig({
+            env: {},
+            option: { src: 'src', dist: 'lib' }
+        }));
+
+        // console.log(seq);
+        expect(seq.length).eq(4);
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile')
+    });
+
+    it('find tasks in compileted dir', async () => {
+        let tasks = await findTasksInDir(path.join(__dirname, './tasks2'), { oper: Operation.build });
+
+        expect(tasks.length).eq(5);
+        let seq = toSequence(gulp, tasks, bindingConfig({
+            env: {},
+            option: { src: 'src', dist: 'lib' }
+        }));
+
+        // console.log(seq);
+        expect(seq.length).eq(4);
+        expect(seq.join(',')).eq('test-clean,TestTaskB,TestTaskE,test-tscompile')
+    });
+
+    it('find tasks in dir task3', async () => {
+        let tasks = await findTasksInDir(path.join(__dirname, './tasks3'), { oper: Operation.test });
+
+        expect(tasks.length).eq(2);
+        let seq = toSequence(gulp, tasks, bindingConfig({
+            env: {},
+            option: { src: 'src', dist: 'lib' }
+        }));
+
+        // console.log(seq);
+        expect(seq.length).eq(2);
+        expect(seq.join(',')).eq('task3-clean,test')
+    });
+
+
+    it('find tasks in compileted dir task4', async () => {
+        let tasks = await findTasksInDir(path.join(__dirname, './tasks4'), { oper: Operation.test });
+
+        expect(tasks.length).eq(2);
+        let seq = toSequence(gulp, tasks, bindingConfig({
+            env: {},
+            option: { src: 'src', dist: 'lib' }
+        }));
+
+        // console.log(seq);
+        expect(seq.length).eq(2);
+        expect(seq.join(',')).eq('task3-clean,test')
+    });
+
 
 });

@@ -40,6 +40,7 @@ export declare class TaskContext implements ITaskContext {
     runSequence(gulp: Gulp, tasks: Src[]): Promise<any>;
     generateTask(tasks: any, match?: any): any;
     addToSequence(sequence: Src[], task: ITaskInfo): Src[];
+    getRootPath(): string;
     toRootSrc(src: Src): Src;
     toRootPath(pathstr: string): string;
     toDistPath(pathstr: string): string;

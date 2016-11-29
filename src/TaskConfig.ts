@@ -899,6 +899,14 @@ export interface ITaskContext extends ITaskConfig {
     addToSequence(sequence: Src[], task: ITaskInfo): Src[];
 
     /**
+     * get development root.
+     * 
+     * @returns {string}
+     * 
+     * @memberOf ITaskContext
+     */
+    getRootPath(): string;
+    /**
      * join src to absolute path src with root( env.root ). 
      * 
      * @param {Src} src
