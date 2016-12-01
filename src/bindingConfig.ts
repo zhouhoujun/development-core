@@ -180,8 +180,8 @@ export class TaskContext implements ITaskContext {
         return taskStringVal(name, this);
     }
 
-    toUrl(pathstr: string, relativePath?: string): string {
-        return (relativePath ? path.relative(pathstr, relativePath) : pathstr).replace(/\\/g, '/').replace(/^\//g, '');
+    toUrl(basePath: string, toPath?: string): string {
+        return (toPath ? path.relative(basePath, toPath) : basePath).replace(/\\/g, '/').replace(/^\//g, '');
     }
 
     private packages = {};

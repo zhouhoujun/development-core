@@ -870,13 +870,13 @@ export interface ITaskContext extends ITaskConfig {
     /**
      * to relative url.
      *
-     * @param {string} pathstr
-     * @param {string} [relativePath]
+     * @param {string} basePath
+     * @param {string} [toPath]
      * @returns {string}
      *
      * @memberOf ITaskContext
      */
-    toUrl(pathstr: string, relativePath?: string): string;
+    toUrl(basePath: string, toPath?: string): string;
     /**
      * get package config. default root path file 'package.json'
      *
