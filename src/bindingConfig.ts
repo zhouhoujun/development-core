@@ -168,8 +168,12 @@ export class TaskContext implements ITaskContext {
         return absolutePath(this.cfg.env.root, pathstr);
     }
 
-    toDistPath(pathstr: string): string {
-        return absolutePath(this.getDist(), pathstr);
+    toDistSrc(src: Src, task?: ITaskInfo): Src {
+        return absoluteSrc(this.getDist(task), src);
+    }
+
+    toDistPath(pathstr: string, task?: ITaskInfo): string {
+        return absolutePath(this.getDist(task), pathstr);
     }
 
     toSrc(source: TaskSource): Src {

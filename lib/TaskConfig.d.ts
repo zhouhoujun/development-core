@@ -841,14 +841,25 @@ export interface ITaskContext extends ITaskConfig {
      */
     toRootPath(pathstr: string): string;
     /**
+     * join src to absolute path src with context dist root.
+     *
+     * @param {Src} src
+     * @param {ITaskInfo} [task]
+     * @returns {Src}
+     *
+     * @memberOf ITaskContext
+     */
+    toDistSrc(src: Src, task?: ITaskInfo): Src;
+    /**
      * join pathstr to absolute path src with dist root.
      *
      * @param {string} pathstr
+     * @param {ITaskInfo} [task]
      * @returns {string}
      *
      * @memberOf ITaskContext
      */
-    toDistPath(pathstr: string): string;
+    toDistPath(pathstr: string, task?: ITaskInfo): string;
     /**
      * to src
      *

@@ -43,7 +43,8 @@ export declare class TaskContext implements ITaskContext {
     getRootPath(): string;
     toRootSrc(src: Src): Src;
     toRootPath(pathstr: string): string;
-    toDistPath(pathstr: string): string;
+    toDistSrc(src: Src, task?: ITaskInfo): Src;
+    toDistPath(pathstr: string, task?: ITaskInfo): string;
     toSrc(source: TaskSource): Src;
     toStr(name: TaskString): string;
     toUrl(basePath: string, toPath?: string): string;
