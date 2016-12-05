@@ -204,20 +204,31 @@ export abstract class PipeTask implements IPipeTask {
      * 
      * @memberOf PipeTask
      */
-    protected customPipe(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp) {
+    protected customPipe(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp): ITransform | Promise<ITransform> {
         let cfgopt = ctx.option;
         let loader = <IPipeOption>cfgopt['loader'];
         let prsrc: Promise<ITransform>;
+        let oper = this.getTransformOperate(source);
         if (cfgopt.pipe) {
             prsrc = this.cpipe2Promise(source, cfgopt, ctx, dist, gulp);
         }
         if (loader && !_.isString(loader) && !_.isArray(loader) && loader.pipe) {
             prsrc = prsrc ?
-                prsrc.then(stream => this.cpipe2Promise(stream, loader, ctx, dist, gulp))
+                prsrc.then(stream => {
+                    this.setTransformOperate(stream, oper);
+                    return this.cpipe2Promise(stream, loader, ctx, dist, gulp)
+                })
                 : this.cpipe2Promise(source, loader, ctx, dist, gulp);
         }
 
-        return prsrc || source;
+        if (prsrc) {
+            return prsrc.then(stream => {
+                this.setTransformOperate(stream, oper);
+                return stream;
+            });
+        }
+
+        return source;
     }
 
     /**
@@ -236,23 +247,47 @@ export abstract class PipeTask implements IPipeTask {
     /**
      * match pipe Operate
      * 
-     * @param {IPipeOperate} p
+     * @protected
+     * @param {IOperate} p
      * @param {string} name
-     * @param {ITaskContext} context
+     * @param {ITaskContext} ctx
+     * @param {IOperate} [trsOperate]
+     * @param {boolean} [isOutput=false]
      * @returns
      * 
      * @memberOf PipeTask
      */
-    protected match(p: IOperate, name: string, context: ITaskContext) {
+    protected match(p: IOperate, name: string, ctx: ITaskContext, trsOperate?: IOperate, isOutput = false) {
         if (!p) {
             return false;
         }
-        if (p.name && !name.endsWith(context.toStr(p.name))) {
+        if (p.name && !name.endsWith(ctx.toStr(p.name))) {
             return false;
         }
 
-        if (p.oper && (p.oper & context.oper) <= 0) {
+        if (p.oper && (p.oper & ctx.oper) <= 0) {
             return false;
+        }
+
+        if (isOutput && p.noneOutput) {
+            return false;
+        } else if (!isOutput && p.nonePipe) {
+            return false;
+        }
+
+        if (trsOperate) {
+            if (trsOperate.name && !name.endsWith(ctx.toStr(trsOperate.name))) {
+                return false;
+            }
+            if (trsOperate.oper && (trsOperate.oper & ctx.oper) <= 0) {
+                return false;
+            }
+
+            if (isOutput && trsOperate.noneOutput) {
+                return false;
+            } else if (!isOutput && trsOperate.nonePipe) {
+                return false;
+            }
         }
 
         return true;
@@ -286,6 +321,42 @@ export abstract class PipeTask implements IPipeTask {
         });
     }
 
+
+    protected operateFileds = ['name', 'oper', 'order', 'nonePipe', 'noneOutput'];
+    /**
+     * get transform Operate.
+     * 
+     * @protected
+     * @param {ITransform} source
+     * @returns {IOperate}
+     * 
+     * @memberOf PipeTask
+     */
+    protected getTransformOperate(source: ITransform): IOperate {
+        return _.pick(source, this.operateFileds);
+    }
+
+    /**
+     * set transform Operate.
+     * 
+     * @protected
+     * @param {ITransform} source
+     * @param {IOperate} operate
+     * @returns
+     * 
+     * @memberOf PipeTask
+     */
+    protected setTransformOperate(source: ITransform, operate: IOperate) {
+        if (!source) {
+            return;
+        }
+        _.each(this.operateFileds, n => {
+            if (!_.isUndefined(operate[n])) {
+                source[n] = operate[n];
+            }
+        });
+    }
+
     /**
      * covert pipes transform to Promise.
      * 
@@ -301,11 +372,12 @@ export abstract class PipeTask implements IPipeTask {
      */
     protected pipes2Promise(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp, pipes?: Pipe[]) {
         let name = ctx.subTaskName(dist, this.name);
+        let oper = this.getTransformOperate(source);
         return Promise.all(_.map(pipes || this.pipes(ctx, dist, gulp), (p: Pipe) => {
             if (_.isFunction(p)) {
                 return p(ctx, dist, gulp);
             } else {
-                if (!this.match(p, name, ctx)) {
+                if (!this.match(p, name, ctx, oper)) {
                     return null;
                 } else {
                     return Promise.resolve(p.toTransform(ctx, dist, gulp))
@@ -321,7 +393,7 @@ export abstract class PipeTask implements IPipeTask {
                 let tans = sortOrder<ITransform>(tanseq, it => it.order, ctx, true);
 
                 _.each(tans, (stream: ITransform) => {
-                    if (!this.match(stream, name, ctx)) {
+                    if (!this.match(stream, name, ctx, oper)) {
                         return;
                     }
 
@@ -333,6 +405,7 @@ export abstract class PipeTask implements IPipeTask {
                         source = source.pipe(stream);
                     }
                 });
+                this.setTransformOperate(source, oper);
                 return source;
             });
     }
@@ -352,12 +425,13 @@ export abstract class PipeTask implements IPipeTask {
      */
     protected output2Promise(source: ITransform, context: ITaskContext, dist: IAssertDist, gulp: Gulp, output?: OutputPipe[]) {
         let name = context.subTaskName(dist, this.name);
+        let oper = this.getTransformOperate(source);
         let outputs = output || this.output(context, dist, gulp);
         return Promise.all(_.map(outputs, output => {
             if (_.isFunction(output)) {
                 return output(source, context, dist, gulp);
             } else {
-                if (!this.match(output, name, context)) {
+                if (!this.match(output, name, context, oper, true)) {
                     return null;
                 } else {
                     return output.toTransform(source, context, dist, gulp);

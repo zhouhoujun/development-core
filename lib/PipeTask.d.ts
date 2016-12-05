@@ -148,14 +148,17 @@ export declare abstract class PipeTask implements IPipeTask {
     /**
      * match pipe Operate
      *
-     * @param {IPipeOperate} p
+     * @protected
+     * @param {IOperate} p
      * @param {string} name
-     * @param {ITaskContext} context
+     * @param {ITaskContext} ctx
+     * @param {IOperate} [trsOperate]
+     * @param {boolean} [isOutput=false]
      * @returns
      *
      * @memberOf PipeTask
      */
-    protected match(p: IOperate, name: string, context: ITaskContext): boolean;
+    protected match(p: IOperate, name: string, ctx: ITaskContext, trsOperate?: IOperate, isOutput?: boolean): boolean;
     /**
      * convert custom pipe result to Promise.
      *
@@ -170,6 +173,28 @@ export declare abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     protected cpipe2Promise(source: ITransform, opt: ICustomPipe, context: ITaskContext, dist: IAssertDist, gulp: Gulp): Promise<ITransform>;
+    protected operateFileds: string[];
+    /**
+     * get transform Operate.
+     *
+     * @protected
+     * @param {ITransform} source
+     * @returns {IOperate}
+     *
+     * @memberOf PipeTask
+     */
+    protected getTransformOperate(source: ITransform): IOperate;
+    /**
+     * set transform Operate.
+     *
+     * @protected
+     * @param {ITransform} source
+     * @param {IOperate} operate
+     * @returns
+     *
+     * @memberOf PipeTask
+     */
+    protected setTransformOperate(source: ITransform, operate: IOperate): void;
     /**
      * covert pipes transform to Promise.
      *

@@ -127,6 +127,20 @@ export interface IOperate {
      * @memberOf IOperate
      */
     order?: Order;
+    /**
+     * none pipe addation.
+     *
+     * @type {boolean}
+     * @memberOf IOperate
+     */
+    nonePipe?: boolean;
+    /**
+     * none output.
+     *
+     * @type {boolean}
+     * @memberOf IOperate
+     */
+    noneOutput?: boolean;
 }
 /**
  * task decorator info.
