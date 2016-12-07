@@ -554,6 +554,7 @@ export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
      */
     match?(task: ITaskInfo, match: ITaskInfo): boolean;
 }
+export declare type folderCallback = (folder: string, folderName?: string, ctx?: ITaskContext) => string;
 /**
  * custom modules task load define.
  * will be remove. use IContextDefine instead.
@@ -839,32 +840,32 @@ export interface ITaskContext extends ITaskConfig {
     /**
      * get root folders.
      *
-     * @param {(folder: string, ctx: ITaskContext) => string} [express]
+     * @param {folderCallback} [express]
      * @returns {string[]}
      *
      * @memberOf ITaskContext
      */
-    getRootFolders(express?: (folder: string, ctx: ITaskContext) => string): string[];
+    getRootFolders(express?: folderCallback): string[];
     /**
      * get folders in path.
      *
      * @param {string} pathstr
-     * @param {(folder: string, ctx: ITaskContext) => string} [express]
+     * @param {folderCallback} [express]
      * @returns {string[]}
      *
      * @memberOf ITaskContext
      */
-    getFolders(pathstr: string, express?: (folder: string, ctx: ITaskContext) => string): string[];
+    getFolders(pathstr: string, express?: folderCallback): string[];
     /**
      * get context dist folders
      *
-     * @param {(folder: string, ctx: ITaskContext) => string} [express]
+     * @param {folderCallback} [express]
      * @param {ITaskInfo} [task]
      * @returns {string[]}
      *
      * @memberOf ITaskContext
      */
-    getDistFolders(express?: (folder: string, ctx: ITaskContext) => string, task?: ITaskInfo): string[];
+    getDistFolders(express?: folderCallback, task?: ITaskInfo): string[];
     /**
      * join src to absolute path src with root( env.root ).
      *

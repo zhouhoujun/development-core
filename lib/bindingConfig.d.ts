@@ -1,7 +1,7 @@
 /// <reference types="chai" />
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { ITask, ITaskDefine, TaskResult, IEnvOption, Operation, ITaskContext, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString } from './TaskConfig';
+import { ITask, ITaskDefine, TaskResult, IEnvOption, Operation, ITaskContext, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
 /**
  * binding Config, create task context.
  *
@@ -41,9 +41,9 @@ export declare class TaskContext implements ITaskContext {
     generateTask(tasks: any, match?: any): any;
     addToSequence(sequence: Src[], task: ITaskInfo): Src[];
     getRootPath(): string;
-    getRootFolders(express?: (folder: string, ctx: ITaskContext) => string): string[];
-    getFolders(pathstr: string, express?: (folder: string, ctx: ITaskContext) => string): string[];
-    getDistFolders(express?: (folder: string, ctx: ITaskContext) => string, task?: ITaskInfo): string[];
+    getRootFolders(express?: folderCallback): string[];
+    getFolders(pathstr: string, express?: folderCallback): string[];
+    getDistFolders(express?: folderCallback, task?: ITaskInfo): string[];
     toRootSrc(src: Src): Src;
     toRootPath(pathstr: string): string;
     toDistSrc(src: Src, task?: ITaskInfo): Src;

@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import { Gulp } from 'gulp';
-import { ITask, ITaskDefine, TaskResult, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString } from './TaskConfig';
+import { ITask, ITaskDefine, TaskResult, IAssertDist, IEnvOption, Operation, ITaskContext
+    , ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { runSequence, addToSequence } from './taskSequence';
 import { matchCompare, absoluteSrc, absolutePath } from './utils';
@@ -160,11 +161,11 @@ export class TaskContext implements ITaskContext {
         return this.env.root;
     }
 
-    getRootFolders(express?: (folder: string, ctx: ITaskContext) => string): string[] {
+    getRootFolders(express?: folderCallback): string[] {
         return this.getFolders(this.getRootPath(), express);
     }
 
-    getFolders(pathstr: string, express?: (folder: string, ctx: ITaskContext) => string): string[] {
+    getFolders(pathstr: string, express?: folderCallback): string[] {
         let dir = fs.readdirSync(pathstr);
         let folders = [];
         _.each(dir, (d: string) => {
@@ -172,7 +173,7 @@ export class TaskContext implements ITaskContext {
             let f = fs.lstatSync(sf);
             if (f.isDirectory()) {
                 if (express) {
-                    let fl = express(sf, this);
+                    let fl = express(sf, d, this);
                     if (fl) {
                         folders.push(fl);
                     }
@@ -184,7 +185,7 @@ export class TaskContext implements ITaskContext {
         return folders;
     }
 
-    getDistFolders(express?: (folder: string, ctx: ITaskContext) => string, task?: ITaskInfo): string[] {
+    getDistFolders(express?: folderCallback, task?: ITaskInfo): string[] {
         return this.getFolders(this.getDist(task), express);
     }
 
