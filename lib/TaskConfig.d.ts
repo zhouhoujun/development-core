@@ -837,6 +837,35 @@ export interface ITaskContext extends ITaskConfig {
      */
     getRootPath(): string;
     /**
+     * get root folders.
+     *
+     * @param {(folder: string, ctx: ITaskContext) => string} [express]
+     * @returns {string[]}
+     *
+     * @memberOf ITaskContext
+     */
+    getRootFolders(express?: (folder: string, ctx: ITaskContext) => string): string[];
+    /**
+     * get folders in path.
+     *
+     * @param {string} pathstr
+     * @param {(folder: string, ctx: ITaskContext) => string} [express]
+     * @returns {string[]}
+     *
+     * @memberOf ITaskContext
+     */
+    getFolders(pathstr: string, express?: (folder: string, ctx: ITaskContext) => string): string[];
+    /**
+     * get context dist folders
+     *
+     * @param {(folder: string, ctx: ITaskContext) => string} [express]
+     * @param {ITaskInfo} [task]
+     * @returns {string[]}
+     *
+     * @memberOf ITaskContext
+     */
+    getDistFolders(express?: (folder: string, ctx: ITaskContext) => string, task?: ITaskInfo): string[];
+    /**
      * join src to absolute path src with root( env.root ).
      *
      * @param {Src} src

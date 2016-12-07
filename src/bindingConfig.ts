@@ -6,6 +6,7 @@ import { runSequence, addToSequence } from './taskSequence';
 import { matchCompare, absoluteSrc, absolutePath } from './utils';
 import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefineInDir } from './decorator';
 import * as path from 'path';
+import * as fs from 'fs';
 const globby = require('globby');
 
 /**
@@ -135,7 +136,6 @@ export class TaskContext implements ITaskContext {
         return findTaskDefineInDir(dirs);
     }
 
-
     fileFilter(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]> {
         return files(express, filter, mapping);
     }
@@ -158,6 +158,34 @@ export class TaskContext implements ITaskContext {
 
     getRootPath() {
         return this.env.root;
+    }
+
+    getRootFolders(express?: (folder: string, ctx: ITaskContext) => string): string[] {
+        return this.getFolders(this.getRootPath(), express);
+    }
+
+    getFolders(pathstr: string, express?: (folder: string, ctx: ITaskContext) => string): string[] {
+        let dir = fs.readdirSync(pathstr);
+        let folders = [];
+        _.each(dir, (d: string) => {
+            let sf = path.join(pathstr, d);
+            let f = fs.lstatSync(sf);
+            if (f.isDirectory()) {
+                if (express) {
+                    let fl = express(sf, this);
+                    if (fl) {
+                        folders.push(fl);
+                    }
+                } else {
+                    folders.push(sf);
+                }
+            }
+        });
+        return folders;
+    }
+
+    getDistFolders(express?: (folder: string, ctx: ITaskContext) => string, task?: ITaskInfo): string[] {
+        return this.getFolders(this.getDist(task), express);
     }
 
     toRootSrc(src: Src): Src {

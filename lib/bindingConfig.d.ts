@@ -41,6 +41,9 @@ export declare class TaskContext implements ITaskContext {
     generateTask(tasks: any, match?: any): any;
     addToSequence(sequence: Src[], task: ITaskInfo): Src[];
     getRootPath(): string;
+    getRootFolders(express?: (folder: string, ctx: ITaskContext) => string): string[];
+    getFolders(pathstr: string, express?: (folder: string, ctx: ITaskContext) => string): string[];
+    getDistFolders(express?: (folder: string, ctx: ITaskContext) => string, task?: ITaskInfo): string[];
     toRootSrc(src: Src): Src;
     toRootPath(pathstr: string): string;
     toDistSrc(src: Src, task?: ITaskInfo): Src;
