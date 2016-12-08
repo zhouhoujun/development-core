@@ -329,10 +329,40 @@ describe('addToSequence', () => {
         expect(tseq.join(',')).not.eq('test1,test2,mytest');
     });
 
+    it('four item sequence add test 2', () => {
+        let tseq = ['test1', 'test2', 'test3', 'test4'];
+        addToSequence(tseq, { taskName: 'mytest', order: total => 2 / total });
+
+        expect(tseq.join(',')).eq('test1,test2,mytest,test3,test4');
+    });
+
+    it('four item sequence add test total-1', () => {
+        let tseq = ['test1', 'test2', 'test3', 'test4'];
+        addToSequence(tseq, { taskName: 'mytest', order: total => (total - 1) / total });
+
+        expect(tseq.join(',')).eq('test1,test2,test3,test4,mytest');
+    });
+
+
+    it('five item sequence add test total-1', () => {
+        let tseq = ['test1', 'test2', 'test3', 'test4', 'test5'];
+        addToSequence(tseq, { taskName: 'mytest', order: total => (total - 1) / total });
+
+        expect(tseq.join(',')).eq('test1,test2,test3,test4,test5,mytest');
+    });
+
+    it('five item sequence add test total-2', () => {
+        let tseq = ['test1', 'test2', 'test3', 'test4', 'test5'];
+        addToSequence(tseq, { taskName: 'mytest', order: total => (total - 2) / total });
+
+        expect(tseq.join(',')).eq('test1,test2,test3,test4,mytest,test5');
+    });
+
+
 
     it('generate build tasks with auto watch with option name and add sequence', () => {
         let btks = generateTask({
-            name: 'bgtest', src: 'test/**/*spec.ts', order: total => 0.1,
+            name: 'bgtest', src: 'test/**/*spec.ts', order: total => 0,
             watch: true,
             oper: Operation.build,
             pipe(src) {

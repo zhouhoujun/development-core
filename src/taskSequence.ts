@@ -261,21 +261,27 @@ export function addToSequence(taskSequence: Src[], rst: ITaskInfo, ctx?: ITaskCo
             order = rst.order.value;
         }
 
-        if (_.isNumber(order)) {
-            if (order > 0 && order < 1) {
-                order = Math.round(order * len);
-            } else if (order === 1) {
-                order = len;
-            } else if (order > len) {
-                order = Math.round(order % len);
-            }
+
+        if (order > 0 && order < 1) {
+            order = order * len;
+        } else if (order === 1) {
+            order = len;
+        } else if (order > len) {
+            order = order % len;
         }
+
+        order = parseInt(order.toFixed(0));
+
         if (order < 0) {
             order = 0;
         }
 
-        if (order >= 0 && order < taskSequence.length) {
+        let seqMax = len - 2;
+        console.log(order);
+        if (order >= 0 && order <= seqMax) {
             taskSequence.splice(order, 0, rst.taskName);
+        } else if (order > seqMax && order < len) {
+            taskSequence.splice(seqMax - (seqMax - order), 0, rst.taskName);
         } else {
             taskSequence.push(rst.taskName);
         }
