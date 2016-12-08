@@ -1,7 +1,9 @@
 import * as _ from 'lodash';
 import { Gulp } from 'gulp';
-import { ITask, ITaskDefine, TaskResult, IAssertDist, IEnvOption, Operation, ITaskContext
-    , ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
+import {
+    ITask, ITaskDefine, TaskResult, IAssertDist, IEnvOption, Operation, ITaskContext
+    , ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
+} from './TaskConfig';
 import { generateTask } from './generateTask';
 import { runSequence, addToSequence } from './taskSequence';
 import { matchCompare, absoluteSrc, absolutePath } from './utils';
@@ -43,11 +45,150 @@ export class TaskContext implements ITaskContext {
     public env: IEnvOption;
     public globals: any;
     protected setupTasks: ITask[] = [];
+    protected children: ITaskContext[] = [];
     constructor(private cfg: ITaskConfig, public parent?: ITaskContext) {
         this.env = cfg.env;
         this.oper = currentOperation(cfg.env);
         this.option = cfg.option;
         this.globals = cfg.globals || globals;
+    }
+
+    /**
+     * add sub ITaskContext
+     * 
+     * @param {ITaskContext} context
+     * 
+     * @memberOf ITaskContext
+     */
+    add(context: ITaskContext): void {
+        context.parent = this;
+        this.children.push(context);
+    }
+    /**
+     * remove sub ITaskContext.
+     * 
+     * @param {ITaskContext} [context]
+     * 
+     * @memberOf ITaskContext
+     */
+    remove(context?: ITaskContext): ITaskContext[] {
+        let items = _.remove(this.children, context);
+        _.each(items, i => {
+            if (i) {
+                i.parent = null;
+            }
+        });
+        return items;
+    }
+
+    /**
+     * find sub context via express.
+     * 
+     * @param {(ITaskContext | ((item: ITaskContext) => boolean))} express
+     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
+     * @returns {ITaskContext}
+     * 
+     * @memberOf ITaskContext
+     */
+    find(express: ITaskContext | ((item: ITaskContext) => boolean), mode?: string): ITaskContext {
+        let context: ITaskContext;
+        this.each(item => {
+            if (context) {
+                return false;
+            }
+            let isFinded = _.isFunction(express) ? express(item) : (<ITaskContext>express) === item;
+            if (isFinded) {
+                context = item;
+                return false;
+            }
+            return true;
+        }, mode);
+        return context;
+    }
+
+    /**
+     * filter items.
+     * 
+     * @param {(((item: ITaskContext) => void | boolean))} express
+     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
+     * @returns {ITaskContext[]}
+     * 
+     * @memberOf ITaskContext
+     */
+    filter(express: ((item: ITaskContext) => void | boolean), mode?: string): ITaskContext[] {
+        let contexts: ITaskContext[] = [];
+        this.each(item => {
+            if (express(item)) {
+                contexts.push(item);
+            }
+        }, mode);
+        return contexts;
+    }
+    /**
+     * find parent context via express.
+     * 
+     * @param {(ITaskContext | ((item: ITaskContext) => boolean))} express
+     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
+     * 
+     * @memberOf ITaskContext
+     */
+    each(express: ((item: ITaskContext) => void | boolean), mode?: string) {
+        mode = mode || '';
+        let r;
+        switch (mode) {
+            case 'route':
+                r = this.route(express);
+                break;
+            case 'children':
+                r = this.eachChildren(express);
+                break;
+
+            case 'traverse':
+                r = this.trans(express);
+                break;
+            default:
+                r = this.trans(express);
+                break;
+        }
+        return r;
+    }
+
+    eachChildren(express: ((item: ITaskContext) => void | boolean)) {
+        _.each(this.children, item => {
+            return express(item);
+        });
+    }
+
+    /**
+     * do express work in routing.
+     * 
+     * @param {(((item: ITaskContext) => void | boolean))} express
+     * 
+     * @memberOf ITaskContext
+     */
+    route(express: ((item: ITaskContext) => void | boolean)) {
+        if (!express(this)) {
+            return false;
+        };
+        if (this.parent && this.parent.route) {
+            return this.parent.route(express);
+        }
+    }
+    /**
+     * translate all sub context to do express work.
+     * 
+     * @param {(((item: ITaskContext) => void | boolean))} express
+     * 
+     * @memberOf ITaskContext
+     */
+    trans(express: ((item: ITaskContext) => void | boolean)) {
+        if (express(this) === false) {
+            return false;
+        }
+        _.each(this.children, item => {
+            return item.trans(express);
+        });
+        return true;
     }
 
     matchCompare(task: ITaskInfo, match: ITaskInfo): boolean {
@@ -64,20 +205,35 @@ export class TaskContext implements ITaskContext {
         if (task && task.assert) {
             src = taskSourceVal(getAssertSrc(task.assert, oper), ctx)
         }
+
         if (!src) {
-            src = taskSourceVal(getAssertSrc(ctx.option, oper), ctx)
+            this.route(c => {
+                src = taskSourceVal(getAssertSrc(c.option, oper), c);
+                if (src) {
+                    return false;
+                }
+                return true;
+            });
         }
         return (relative !== false) ? src : absoluteSrc(ctx.env.root, src);
     }
 
-    getDist(task?: ITaskInfo, relative = false) {
-        let dist;
+    getDist(task?: ITaskInfo, relative = false): string {
+        let dist: string;
         let ctx = this;
         // let oper = task ? (task.oper || context.oper) : context.oper;
         if (task && task.assert) {
             dist = getCurrentDist(task.assert, ctx);
         }
-        dist = dist || getCurrentDist(ctx.option, ctx);
+        if (!dist) {
+            this.route(c => {
+                dist = getCurrentDist(c.option, c);
+                if (dist) {
+                    return false;
+                }
+                return true;
+            });
+        }
 
         return (relative !== false) ? dist : absolutePath(ctx.env.root, dist);
     }
@@ -97,8 +253,15 @@ export class TaskContext implements ITaskContext {
                 name = taskStringVal(task.assert.name, ctx)
             }
         }
+        let optName: string;
+        this.route(c => {
+            optName = taskStringVal(c.option.name, c);
+            if (optName) {
+                return false;
+            }
+            return true;
+        })
 
-        let optName = taskStringVal(ctx.option.name, ctx);
         if (optName) {
             if (name.indexOf(optName + '-') === 0) {
                 return name;
@@ -238,7 +401,11 @@ export class TaskContext implements ITaskContext {
     }
 
     registerTasks(express?: (item: ITask) => boolean): ITask[] {
-        return this.tasks(express);
+        let tasks = [];
+        this.each(c => {
+            tasks = tasks.concat(c.tasks(express));
+        });
+        return tasks;
     }
 
     globalTasks(): string[] {

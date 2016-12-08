@@ -26,11 +26,74 @@ export declare class TaskContext implements ITaskContext {
     env: IEnvOption;
     globals: any;
     protected setupTasks: ITask[];
+    protected children: ITaskContext[];
     constructor(cfg: ITaskConfig, parent?: ITaskContext);
+    /**
+     * add sub ITaskContext
+     *
+     * @param {ITaskContext} context
+     *
+     * @memberOf ITaskContext
+     */
+    add(context: ITaskContext): void;
+    /**
+     * remove sub ITaskContext.
+     *
+     * @param {ITaskContext} [context]
+     *
+     * @memberOf ITaskContext
+     */
+    remove(context?: ITaskContext): ITaskContext[];
+    /**
+     * find sub context via express.
+     *
+     * @param {(ITaskContext | ((item: ITaskContext) => boolean))} express
+     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
+     * @returns {ITaskContext}
+     *
+     * @memberOf ITaskContext
+     */
+    find(express: ITaskContext | ((item: ITaskContext) => boolean), mode?: string): ITaskContext;
+    /**
+     * filter items.
+     *
+     * @param {(((item: ITaskContext) => void | boolean))} express
+     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
+     * @returns {ITaskContext[]}
+     *
+     * @memberOf ITaskContext
+     */
+    filter(express: ((item: ITaskContext) => void | boolean), mode?: string): ITaskContext[];
+    /**
+     * find parent context via express.
+     *
+     * @param {(ITaskContext | ((item: ITaskContext) => boolean))} express
+     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
+     *
+     * @memberOf ITaskContext
+     */
+    each(express: ((item: ITaskContext) => void | boolean), mode?: string): any;
+    eachChildren(express: ((item: ITaskContext) => void | boolean)): void;
+    /**
+     * do express work in routing.
+     *
+     * @param {(((item: ITaskContext) => void | boolean))} express
+     *
+     * @memberOf ITaskContext
+     */
+    route(express: ((item: ITaskContext) => void | boolean)): any;
+    /**
+     * translate all sub context to do express work.
+     *
+     * @param {(((item: ITaskContext) => void | boolean))} express
+     *
+     * @memberOf ITaskContext
+     */
+    trans(express: ((item: ITaskContext) => void | boolean)): boolean;
     matchCompare(task: ITaskInfo, match: ITaskInfo): boolean;
     getSrc(task?: ITaskInfo, relative?: boolean): Src;
-    getDist(task?: ITaskInfo, relative?: boolean): any;
-    subTaskName(task: any, ext?: string): any;
+    getDist(task?: ITaskInfo, relative?: boolean): string;
+    subTaskName(task: any, ext?: string): string;
     printHelp(lang: string): void;
     findTasks(module: string | Object, match?: ITaskInfo): Promise<ITask[]>;
     findTasksInDir(dirs: Src, match?: ITaskInfo): Promise<ITask[]>;

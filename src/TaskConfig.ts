@@ -93,7 +93,27 @@ export interface IOrder {
      * @type {number}
      * @memberOf IOrder
      */
-    value: number;
+    value?: number;
+    /**
+     * before the task to run.
+     * 
+     * @type {string}
+     * @memberOf IOrder
+     */
+    before?: string;
+    /**
+     * afater the task to run.
+     * 
+     * @type {string}
+     * @memberOf IOrder
+     */
+    after?: string;
+    /**
+     * run Way type.
+     * 
+     * @type {RunWay}
+     * @memberOf IOrder
+     */
     runWay?: RunWay;
 }
 
@@ -776,6 +796,72 @@ export interface ITaskContext extends ITaskConfig {
      * @memberOf ITaskContext
      */
     oper: Operation;
+
+
+    /**
+     * add sub ITaskContext
+     * 
+     * @param {ITaskContext} context
+     * 
+     * @memberOf ITaskContext
+     */
+    add(context: ITaskContext): void;
+    /**
+     * remove sub ITaskContext.
+     * 
+     * @param {ITaskContext} [context]
+     * @returns {ITaskContext[]}
+     * 
+     * @memberOf ITaskContext
+     */
+    remove(context?: ITaskContext): ITaskContext[] ;
+
+    /**
+     * find sub context via express.
+     * 
+     * @param {(ITaskContext | ((item: ITaskContext) => boolean))} express
+     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
+     * @returns {ITaskContext}
+     * 
+     * @memberOf ITaskContext
+     */
+    find(express: ITaskContext | ((item: ITaskContext) => boolean), mode?: string): ITaskContext
+
+    /**
+     * filter items.
+     * 
+     * @param {(((item: ITaskContext) => void | boolean))} express
+     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
+     * @returns {ITaskContext[]}
+     * 
+     * @memberOf ITaskContext
+     */
+    filter(express: ((item: ITaskContext) => void | boolean), mode?: string): ITaskContext[]
+    /**
+     * find parent context via express.
+     * 
+     * @param {(ITaskContext | ((item: ITaskContext) => boolean))} express
+     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
+     * 
+     * @memberOf ITaskContext
+     */
+    each(express: ((item: ITaskContext) => void | boolean), mode?: string);
+    /**
+     * do express work in routing.
+     * 
+     * @param {(((item: ITaskContext) => void | boolean))} express
+     * 
+     * @memberOf ITaskContext
+     */
+    route(express: ((item: ITaskContext) => void | boolean));
+    /**
+     * translate all sub context to do express work.
+     * 
+     * @param {(((item: ITaskContext) => void | boolean))} express
+     * 
+     * @memberOf ITaskContext
+     */
+    trans(express: ((item: ITaskContext) => void | boolean));
 
     /**
      * custom task match filter
