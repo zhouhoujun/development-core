@@ -987,6 +987,16 @@ export interface ITaskContext extends ITaskConfig {
      */
     toDistPath(pathstr: string, task?: ITaskInfo): string;
     /**
+     * parse to T type;
+     *
+     * @template T
+     * @param {(T | ((ctx: ITaskContext) => T))} setting
+     * @returns {T}
+     *
+     * @memberOf ITaskContext
+     */
+    to<T>(setting: T | ((ctx: ITaskContext) => T)): T;
+    /**
      * to src
      *
      * @param {any} TaskSource

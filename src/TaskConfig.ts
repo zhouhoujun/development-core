@@ -814,7 +814,7 @@ export interface ITaskContext extends ITaskConfig {
      * 
      * @memberOf ITaskContext
      */
-    remove(context?: ITaskContext): ITaskContext[] ;
+    remove(context?: ITaskContext): ITaskContext[];
 
     /**
      * find sub context via express.
@@ -1079,6 +1079,16 @@ export interface ITaskContext extends ITaskConfig {
      */
     toDistPath(pathstr: string, task?: ITaskInfo): string;
 
+    /**
+     * parse to T type;
+     * 
+     * @template T
+     * @param {(T | ((ctx: ITaskContext) => T))} setting
+     * @returns {T}
+     * 
+     * @memberOf ITaskContext
+     */
+    to<T>(setting: T | ((ctx: ITaskContext) => T)): T;
     /**
      * to src
      * 

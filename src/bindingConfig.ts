@@ -368,6 +368,10 @@ export class TaskContext implements ITaskContext {
         return absolutePath(this.getDist(task), pathstr);
     }
 
+    to<T>(setting: T | ((ctx: ITaskContext) => T)): T {
+        return _.isFunction(setting) ? setting(this) : setting;
+    }
+
     toSrc(source: TaskSource): Src {
         return taskSourceVal(source, this);
     }
