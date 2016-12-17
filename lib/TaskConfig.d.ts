@@ -761,7 +761,7 @@ export interface ITaskContext extends ITaskConfig {
      */
     filter(express: ((item: ITaskContext) => void | boolean), mode?: string): ITaskContext[];
     /**
-     * find parent context via express.
+     * iteration context with express.
      *
      * @param {(ITaskContext | ((item: ITaskContext) => boolean))} express
      * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
@@ -1052,6 +1052,12 @@ export interface ITaskContext extends ITaskConfig {
      * @memberOf ITaskContext
      */
     tasks(express?: (item: ITask) => boolean): ITask[];
+    /**
+     * filter registered tasks in this context and sub context.
+     *
+     * @param {(item: ITask) => boolean} [express]
+     * @returns {ITask[]}
+     */
     registerTasks?(express?: (item: ITask) => boolean): ITask[];
     /**
      * get all global tasks registered in gulp.
