@@ -6,6 +6,9 @@ import * as chalk from 'chalk';
 import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
 import { matchCompare } from './utils';
 import { PipeTask } from './PipeTask';
+import { runSequence } from './taskSequence';
+
+import * as watch from 'gulp-watch';
 
 type factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => TaskResult;
 /**
@@ -164,11 +167,20 @@ function createCustomTask(dt: IDynamicTaskOption): ITask {
 function createWatchTask(dt: IDynamicTaskOption): ITask {
     let factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => {
         let watchs = _.isFunction(dt.watchTasks) ? dt.watchTasks(ctx, dt) : dt.watchTasks;
+        // if (!_.isFunction(_.last(watchs))) {
+        //     watchs.push(<WatchCallback>(event: WatchEvent) => {
+        //         dt.watchChanged && dt.watchChanged(event, ctx);
+        //     });
+        // }
+        let callback;
         if (!_.isFunction(_.last(watchs))) {
-            watchs.push(<WatchCallback>(event: WatchEvent) => {
+            callback = (event: WatchEvent) => {
                 dt.watchChanged && dt.watchChanged(event, ctx);
-            });
+            };
+        } else {
+            callback = watchs.pop();
         }
+
         watchs = _.map(watchs, w => {
             if (_.isString(w)) {
                 return ctx.subTaskName(w);
@@ -180,7 +192,13 @@ function createWatchTask(dt: IDynamicTaskOption): ITask {
         gulp.task(tk, () => {
             let src = ctx.getSrc(info);
             console.log('watch, src:', chalk.cyan.call(chalk, src));
-            gulp.watch(src, watchs)
+            // watch(src, watchs);
+            watch(src, () => {
+                runSequence(gulp, <string[]>watchs)
+                    .then(() => {
+                        callback && callback();
+                    });
+            });
         });
 
         return tk;

@@ -3,7 +3,7 @@ import { Gulp } from 'gulp';
 import * as chalk from 'chalk';
 import { Src, RunWay, ITaskInfo, ITaskContext, ITask, Operation } from './TaskConfig';
 import { sortOrder } from './utils';
-
+import * as watch from 'gulp-watch';
 
 export type ZipTaskName = (name: string, runWay?: RunWay, ctx?: ITaskContext) => string
 /**
@@ -81,7 +81,9 @@ function setupTask(gulp: Gulp, t: ITask, ctx: ITaskContext, callback: (name: Src
                 gulp.task(wname, () => {
                     let src = ctx.getSrc(info);
                     console.log('watch, src:', chalk.cyan.call(chalk, src));
-                    gulp.watch(src, _.isArray(tname) ? tname : [<string>tname]);
+                    watch(src, (cb) => {
+                        runSequence(gulp, _.isArray(tname) ? tname : [<string>tname]);
+                    });
                 });
 
                 callback(wname);
@@ -143,7 +145,9 @@ export function taskSequenceWatch(gulp: Gulp, tasks: Src[], ctx: ITaskContext, e
             gulp.task(name, () => {
                 let src = ctx.getSrc();
                 console.log('watch, src:', chalk.cyan.call(chalk, src));
-                gulp.watch(src, wats)
+                watch(src, () => {
+                    runSequence(gulp, wats)
+                })
             });
             return name;
         }
