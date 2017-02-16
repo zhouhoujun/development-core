@@ -1,6 +1,5 @@
 /// <reference types="gulp" />
 /// <reference types="node" />
-/// <reference types="chai" />
 import { Gulp, WatchEvent, WatchCallback, TaskCallback } from 'gulp';
 /**
  * mutil source stream pipe task run way.
@@ -856,20 +855,20 @@ export interface ITaskContext extends ITaskConfig {
      * find taskdefine in module. default implement in bindingConfig.
      *
      * @param {(string | Object)} module
-     * @returns {Promise<ITaskDefine>}
+     * @returns {Promise<IContextDefine>}
      *
      * @memberOf ITaskContext
      */
-    findTaskDefine(module: string | Object): Promise<ITaskDefine>;
+    findTaskDefine(module: string | Object): Promise<IContextDefine>;
     /**
      * find taskdefine in directories.  default implement in bindingConfig.
      *
      * @param {Src} dirs
-     * @returns {Promise<ITaskDefine>}
+     * @returns {Promise<IContextDefine>}
      *
      * @memberOf ITaskContext
      */
-    findTaskDefineInDir(dirs: Src): Promise<ITaskDefine>;
+    findTaskDefineInDir(dirs: Src): Promise<IContextDefine>;
     /**
      * filter file in directory.  default implement in bindingConfig.
      *

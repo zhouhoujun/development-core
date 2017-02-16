@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { Gulp } from 'gulp';
 import {
-    ITask, ITaskDefine, TaskResult, IAssertDist, IEnvOption, Operation, ITaskContext
+    ITask, ITaskDefine, IContextDefine, TaskResult, IAssertDist, IEnvOption, Operation, ITaskContext
     , ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
 } from './TaskConfig';
 import { generateTask } from './generateTask';
@@ -292,11 +292,11 @@ export class TaskContext implements ITaskContext {
         return findTasksInDir(dirs, _.extend({ oper: ctx.oper }, match || {}), this);
     }
 
-    findTaskDefine(module: string | Object): Promise<ITaskDefine> {
+    findTaskDefine(module: string | Object): Promise<IContextDefine> {
         return findTaskDefineInModule(module);
     }
 
-    findTaskDefineInDir(dirs: Src): Promise<ITaskDefine> {
+    findTaskDefineInDir(dirs: Src): Promise<IContextDefine> {
         return findTaskDefineInDir(dirs);
     }
 

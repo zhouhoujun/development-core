@@ -17,7 +17,7 @@ const ts = require('gulp-typescript');
 const sourcemaps = require('gulp-sourcemaps');
 let tsProject = ts.createProject('tsconfig.json');
 const uglify = require('gulp-uglify');
-const babel = require('gulp-babel');
+// const babel = require('gulp-babel');
 import * as gulp from 'gulp';
 
 describe('generateTask', () => {
@@ -42,8 +42,7 @@ describe('generateTask', () => {
                     (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
                     (tsmap, config, dt) => {
                         if (config.oper === Operation.release || config.oper === Operation.deploy) {
-                            return tsmap.js.pipe(babel({ presets: ['es2015'] }))
-                                .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
+                            return tsmap.js.pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
                                 .pipe(gulp.dest(config.getDist(dt)));
                         } else {
                             return tsmap.js.pipe(sourcemaps.write('./sourcemaps')).pipe(gulp.dest(config.getDist(dt)));

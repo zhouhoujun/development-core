@@ -1,7 +1,6 @@
-/// <reference types="chai" />
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { ITask, ITaskDefine, TaskResult, IEnvOption, Operation, ITaskContext, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
+import { ITask, IContextDefine, TaskResult, IEnvOption, Operation, ITaskContext, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
 /**
  * binding Config, create task context.
  *
@@ -97,8 +96,8 @@ export declare class TaskContext implements ITaskContext {
     printHelp(lang: string): void;
     findTasks(module: string | Object, match?: ITaskInfo): Promise<ITask[]>;
     findTasksInDir(dirs: Src, match?: ITaskInfo): Promise<ITask[]>;
-    findTaskDefine(module: string | Object): Promise<ITaskDefine>;
-    findTaskDefineInDir(dirs: Src): Promise<ITaskDefine>;
+    findTaskDefine(module: string | Object): Promise<IContextDefine>;
+    findTaskDefineInDir(dirs: Src): Promise<IContextDefine>;
     fileFilter(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]>;
     runSequence(gulp: Gulp, tasks: Src[]): Promise<any>;
     generateTask(tasks: any, match?: any): any;

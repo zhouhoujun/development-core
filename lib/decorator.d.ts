@@ -1,4 +1,3 @@
-/// <reference types="chai" />
 import 'reflect-metadata';
 import { ITask, ITaskDecorator, ITaskContext, IContextDefine, ITaskDefine, Src } from './TaskConfig';
 /**
