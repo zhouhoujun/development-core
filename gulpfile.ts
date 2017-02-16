@@ -11,7 +11,6 @@ const ts = require('gulp-typescript');
 const sourcemaps = require('gulp-sourcemaps');
 let tsProject = ts.createProject('tsconfig.json');
 const uglify = require('gulp-uglify');
-const babel = require('gulp-babel');
 
 gulp.task('build', () => {
     var options: IEnvOption = minimist(process.argv.slice(2), {
@@ -71,7 +70,6 @@ let createTask = (env) => {
                     transform.transformSourcePipe = (source) => source.pipe(transform)['js'];
                     return transform;
                 },
-                (config) => babel({ presets: ['es2015'] }),
                 (config) => sourcemaps.write('./sourcemaps')
             ]
         },
@@ -85,7 +83,7 @@ let createTask = (env) => {
             ],
             output: [
                 (tsmap, config, dt, gulp) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
-                (tsmap, config, dt, gulp) => tsmap.js.pipe(babel({ presets: ['es2015'] }))
+                (tsmap, config, dt, gulp) => tsmap.js
                     .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
                     .pipe(gulp.dest(config.getDist(dt)))
             ]
