@@ -428,7 +428,7 @@ export class TaskContext implements ITaskContext {
 export function currentOperation(env: IEnvOption) {
     let oper: Operation;
     if (env.deploy) {
-        oper = Operation.deploy;
+        oper = Operation.deploy | Operation.release;
     } else if (env.release) {
         oper = Operation.release;
     } else {
@@ -487,15 +487,22 @@ function getCurrentDist(ds: IAssertDist, ctx: ITaskContext) {
     let env = ctx.env;
     let oper = ctx.oper;
     if (env.deploy || (oper & Operation.deploy) > 0) {
-        dist = ds.deployDist || taskStringVal(ds.dist, ctx);
-    } else if (env.release || (oper & Operation.release) > 0) {
-        dist = ds.releaseDist || taskStringVal(ds.dist, ctx);
-    } else if (env.e2e || (oper & Operation.e2e) > 0) {
-        dist = ds.e2eDist || ds.buildDist || taskStringVal(ds.dist, ctx);
-    } else if (env.test || (oper & Operation.test) > 0) {
-        dist = ds.testDist || ds.buildDist || taskStringVal(ds.dist, ctx);
-    } else if ((oper & Operation.build) > 0) {
-        dist = ds.buildDist || taskStringVal(ds.dist, ctx);
+        dist = taskStringVal(ds.deployDist, ctx);
+    }
+    if (!dist && (env.release || (oper & Operation.release) > 0)) {
+        dist = taskStringVal(ds.releaseDist, ctx);
+    }
+    if (!dist && (env.e2e || (oper & Operation.e2e) > 0)) {
+        dist = taskStringVal(ds.e2eDist, ctx);
+    }
+    if (!dist && (env.test || (oper & Operation.test) > 0)) {
+        dist = taskStringVal(ds.testDist, ctx);
+    }
+    if (!dist && ((oper & Operation.build) > 0)) {
+        dist = taskStringVal(ds.buildDist, ctx);
+    }
+    if (!dist) {
+        dist = taskStringVal(ds.dist, ctx);
     }
 
     return dist;

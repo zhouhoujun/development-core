@@ -407,35 +407,35 @@ export interface IAssertDist {
      * @type {string}
      * @memberOf Dist
      */
-    buildDist?: string;
+    buildDist?: TaskString;
     /**
      * test output folder. if empty use parent setting, or ues 'dist'.
      *
      * @type {string}
      * @memberOf Dist
      */
-    testDist?: string;
+    testDist?: TaskString;
     /**
      * e2e output folder. if empty use parent setting, or ues 'dist'.
      *
      * @type {string}
      * @memberOf Dist
      */
-    e2eDist?: string;
+    e2eDist?: TaskString;
     /**
      * release output folder. if empty use parent setting, or ues 'dist'.
      *
      * @type {string}
      * @memberOf Dist
      */
-    releaseDist?: string;
+    releaseDist?: TaskString;
     /**
      * deploy output folder. if empty use parent setting, or ues 'dist'.
      *
      * @type {string}
      * @memberOf Dist
      */
-    deployDist?: string;
+    deployDist?: TaskString;
 }
 /**
  * custom pipe.
