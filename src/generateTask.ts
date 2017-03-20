@@ -3,14 +3,63 @@ import { Gulp, WatchEvent } from 'gulp';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
-import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
+import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, TaskString, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
 import { matchCompare } from './utils';
 import { PipeTask } from './PipeTask';
 import { runSequence } from './taskSequence';
-
 import * as watch from 'gulp-watch';
+import { exec } from 'child_process';
 
 type factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => TaskResult;
+
+/**
+ * Shell Task
+ * 
+ * @class ShellTask
+ * @implements {ITask}
+ */
+class ShellTask implements ITask {
+    constructor(protected info: ITaskInfo, protected cmd: TaskString) {
+
+    }
+
+    public getInfo(): ITaskInfo {
+        return this.info;
+    }
+
+    setup(ctx: ITaskContext, gulp?: Gulp) {
+        gulp = gulp || coregulp;
+        // let option = this.getOption(context);
+        let tk = ctx.subTaskName(this.getInfo());
+        console.log(`register ${tk} task:`, chalk.cyan(tk));
+
+        gulp.task(tk, () => {
+            return new Promise((resolve, reject) => {
+                let cmd = ctx.toStr(this.cmd);
+                let shell = exec(cmd, (err, stdout, stderr) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(stdout);
+                    }
+                });
+
+                shell.stdout.on('data', data => {
+                    console.log(data);
+                });
+
+                shell.stderr.on('data', data => {
+                    console.log(data);
+                });
+            });
+        });
+
+        this.info.taskName = tk;
+
+        return tk;
+    }
+}
+
 /**
  * custom dynamic task.
  * 
@@ -125,6 +174,8 @@ export function createTask(dt: IDynamicTaskOption): ITask {
     let task: ITask;
     if (dt.oper & Operation.watch) {
         task = createWatchTask(dt);
+    } else if (dt.shell) {
+        task = new ShellTask(dt, dt.shell);
     } else if (_.isFunction(dt.task)) {
         // custom task
         task = createCustomTask(dt);

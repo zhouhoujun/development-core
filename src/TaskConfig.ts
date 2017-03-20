@@ -584,6 +584,13 @@ export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPip
      */
     task?(context: ITaskContext, dt?: IDynamicTaskOption, gulp?: Gulp): void | ITransform | Promise<any>;
 
+    /**
+     *  shell task.
+     * 
+     * @type {TaskString}
+     * @memberOf IDynamicTaskOption
+     */
+    shell?: TaskString;
 }
 
 /**
