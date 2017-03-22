@@ -11,7 +11,7 @@ const requireDir = require('require-dir');
 
 /**
  * task decorator.
- * 
+ *
  * @export
  * @param {ITaskDecorator} type
  * @returns
@@ -31,7 +31,7 @@ export function task<T extends Function>(target?: (new <T>() => T) | ITaskDecora
 
 /**
  * dynamic task decorator.
- * 
+ *
  * @export
  * @template T
  * @param {((new <T>() => T) | ITaskDecorator)} [target]
@@ -104,7 +104,7 @@ function findTaskset(tasks: Map<any, Taskitem>, target: any, match?: ITaskDecora
             if (!key || !target[key] || /^[0-9]+$/.test(key)) {
                 return;
             }
-            console.log(chalk.grey('find task from :'), chalk.cyan(key));
+            // console.log(chalk.grey('find task from :'), chalk.cyan(key));
             findTaskset(tasks, target[key], match, ctx);
         });
     }
@@ -126,7 +126,7 @@ function findTaskMap(target: any, match?: ITaskDecorator, ctx?: ITaskContext, ma
 }
 /**
  * find tasks in Object module.
- * 
+ *
  * @export
  * @param {*} target
  * @param {ITaskDecorator} [match]
@@ -139,7 +139,7 @@ export function findTasks(target: any, match?: ITaskDecorator, ctx?: ITaskContex
 
 /**
  * decorator task define implements IContextDefine.
- * 
+ *
  * @export
  * @param {Function} constructor
  */
@@ -159,7 +159,7 @@ export function taskdefine<T extends Function>(target?: (new <T>() => T)): any {
 
 /**
  * get all taskdefine in module.
- * 
+ *
  * @export
  * @param {any} target
  * @returns
@@ -186,7 +186,7 @@ export function findTaskDefines(target): IContextDefine[] {
             if (!key || !target[key] || /^[0-9]+$/.test(key)) {
                 return;
             }
-            console.log(chalk.grey('find task define from :'), chalk.cyan(key));
+            // console.log(chalk.grey('find task define from :'), chalk.cyan(key));
             defs = defs.concat(findTaskDefines(target[key]));
         });
     }
@@ -197,7 +197,7 @@ export function findTaskDefines(target): IContextDefine[] {
 
 /**
  * get one taskdefine in module.
- * 
+ *
  * @export
  * @param {any} target
  * @returns
@@ -232,7 +232,7 @@ export function findTaskDefine(target): IContextDefine {
             if (!key || !target[key] || /^[0-9]+$/.test(key)) {
                 return true;
             }
-            console.log(chalk.grey('find task define from :'), chalk.cyan(key));
+            // console.log(chalk.grey('find task define from :'), chalk.cyan(key));
             def = findTaskDefine(target[key]);
             return true;
         });
@@ -243,7 +243,7 @@ export function findTaskDefine(target): IContextDefine {
 
 /**
  * find one taskdefine in module.
- * 
+ *
  * @export
  * @param {(string | Object)} md
  * @returns {Promise<IContextDefine>}
@@ -264,14 +264,14 @@ export function findTaskDefineInModule(md: string | Object): Promise<IContextDef
         return Promise.resolve(tsdef);
     } else {
         // console.error('can not found task config builder method in module {0}.', mdl);
-        console.log(chalk.yellow('can not found task define in module.'));
+        // console.log(chalk.yellow('can not found task define in module.'));
         return Promise.resolve(null);
     }
 }
 
 /**
  * fund tasks in module.
- * 
+ *
  * @export
  * @param {(string | Object)} md
  * @param {ITaskDecorator} [match]
@@ -296,7 +296,7 @@ export function findTasksInModule(md: string | Object, match?: ITaskDecorator, c
 
 /**
  * find one task define in directories.
- * 
+ *
  * @export
  * @param {Src} dirs
  * @returns {Promise<IContextDefine>}
@@ -319,7 +319,7 @@ export function findTaskDefineInDir(dirs: Src): Promise<IContextDefine> {
 
 /**
  * find tasks in directories.
- * 
+ *
  * @export
  * @param {Src} dirs
  * @param {ITaskDecorator} [match]
@@ -344,7 +344,7 @@ export function findTasksInDir(dirs: Src, match?: ITaskDecorator, ctx?: ITaskCon
 
 /**
  * task define context convert.
- * 
+ *
  * @export
  * @param {ITaskDefine} tdef
  * @returns {IContextDefine}

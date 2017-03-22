@@ -7,58 +7,58 @@ import * as _ from 'lodash';
 
 /**
  * pipe task.
- * 
+ *
  * @export
  * @interface IPipeWork
  */
 export interface IPipeTask extends ITask {
     /**
      * task default name.
-     * 
+     *
      * @type {string}
      * @memberOf IPipeTask
      */
     name: string;
     /**
      * gulp src stream.
-     * 
+     *
      * @param {ITaskContext} context
      * @param {IAssertDist} dist
      * @param {Gulp} gulp
      * @returns {(TransformSource | Promise<TransformSource>)}
-     * 
+     *
      * @memberOf IPipeTask
      */
     source(context: ITaskContext, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource>;
     /**
      * task pipe works.
-     * 
+     *
      * @param {ITaskContext} context
      * @param {IAssertDist} dist
      * @param {Gulp} [gulp]
      * @returns {Pipe[]}
-     * 
+     *
      * @memberOf IPipeTask
      */
     pipes(context: ITaskContext, dist: IAssertDist, gulp?: Gulp): Pipe[];
 
     /**
      * output pipes.
-     * 
+     *
      * @param {ITaskContext} [context]
      * @param {Gulp} [gulp]
      * @returns {OutputPipe[]}
-     * 
+     *
      * @memberOf IPipeTask
      */
     output(context: ITaskContext, dist: IAssertDist, gulp?: Gulp): OutputPipe[];
     /**
      * execute task works.
-     * 
+     *
      * @param {ITaskContext} context
      * @param {Gulp} gulp
      * @returns {Promise<any>}
-     * 
+     *
      * @memberOf IPipeTask
      */
     execute(context: ITaskContext, gulp: Gulp): Promise<any>;
@@ -66,7 +66,7 @@ export interface IPipeTask extends ITask {
 
 /**
  * Task base class.
- * 
+ *
  * @export
  * @class Task
  * @implements {ITask}
@@ -74,14 +74,13 @@ export interface IPipeTask extends ITask {
 export abstract class PipeTask implements IPipeTask {
     /**
      * run mutil source stream way. default parallel.
-     * 
-     * 
+     *
      * @memberOf PipeTask
      */
     public runWay = RunWay.parallel;
     /**
      * task default name.
-     * 
+     *
      * @type {string}
      * @memberOf PipeTask
      */
@@ -97,7 +96,7 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * get task info.
-     * 
+     *
      * @type {ITaskInfo}
      * @memberOf PipeTask
      */
@@ -110,12 +109,12 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * source streams.
-     * 
+     *
      * @param {ITaskContext} context
      * @param {IAssertDist} option
      * @param {Gulp} gulp
      * @returns {(TransformSource | Promise<TransformSource>)}
-     * 
+     *
      * @memberOf PipeTask
      */
     source(ctx: ITaskContext, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource> {
@@ -134,12 +133,12 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * task pipe works.
-     * 
+     *
      * @param {ITaskContext} context
      * @param {IAssertDist} dist
      * @param {Gulp} [gulp]
      * @returns {Pipe[]}
-     * 
+     *
      * @memberOf PipeTask
      */
     pipes(ctx: ITaskContext, dist: IAssertDist, gulp?: Gulp): Pipe[] {
@@ -161,12 +160,12 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * output pipes.
-     * 
+     *
      * @param {ITaskContext} context
      * @param {IAssertDist} dist
      * @param {Gulp} [gulp]
      * @returns {OutputPipe[]}
-     * 
+     *
      * @memberOf PipeTask
      */
     output(ctx: ITaskContext, dist: IAssertDist, gulp?: Gulp): OutputPipe[] {
@@ -194,14 +193,14 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      *  custom pipe Promise.
-     * 
+     *
      * @protected
      * @param {ITransform} source
      * @param {ITaskContext} ctx
      * @param {IAssertDist} dist
      * @param {Gulp} gulp
      * @returns
-     * 
+     *
      * @memberOf PipeTask
      */
     protected customPipe(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp): ITransform | Promise<ITransform> {
@@ -233,11 +232,11 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * get option.
-     * 
+     *
      * @protected
      * @param {ITaskContext} context
      * @returns {IAssertDist}
-     * 
+     *
      * @memberOf PipeTask
      */
     protected getOption(context: ITaskContext): IAssertDist {
@@ -246,7 +245,7 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * match pipe Operate
-     * 
+     *
      * @protected
      * @param {IOperate} p
      * @param {string} name
@@ -254,7 +253,7 @@ export abstract class PipeTask implements IPipeTask {
      * @param {IOperate} [trsOperate]
      * @param {boolean} [isOutput=false]
      * @returns
-     * 
+     *
      * @memberOf PipeTask
      */
     protected match(p: IOperate, name: string, ctx: ITaskContext, trsOperate?: IOperate, isOutput = false) {
@@ -295,7 +294,7 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * convert custom pipe result to Promise.
-     * 
+     *
      * @protected
      * @param {ITransform} source
      * @param {ICustomPipe} opt
@@ -303,7 +302,7 @@ export abstract class PipeTask implements IPipeTask {
      * @param {IAssertDist} dist
      * @param {Gulp} gulp
      * @returns
-     * 
+     *
      * @memberOf PipeTask
      */
     protected cpipe2Promise(source: ITransform, opt: ICustomPipe, context: ITaskContext, dist: IAssertDist, gulp: Gulp) {
@@ -325,11 +324,11 @@ export abstract class PipeTask implements IPipeTask {
     protected operateFileds = ['name', 'oper', 'order', 'nonePipe', 'noneOutput'];
     /**
      * get transform Operate.
-     * 
+     *
      * @protected
      * @param {ITransform} source
      * @returns {IOperate}
-     * 
+     *
      * @memberOf PipeTask
      */
     protected getTransformOperate(source: ITransform): IOperate {
@@ -338,12 +337,12 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * set transform Operate.
-     * 
+     *
      * @protected
      * @param {ITransform} source
      * @param {IOperate} operate
      * @returns
-     * 
+     *
      * @memberOf PipeTask
      */
     protected setTransformOperate(source: ITransform, operate: IOperate) {
@@ -359,7 +358,7 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * covert pipes transform to Promise.
-     * 
+     *
      * @protected
      * @param {ITransform} source
      * @param {ITaskContext} context
@@ -367,7 +366,7 @@ export abstract class PipeTask implements IPipeTask {
      * @param {Gulp} gulp
      * @param {Pipe[]} [pipes]
      * @returns
-     * 
+     *
      * @memberOf PipeTask
      */
     protected pipes2Promise(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp, pipes?: Pipe[]) {
@@ -412,7 +411,7 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * output pipes transform to Promise.
-     * 
+     *
      * @protected
      * @param {ITransform} source
      * @param {ITaskContext} context
@@ -420,7 +419,7 @@ export abstract class PipeTask implements IPipeTask {
      * @param {Gulp} gulp
      * @param {OutputPipe[]} [output]
      * @returns
-     * 
+     *
      * @memberOf PipeTask
      */
     protected output2Promise(source: ITransform, context: ITaskContext, dist: IAssertDist, gulp: Gulp, output?: OutputPipe[]) {
@@ -461,7 +460,7 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * each one source stream works.
-     * 
+     *
      * @protected
      * @param {ITransform} source
      * @param {ITaskContext} ctx
@@ -470,7 +469,7 @@ export abstract class PipeTask implements IPipeTask {
      * @param {Pipe[]} [pipes]
      * @param {OutputPipe[]} [output]
      * @returns
-     * 
+     *
      * @memberOf PipeTask
      */
     protected working(source: ITransform, ctx: ITaskContext, option: IAssertDist, gulp: Gulp, pipes?: Pipe[], output?: OutputPipe[]) {
@@ -486,11 +485,11 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * execute task working
-     * 
+     *
      * @param {ITaskContext} context
      * @param {Gulp} gulp
      * @returns {Promise<any>}
-     * 
+     *
      * @memberOf PipeTask
      */
     execute(context: ITaskContext, gulp: Gulp): Promise<any> {
@@ -523,11 +522,11 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * setup task works.
-     * 
+     *
      * @param {ITaskContext} context
      * @param {Gulp} [gulp]
      * @returns {TaskResult}
-     * 
+     *
      * @memberOf PipeTask
      */
     setup(context: ITaskContext, gulp?: Gulp): TaskResult {

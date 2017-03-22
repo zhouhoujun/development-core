@@ -69,7 +69,6 @@ export declare abstract class PipeTask implements IPipeTask {
     /**
      * run mutil source stream way. default parallel.
      *
-     *
      * @memberOf PipeTask
      */
     runWay: RunWay;

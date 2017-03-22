@@ -469,20 +469,17 @@ export interface IPipeOption extends ICustomPipe {
     /**
      * task source stream config.
      *
-     *
      * @memberOf IPipeOption
      */
     source?: TransformSource | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => TransformSource);
     /**
      * task pipe works.
      *
-     *
      * @memberOf IDynamicTaskOption
      */
     pipes?: Pipe[] | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => Pipe[]);
     /**
      * output pipe task
-     *
      *
      * @memberOf IPipeOption
      */
@@ -505,7 +502,6 @@ export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPip
     name: TaskString;
     /**
      * watch tasks
-     *
      *
      * @memberOf IDynamicTaskOption
      */
@@ -530,6 +526,13 @@ export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPip
      * @memberOf IDynamicTaskOption
      */
     task?(context: ITaskContext, dt?: IDynamicTaskOption, gulp?: Gulp): void | ITransform | Promise<any>;
+    /**
+     *  shell command task.
+     *
+     * @type {TaskSource}
+     * @memberOf IDynamicTaskOption
+     */
+    shell?: TaskSource;
 }
 /**
  * dynamic tasks
@@ -562,6 +565,13 @@ export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
      * @memberOf IAsserts
      */
     assertsOrder?: Order;
+    /**
+     * the shell command run way. default parallel.
+     *
+     * @type {RunWay}
+     * @memberOf IAsserts
+     */
+    shellRunWay?: RunWay;
     /**
      * custom control how to match tasks.
      *

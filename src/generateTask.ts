@@ -3,7 +3,7 @@ import { Gulp, WatchEvent } from 'gulp';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
-import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, TaskString, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
+import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, RunWay, TaskSource, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
 import { matchCompare } from './utils';
 import { PipeTask } from './PipeTask';
 import { runSequence } from './taskSequence';
@@ -14,55 +14,89 @@ type factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => TaskResult;
 
 /**
  * Shell Task
- * 
+ *
  * @class ShellTask
  * @implements {ITask}
  */
 class ShellTask implements ITask {
-    constructor(protected info: ITaskInfo, protected cmd: TaskString) {
+    constructor(protected info: ITaskInfo, protected cmd: TaskSource) {
 
     }
 
+    /**
+     * get task info.
+     */
     public getInfo(): ITaskInfo {
         return this.info;
     }
 
+    /**
+     * setup shell task.
+     *
+     * @param {ITaskContext} ctx
+     * @param {Gulp} [gulp]
+     * @returns
+     *
+     * @memberOf ShellTask
+     */
     setup(ctx: ITaskContext, gulp?: Gulp) {
         gulp = gulp || coregulp;
         // let option = this.getOption(context);
         let tk = ctx.subTaskName(this.getInfo());
-        console.log(`register ${tk} task:`, chalk.cyan(tk));
+        console.log(`register shell task:`, chalk.cyan(tk));
 
         gulp.task(tk, () => {
-            return new Promise((resolve, reject) => {
-                let cmd = ctx.toStr(this.cmd);
-                let shell = exec(cmd, (err, stdout, stderr) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(stdout);
-                    }
-                });
+            let cmds = ctx.toSrc(this.cmd);
+            if (_.isString(cmds)) {
+                return this.execShell(cmds);
+            } else if (_.isArray(cmds)) {
+                if (ctx.option.shellRunWay === RunWay.sequence) {
+                    let pip = Promise.resolve();
+                    _.each(cmds, cmd => {
+                        pip = pip.then(() => this.execShell(cmd));
+                    });
+                    return pip;
+                } else {
+                    return Promise.all(_.map(cmds, cmd => this.execShell(cmd)));
+                }
+            } else {
 
-                shell.stdout.on('data', data => {
-                    console.log(data);
-                });
+                return Promise.reject('shell task config error');
+            }
 
-                shell.stderr.on('data', data => {
-                    console.log(data);
-                });
-            });
         });
 
         this.info.taskName = tk;
 
         return tk;
     }
+
+
+    execShell(cmd: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            console.log('execute shell:', chalk.cyan(cmd));
+            let shell = exec(cmd, (err, stdout, stderr) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(stdout);
+                }
+            });
+
+            shell.stdout.on('data', data => {
+                console.log(data);
+            });
+
+            shell.stderr.on('data', data => {
+                console.log(data);
+            });
+        });
+    }
 }
 
 /**
  * custom dynamic task.
- * 
+ *
  * @class DynamicTask
  * @implements {ITask}
  */
@@ -72,7 +106,7 @@ class DynamicTask implements ITask {
 
     /**
      * get task info.
-     * 
+     *
      * @type {ITaskInfo}
      * @memberOf PipeTask
      */
@@ -91,7 +125,7 @@ class DynamicTask implements ITask {
 
 /**
  * pipe task for dynamic task.
- * 
+ *
  * @class DynamicPipeTask
  * @extends {PipeTask}
  */
@@ -134,7 +168,7 @@ class DynamicPipeTask extends PipeTask {
 
 /**
  * dynamic build tasks.
- * 
+ *
  * @export
  * @param {(IDynamicTaskOption | IDynamicTaskOption[])} tasks
  * @param {ITaskInfo} [match]
@@ -165,7 +199,7 @@ export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], m
 
 /**
  * create task by dynamic option.
- * 
+ *
  * @export
  * @param {IDynamicTaskOption} dt
  * @returns {ITask}
@@ -189,7 +223,7 @@ export function createTask(dt: IDynamicTaskOption): ITask {
 
 /**
  * create custom task.
- * 
+ *
  * @param {IDynamicTaskOption} dt
  * @returns {ITask}
  */
@@ -210,7 +244,7 @@ function createCustomTask(dt: IDynamicTaskOption): ITask {
 
 /**
  * create dynamic watch task.
- * 
+ *
  * @export
  * @param {IDynamicTaskOption} dt
  * @returns {ITask}
@@ -260,7 +294,7 @@ function createWatchTask(dt: IDynamicTaskOption): ITask {
 
 /**
  * create pipe task.
- * 
+ *
  * @export
  * @param {IDynamicTaskOption} dt
  * @returns {ITask}

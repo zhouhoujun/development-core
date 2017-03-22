@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { Gulp } from 'gulp';
 import {
-    ITask, ITaskDefine, IContextDefine, TaskResult, IAssertDist, IEnvOption, Operation, ITaskContext
+    ITask, IContextDefine, TaskResult, IAssertDist, IEnvOption, Operation, ITaskContext
     , ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
 } from './TaskConfig';
 import { generateTask } from './generateTask';
@@ -14,7 +14,7 @@ const globby = require('globby');
 
 /**
  * binding Config, create task context.
- * 
+ *
  * @export
  * @param {ITaskConfig} cfg
  * @param {ITaskContext} [parent]
@@ -34,7 +34,7 @@ let globals = {};
 
 /**
  * TaskContext
- * 
+ *
  * @export
  * @class TaskContext
  * @implements {ITaskContext}
@@ -55,9 +55,9 @@ export class TaskContext implements ITaskContext {
 
     /**
      * add sub ITaskContext
-     * 
+     *
      * @param {ITaskContext} context
-     * 
+     *
      * @memberOf ITaskContext
      */
     add(context: ITaskContext): void {
@@ -66,9 +66,9 @@ export class TaskContext implements ITaskContext {
     }
     /**
      * remove sub ITaskContext.
-     * 
+     *
      * @param {ITaskContext} [context]
-     * 
+     *
      * @memberOf ITaskContext
      */
     remove(context?: ITaskContext): ITaskContext[] {
@@ -83,11 +83,11 @@ export class TaskContext implements ITaskContext {
 
     /**
      * find sub context via express.
-     * 
+     *
      * @param {(ITaskContext | ((item: ITaskContext) => boolean))} express
      * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
      * @returns {ITaskContext}
-     * 
+     *
      * @memberOf ITaskContext
      */
     find(express: ITaskContext | ((item: ITaskContext) => boolean), mode?: string): ITaskContext {
@@ -108,11 +108,11 @@ export class TaskContext implements ITaskContext {
 
     /**
      * filter items.
-     * 
+     *
      * @param {(((item: ITaskContext) => void | boolean))} express
      * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
      * @returns {ITaskContext[]}
-     * 
+     *
      * @memberOf ITaskContext
      */
     filter(express: ((item: ITaskContext) => void | boolean), mode?: string): ITaskContext[] {
@@ -126,10 +126,10 @@ export class TaskContext implements ITaskContext {
     }
     /**
      * find parent context via express.
-     * 
+     *
      * @param {(ITaskContext | ((item: ITaskContext) => boolean))} express
      * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
-     * 
+     *
      * @memberOf ITaskContext
      */
     each(express: ((item: ITaskContext) => void | boolean), mode?: string) {
@@ -161,9 +161,9 @@ export class TaskContext implements ITaskContext {
 
     /**
      * do express work in routing.
-     * 
+     *
      * @param {(((item: ITaskContext) => void | boolean))} express
-     * 
+     *
      * @memberOf ITaskContext
      */
     route(express: ((item: ITaskContext) => void | boolean)) {
@@ -176,9 +176,9 @@ export class TaskContext implements ITaskContext {
     }
     /**
      * translate all sub context to do express work.
-     * 
+     *
      * @param {(((item: ITaskContext) => void | boolean))} express
-     * 
+     *
      * @memberOf ITaskContext
      */
     trans(express: ((item: ITaskContext) => void | boolean)) {
@@ -420,7 +420,7 @@ export class TaskContext implements ITaskContext {
 
 /**
  * get current env Operation.
- * 
+ *
  * @export
  * @param {EnvOption} env
  * @returns
@@ -453,7 +453,7 @@ export function currentOperation(env: IEnvOption) {
 
 /**
  * get assert source.
- * 
+ *
  * @param {IAssertDist} assert
  * @param {Operation} oper
  * @returns
@@ -477,7 +477,7 @@ function getAssertSrc(assert: IAssertDist, oper: Operation) {
 
 /**
  * get dist.
- * 
+ *
  * @param {IAssertDist} ds
  * @param {ITaskContext} ctx
  * @returns
@@ -511,7 +511,7 @@ function getCurrentDist(ds: IAssertDist, ctx: ITaskContext) {
 
 /**
  * filter fileName in directory.
- * 
+ *
  * @export
  * @param {string} directory
  * @param {((fileName: string) => boolean)} [express]
@@ -532,7 +532,7 @@ export function files(express: Src, filter?: (fileName: string) => boolean, mapp
 
 /**
  * task src, string or array string.
- * 
+ *
  * @export
  * @param {TaskSource} src
  * @param {Operation} oper runtime Operation
@@ -545,7 +545,7 @@ export function taskSourceVal(src: TaskSource, ctx: ITaskContext) {
 
 /**
  * task string.
- * 
+ *
  * @export
  * @param {TaskString} name
  * @param {ITaskContext} ctx

@@ -281,7 +281,7 @@ export function addToSequence(taskSequence: Src[], rst: ITaskInfo, ctx?: ITaskCo
         }
 
         let seqMax = len - 2;
-        console.log(order);
+        // console.log(order);
         if (order >= 0 && order <= seqMax) {
             taskSequence.splice(order, 0, rst.taskName);
         } else if (order > seqMax && order < len) {
