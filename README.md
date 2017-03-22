@@ -41,6 +41,32 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
 
 ```
 
+## define shell task with dynamic task
+```ts
+@dynamicTask
+export class TestDynamicTask implements IDynamicTasks {
+    tasks(): IDynamicTaskOption[] {
+        return [
+            {
+                name: 'test-tscompile', src: 'src/**/*.ts', dist: 'lib',
+                shell:'docker-compose down & docker-compose build'
+            },
+            {
+                name: 'test-test', src: 'test/**/*spec.ts', order: total => 1 / total, //second.
+                shell:['docker tag xxx  xxxx', 'docker tag xxx  xxxx']
+            },
+            {
+                name: 'test-test', src: 'test/**/*spec.ts', order: total => 1 / total, //second.
+                shell:(ctx)=>{
+                    return ''
+                }
+            }
+        ];
+    }
+}
+```
+
+
 ## define task and taskdefine
 
  decorator not support function now, so refactor ITask interface.
