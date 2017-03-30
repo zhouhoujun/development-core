@@ -73,6 +73,9 @@ class ShellTask implements ITask {
 
 
     execShell(cmd: string): Promise<any> {
+        if (!cmd) {
+            return Promise.resolve();
+        }
         return new Promise((resolve, reject) => {
             console.log('execute shell:', chalk.cyan(cmd));
             let shell = exec(cmd, (err, stdout, stderr) => {
