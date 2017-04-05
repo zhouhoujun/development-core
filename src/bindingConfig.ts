@@ -381,7 +381,7 @@ export class TaskContext implements ITaskContext {
     }
 
     toUrl(basePath: string, toPath?: string): string {
-        return (toPath ? path.relative(basePath, toPath) : basePath).replace(/\\/g, '/').replace(/^\//g, '');
+        return (toPath ? path.relative(basePath, toPath) : basePath).replace(/\\/g, '/'); // .replace(/^\//g, '');
     }
 
     private packages = {};
