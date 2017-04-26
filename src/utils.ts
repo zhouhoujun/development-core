@@ -16,26 +16,28 @@ import * as path from 'path';
  */
 export function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order, ctx: ITaskContext, forceSequence = false): Array<T | T[]> {
     let parall: IMap<T[]> = {};
-    let rseq: Array<T | T[]> = _.orderBy(_.filter(sequence, t => t), (t: T) => {
+    sequence = _.filter(sequence, t => t);
+    let rseq: Array<T | T[]> = _.orderBy(sequence, (t: T) => {
         if (_.isArray(t)) {
             return 0.5;
         } else {
             let order = orderBy(t);
             if (_.isFunction(order)) {
                 order = order(sequence.length, ctx);
-            } else if (!_.isNumber(order) && !order) {
-                order = 0.5;
             }
 
             let orderVal: number;
             if (_.isNumber(order)) {
                 orderVal = order;
-            } else {
+            } else if (order) {
+                order.value = _.isNumber(order.value) ? order.value : 0.5;
                 if (!forceSequence && order.runWay === RunWay.parallel) {
                     parall[order.value] = parall[order.value] || [];
                     parall[order.value].push(t);
                 }
                 orderVal = order.value;
+            } else {
+                orderVal = 0.5;
             }
 
             if (orderVal > 1) {

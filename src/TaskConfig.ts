@@ -608,6 +608,7 @@ export interface IDynamicTasks {
  * @extends {IAssertDist}
  */
 export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
+
     /**
      * tasks to deal with IAsserts.
      *
@@ -617,12 +618,17 @@ export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
     asserts?: IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>;
 
     /**
-     * set IAsserts task order in this task sequence.
+     * set sub asserts task order in this task sequence.
      *
      * @type {Order}
      * @memberOf IAsserts
      */
     assertsOrder?: Order;
+
+    /**
+     * current assert order.
+     */
+    order?: Order;
 
     /**
      * the shell command run way. default parallel.

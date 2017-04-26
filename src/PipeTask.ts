@@ -146,11 +146,11 @@ export abstract class PipeTask implements IPipeTask {
         let pipes: Pipe[] = null;
         let loader = <IPipeOption>option['loader'];
         if (loader && _.isFunction(loader.pipes)) {
-            pipes = _.isFunction(loader.pipes) ? loader.pipes(ctx, option, gulp) : _.filter(<Pipe[]>loader.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
+            pipes = _.isFunction(loader.pipes) ? loader.pipes(ctx, option, gulp) : _.filter(<Pipe[]>loader.pipes, p => p);
         }
 
         if (option.pipes) {
-            let opps = _.isFunction(option.pipes) ? option.pipes(ctx, option, gulp) : _.filter(<Pipe[]>option.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
+            let opps = _.isFunction(option.pipes) ? option.pipes(ctx, option, gulp) : _.filter(<Pipe[]>option.pipes, p => p );
             if (opps && opps.length > 0) {
                 pipes = pipes ? pipes.concat(opps) : opps;
             }
@@ -174,13 +174,13 @@ export abstract class PipeTask implements IPipeTask {
         let loader = <IPipeOption>option['loader'];
         if (loader && !_.isString(loader) && !_.isArray(loader)) {
             if (loader.output) {
-                pipes = _.isFunction(loader.output) ? loader.output(ctx, option, gulp) : _.filter(<OutputPipe[]>loader.pipes, p => _.isFunction(p) || (p.name && p.name === dist.name));
+                pipes = _.isFunction(loader.output) ? loader.output(ctx, option, gulp) : _.filter(<OutputPipe[]>loader.pipes, p => p);
             } else if (loader.output === null) {
                 return [(stream) => stream];
             }
         }
         if (option.output) {
-            let opps = _.isFunction(option.output) ? option.output(ctx, option, gulp) : _.filter(<OutputPipe[]>option.output, p => _.isFunction(p) || (p.name && p.name === dist.name));
+            let opps = _.isFunction(option.output) ? option.output(ctx, option, gulp) : _.filter(<OutputPipe[]>option.output, p => p);
             if (opps && opps.length > 0) {
                 pipes = pipes ? pipes.concat(opps) : opps;
             }
@@ -257,6 +257,18 @@ export abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     protected match(p: IOperate, name: string, ctx: ITaskContext, trsOperate?: IOperate, isOutput = false) {
+        // return this.matchOperate(p, name, ctx, isOutput) && (!trsOperate || (trsOperate && this.matchOperate(trsOperate, name, ctx, isOutput)));
+        return this.matchOperate(p, name, ctx, isOutput) || (trsOperate && this.matchOperate(trsOperate, name, ctx, isOutput));
+    }
+
+    /**
+     * match operate.
+     * @param p 
+     * @param name 
+     * @param ctx 
+     * @param isOutput 
+     */
+    protected matchOperate(p: IOperate, name: string, ctx: ITaskContext, isOutput = false) {
         if (!p) {
             return false;
         }
@@ -268,25 +280,10 @@ export abstract class PipeTask implements IPipeTask {
             return false;
         }
 
-        if (isOutput && p.noneOutput) {
+        if (isOutput && p.noneOutput === true) {
             return false;
-        } else if (!isOutput && p.nonePipe) {
+        } else if (!isOutput && p.nonePipe === true) {
             return false;
-        }
-
-        if (trsOperate) {
-            if (trsOperate.name && !name.endsWith(ctx.toStr(trsOperate.name))) {
-                return false;
-            }
-            if (trsOperate.oper && (trsOperate.oper & ctx.oper) <= 0) {
-                return false;
-            }
-
-            if (isOutput && trsOperate.noneOutput) {
-                return false;
-            } else if (!isOutput && trsOperate.nonePipe) {
-                return false;
-            }
         }
 
         return true;
@@ -332,7 +329,7 @@ export abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     protected getTransformOperate(source: ITransform): IOperate {
-        return _.pick(source, this.operateFileds);
+        return _.pick(source, this.operateFileds) as IOperate;
     }
 
     /**
@@ -349,10 +346,11 @@ export abstract class PipeTask implements IPipeTask {
         if (!source) {
             return;
         }
+
         _.each(this.operateFileds, n => {
-            if (!_.isUndefined(operate[n])) {
-                source[n] = operate[n];
-            }
+            // if (!_.isUndefined(operate[n])) {
+            source[n] = operate[n];
+            // }
         });
     }
 
@@ -376,15 +374,16 @@ export abstract class PipeTask implements IPipeTask {
             if (_.isFunction(p)) {
                 return p(ctx, dist, gulp);
             } else {
-                if (!this.match(p, name, ctx, oper)) {
-                    return null;
-                } else {
-                    return Promise.resolve(p.toTransform(ctx, dist, gulp))
-                        .then(trs => {
-                            trs.order = p.order;
-                            return trs;
-                        });
-                }
+                // if (!this.match(p, name, ctx)) {
+                //     return null;
+                // } else {
+                return Promise.resolve(p.toTransform(ctx, dist, gulp))
+                    .then(trs => {
+                        this.setTransformOperate(trs, p);
+                        // trs.order = p.order;
+                        return trs;
+                    });
+                // }
             }
         }))
             .then(tanseq => {

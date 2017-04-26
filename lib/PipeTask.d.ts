@@ -159,6 +159,14 @@ export declare abstract class PipeTask implements IPipeTask {
      */
     protected match(p: IOperate, name: string, ctx: ITaskContext, trsOperate?: IOperate, isOutput?: boolean): boolean;
     /**
+     * match operate.
+     * @param p
+     * @param name
+     * @param ctx
+     * @param isOutput
+     */
+    protected matchOperate(p: IOperate, name: string, ctx: ITaskContext, isOutput?: boolean): boolean;
+    /**
      * convert custom pipe result to Promise.
      *
      * @protected
