@@ -150,7 +150,7 @@ export abstract class PipeTask implements IPipeTask {
         }
 
         if (option.pipes) {
-            let opps = _.isFunction(option.pipes) ? option.pipes(ctx, option, gulp) : _.filter(<Pipe[]>option.pipes, p => p );
+            let opps = _.isFunction(option.pipes) ? option.pipes(ctx, option, gulp) : _.filter(<Pipe[]>option.pipes, p => p);
             if (opps && opps.length > 0) {
                 pipes = pipes ? pipes.concat(opps) : opps;
             }
@@ -207,11 +207,13 @@ export abstract class PipeTask implements IPipeTask {
         let cfgopt = ctx.option;
         let loader = <IPipeOption>cfgopt['loader'];
         let prsrc: Promise<ITransform>;
-        let oper = this.getTransformOperate(source);
+        let oper;
         if (cfgopt.pipe) {
+            oper = this.getTransformOperate(source);
             prsrc = this.cpipe2Promise(source, cfgopt, ctx, dist, gulp);
         }
         if (loader && !_.isString(loader) && !_.isArray(loader) && loader.pipe) {
+            oper = this.getTransformOperate(source);
             prsrc = prsrc ?
                 prsrc.then(stream => {
                     this.setTransformOperate(stream, oper);
@@ -348,9 +350,9 @@ export abstract class PipeTask implements IPipeTask {
         }
 
         _.each(this.operateFileds, n => {
-            // if (!_.isUndefined(operate[n])) {
-            source[n] = operate[n];
-            // }
+            if (!_.isUndefined(operate[n])) {
+                source[n] = operate[n];
+            }
         });
     }
 
@@ -370,20 +372,23 @@ export abstract class PipeTask implements IPipeTask {
     protected pipes2Promise(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp, pipes?: Pipe[]) {
         let name = ctx.subTaskName(dist, this.name);
         let oper = this.getTransformOperate(source);
+        if (!this.match(oper, name, ctx)) {
+            return Promise.resolve(source);
+        }
         return Promise.all(_.map(pipes || this.pipes(ctx, dist, gulp), (p: Pipe) => {
             if (_.isFunction(p)) {
                 return p(ctx, dist, gulp);
             } else {
-                // if (!this.match(p, name, ctx)) {
-                //     return null;
-                // } else {
-                return Promise.resolve(p.toTransform(ctx, dist, gulp))
-                    .then(trs => {
-                        this.setTransformOperate(trs, p);
-                        // trs.order = p.order;
-                        return trs;
-                    });
-                // }
+                if (!this.match(p, name, ctx)) {
+                    return null;
+                } else {
+                    return Promise.resolve(p.toTransform(ctx, dist, gulp))
+                        .then(trs => {
+                            this.setTransformOperate(trs, p);
+                            // trs.order = p.order;
+                            return trs;
+                        });
+                }
             }
         }))
             .then(tanseq => {
