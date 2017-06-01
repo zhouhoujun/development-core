@@ -129,6 +129,11 @@ export type Order = number | IOrder | ((total: number, ctx?: ITaskContext) => nu
 export type Src = string | string[];
 
 /**
+ * async source.
+ */
+export type AsyncSrc = Src | Promise<Src>;
+
+/**
  * operate.
  *
  * @export
@@ -274,6 +279,10 @@ export type TaskSource = Src | ((ctx?: ITaskContext) => Src);
  */
 export type TaskString = string | ((ctx?: ITaskContext) => string);
 
+/**
+ * async task source.
+ */
+export type AsyncTaskSource = TaskSource | ((ctx?: ITaskContext) => Promise<Src>);
 
 /**
  * transform interface.
@@ -583,10 +592,10 @@ export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPip
     /**
      *  shell command task.
      *
-     * @type {TaskSource}
+     * @type {AsyncTaskSource}
      * @memberOf IDynamicTaskOption
      */
-    shell?: TaskSource;
+    shell?: AsyncTaskSource
 }
 
 /**

@@ -3,7 +3,7 @@ import { Gulp, WatchEvent } from 'gulp';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
-import { IAssertDist, IOutputPipe, Operation, ITaskInfo, ITransform, RunWay, TaskSource, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
+import { IAssertDist, IOutputPipe, Operation, AsyncSrc, ITaskInfo, ITransform, RunWay, AsyncTaskSource, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
 import { matchCompare } from './utils';
 import { PipeTask } from './PipeTask';
 import { runSequence } from './taskSequence';
@@ -19,7 +19,7 @@ type factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => TaskResult;
  * @implements {ITask}
  */
 class ShellTask implements ITask {
-    constructor(protected info: ITaskInfo, protected cmd: TaskSource) {
+    constructor(protected info: ITaskInfo, protected cmd: AsyncTaskSource) {
 
     }
 
@@ -46,23 +46,26 @@ class ShellTask implements ITask {
         console.log(`register shell task:`, chalk.cyan(tk));
 
         gulp.task(tk, () => {
-            let cmds = ctx.toSrc(this.cmd);
-            if (_.isString(cmds)) {
-                return this.execShell(cmds);
-            } else if (_.isArray(cmds)) {
-                if (ctx.option.shellRunWay === RunWay.sequence) {
-                    let pip = Promise.resolve();
-                    _.each(cmds, cmd => {
-                        pip = pip.then(() => this.execShell(cmd));
-                    });
-                    return pip;
-                } else {
-                    return Promise.all(_.map(cmds, cmd => this.execShell(cmd)));
-                }
-            } else {
+            let cmd = ctx.to<AsyncSrc>(this.cmd);
+            return Promise.resolve(cmd)
+                .then(cmds => {
+                    if (_.isString(cmds)) {
+                        return this.execShell(cmds);
+                    } else if (_.isArray(cmds)) {
+                        if (ctx.option.shellRunWay === RunWay.sequence) {
+                            let pip = Promise.resolve();
+                            _.each(cmds, cmd => {
+                                pip = pip.then(() => this.execShell(cmd));
+                            });
+                            return pip;
+                        } else {
+                            return Promise.all(_.map(cmds, cmd => this.execShell(cmd)));
+                        }
+                    } else {
 
-                return Promise.reject('shell task config error');
-            }
+                        return Promise.reject('shell task config error');
+                    }
+                });
 
         });
 
