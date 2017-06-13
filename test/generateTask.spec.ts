@@ -4,7 +4,7 @@ import { expect, assert } from 'chai';
 import { IOrder, IDynamicTaskOption, IAsserts, Operation, ITask, Src, IEnvOption, RunWay } from '../src/TaskConfig';
 import { generateTask, } from '../src/generateTask';
 import { toSequence, addToSequence, flattenSequence, zipSequence } from '../src/taskSequence';
-import { bindingConfig } from '../src/bindingConfig';
+import { createContext } from '../src/TaskContext';
 let root = __dirname;
 
 import * as path from 'path';
@@ -27,7 +27,7 @@ describe('generateTask', () => {
 
     beforeEach(() => {
         registerTask = (tks, env, option?: IAsserts) => {
-            let config = bindingConfig({
+            let config = createContext({
                 env: env,
                 option: _.extend({ src: 'src', dist: 'lib' }, option || {})
             });
@@ -274,7 +274,7 @@ describe('addToSequence', () => {
 
     beforeEach(() => {
         registerTask = (tks, env, option?: IAsserts) => {
-            let config = bindingConfig({
+            let config = createContext({
                 env: env,
                 option: _.extend({ src: 'src', dist: 'lib' }, option || {})
             });
@@ -391,25 +391,25 @@ describe('zipTask', () => {
 
     it('one item sequence', () => {
         let tseq = ['test'];
-        let name = zipSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        let name = zipSequence(gulp, tseq, createContext({ env: {}, option: { src: '', dist: '' } }))
         expect(name).eq('test');
     });
 
     it('one array one item sequence', () => {
         let tseq = [['test']];
-        let name = zipSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        let name = zipSequence(gulp, tseq, createContext({ env: {}, option: { src: '', dist: '' } }))
         expect(name).eq('test');
     });
 
     it('many item sequence', () => {
         let tseq = ['test', 'test1', 'test2'];
-        let name = zipSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        let name = zipSequence(gulp, tseq, createContext({ env: {}, option: { src: '', dist: '' } }))
         expect(name).eq('test-test2-seq');
     });
 
     it('many array many item sequence', () => {
         let tseq = [['s', 't'], 'test', 'test1', 'test2', ['end1', 'end2']];
-        let name = zipSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        let name = zipSequence(gulp, tseq, createContext({ env: {}, option: { src: '', dist: '' } }))
         expect(name).eq('s-end2-seq');
     });
 });
@@ -419,25 +419,25 @@ describe('flattenSequence', () => {
 
     it('one item sequence', () => {
         let tseq = ['test'];
-        let seq = flattenSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        let seq = flattenSequence(gulp, tseq, createContext({ env: {}, option: { src: '', dist: '' } }))
         expect(seq.join(',')).eq('test');
     });
 
     it('one array one item sequence', () => {
         let tseq = [['test']];
-        let seq = flattenSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        let seq = flattenSequence(gulp, tseq, createContext({ env: {}, option: { src: '', dist: '' } }))
         expect(seq.join(',')).eq('test');
     });
 
     it('many item sequence', () => {
         let tseq = ['test', 'test1', 'test2'];
-        let seq = flattenSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        let seq = flattenSequence(gulp, tseq, createContext({ env: {}, option: { src: '', dist: '' } }))
         expect(seq.join(',')).eq('test,test1,test2');
     });
 
     it('many array many item sequence', () => {
         let tseq = [['s', 't'], 'test', 'test1', 'test2', ['end1', 'end2']];
-        let seq = flattenSequence(gulp, tseq, bindingConfig({ env: {}, option: { src: '', dist: '' } }))
+        let seq = flattenSequence(gulp, tseq, createContext({ env: {}, option: { src: '', dist: '' } }))
         expect(seq.join(',')).eq('s-t-paral,test,test1,test2,end1-end2-paral');
     });
 });

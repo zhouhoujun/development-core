@@ -1,11 +1,12 @@
 import * as _ from 'lodash';
 import { Gulp } from 'gulp';
+import * as gulp from 'gulp';
 import {
-    ITask, IContextDefine, TaskResult, IAssertDist, IEnvOption, Operation, ITaskContext
-    , ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
+    ITask, TaskResult, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption
+    , ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
 } from './TaskConfig';
 import { generateTask } from './generateTask';
-import { runSequence, addToSequence } from './taskSequence';
+import { toSequence, runSequence, addToSequence, zipSequence, flattenSequence, runTaskSequence } from './taskSequence';
 import { matchCompare, absoluteSrc, absolutePath } from './utils';
 import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefineInDir } from './decorator';
 import * as path from 'path';
@@ -21,6 +22,18 @@ const globby = require('globby');
  * @returns {ITaskContext}
  */
 export function bindingConfig(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext {
+    return createContext(cfg, parent);
+}
+
+/**
+ * create Task context.
+ * 
+ * @export
+ * @param {ITaskConfig} cfg 
+ * @param {ITaskContext} [parent] 
+ * @returns {ITaskContext} 
+ */
+export function createContext(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext {
     if (cfg.createContext) {
         return cfg.createContext(cfg, parent);
     }
@@ -43,14 +56,20 @@ export class TaskContext implements ITaskContext {
     public oper: Operation;
     public option: IAsserts;
     public env: IEnvOption;
+    protected cfg: ITaskConfig
     public globals: any;
     protected setupTasks: ITask[] = [];
     protected children: ITaskContext[] = [];
-    constructor(private cfg: ITaskConfig, public parent?: ITaskContext) {
-        this.env = cfg.env;
-        this.oper = currentOperation(cfg.env);
-        this.option = cfg.option;
-        this.globals = cfg.globals || globals;
+    constructor(cfg: ITaskConfig, public parent?: ITaskContext) {
+        this.loadConfig(cfg);
+    }
+
+    private _gulp: Gulp;
+    get gulp() {
+        return this._gulp || gulp;
+    }
+    set gulp(gulp: Gulp) {
+        this._gulp = gulp;
     }
 
     /**
@@ -82,15 +101,41 @@ export class TaskContext implements ITaskContext {
     }
 
     /**
+     * load config
+     * 
+     * @param {ITaskConfig} cfg 
+     * 
+     * @memberof TaskContext
+     */
+    loadConfig(cfg: ITaskConfig) {
+        this.env = _.extend(cfg.env, this.env || {});
+        this.oper = cfg.oper || currentOperation(cfg.env);
+        this.globals = cfg.globals || globals;
+        this.option = _.extend(cfg.option, this.option || {});
+        this.cfg = _.extend(cfg, this.cfg);
+    }
+
+    /**
+     * get config.
+     * 
+     * @returns {ITaskConfig}
+     * 
+     * @memberof TaskContext
+     */
+    getConfig(): ITaskConfig {
+        return this.cfg;
+    }
+
+    /**
      * find sub context via express.
      *
-     * @param {(ITaskContext | ((item: ITaskContext) => boolean))} express
-     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
+     * @param {(ITaskContext | Express<ITaskContext, boolean>} express
+     * @param {Mode} [mode] default traverse.
      * @returns {ITaskContext}
      *
      * @memberOf ITaskContext
      */
-    find(express: ITaskContext | ((item: ITaskContext) => boolean), mode?: string): ITaskContext {
+    find(express: ITaskContext | Express<ITaskContext, boolean>, mode?: Mode): ITaskContext {
         let context: ITaskContext;
         this.each(item => {
             if (context) {
@@ -109,13 +154,13 @@ export class TaskContext implements ITaskContext {
     /**
      * filter items.
      *
-     * @param {(((item: ITaskContext) => void | boolean))} express
-     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
+     * @param {Express<ITaskContext, void | boolean>} express
+     * @param {Mode} [mode] {enum:['route','children', traverse']} default traverse.
      * @returns {ITaskContext[]}
      *
      * @memberOf ITaskContext
      */
-    filter(express: ((item: ITaskContext) => void | boolean), mode?: string): ITaskContext[] {
+    filter(express: Express<ITaskContext, void | boolean>, mode?: Mode): ITaskContext[] {
         let contexts: ITaskContext[] = [];
         this.each(item => {
             if (express(item)) {
@@ -127,23 +172,23 @@ export class TaskContext implements ITaskContext {
     /**
      * find parent context via express.
      *
-     * @param {(ITaskContext | ((item: ITaskContext) => boolean))} express
-     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
+     * @param {(ITaskContext | Express<ITaskContext, boolean>)} express
+     * @param {Mode} [mode] {enum:['route','children', traverse']} default traverse.
      *
      * @memberOf ITaskContext
      */
-    each(express: ((item: ITaskContext) => void | boolean), mode?: string) {
-        mode = mode || '';
+    each(express: Express<ITaskContext, void | boolean>, mode?: Mode) {
+        mode = mode || Mode.traverse;
         let r;
         switch (mode) {
-            case 'route':
+            case Mode.route:
                 r = this.route(express);
                 break;
-            case 'children':
+            case Mode.children:
                 r = this.eachChildren(express);
                 break;
 
-            case 'traverse':
+            case Mode.traverse:
                 r = this.trans(express);
                 break;
             default:
@@ -153,7 +198,32 @@ export class TaskContext implements ITaskContext {
         return r;
     }
 
-    eachChildren(express: ((item: ITaskContext) => void | boolean)) {
+    /**
+     *map context.
+     * 
+     * @template T 
+     * @param {Express<ITaskContext, T>} express 
+     * @param {Mode} [mode] 
+     * @param {Express<ITaskContext, boolean>} [filter] 
+     * @returns {T[]} 
+     * 
+     * @memberof TaskContext
+     */
+    map<T>(express: Express<ITaskContext, T>, mode?: Mode, filter?: Express<ITaskContext, boolean>): T[] {
+        let arr: T[] = []
+        this.each((ctx) => {
+            if (filter) {
+                if (filter(ctx)) {
+                    arr.push(express(ctx));
+                }
+            } else {
+                arr.push(express(ctx));
+            }
+        }, mode);
+        return arr;
+    }
+
+    eachChildren(express: Express<ITaskContext, void | boolean>) {
         _.each(this.children, item => {
             return express(item);
         });
@@ -162,11 +232,11 @@ export class TaskContext implements ITaskContext {
     /**
      * do express work in routing.
      *
-     * @param {(((item: ITaskContext) => void | boolean))} express
+     * @param {Express<ITaskContext, void | boolean>} express
      *
      * @memberOf ITaskContext
      */
-    route(express: ((item: ITaskContext) => void | boolean)) {
+    route(express: Express<ITaskContext, void | boolean>) {
         if (!express(this)) {
             return false;
         };
@@ -177,11 +247,11 @@ export class TaskContext implements ITaskContext {
     /**
      * translate all sub context to do express work.
      *
-     * @param {(((item: ITaskContext) => void | boolean))} express
+     * @param {Express<ITaskContext, void | boolean>} express
      *
      * @memberOf ITaskContext
      */
-    trans(express: ((item: ITaskContext) => void | boolean)) {
+    trans(express: Express<ITaskContext, void | boolean>) {
         if (express(this) === false) {
             return false;
         }
@@ -287,32 +357,113 @@ export class TaskContext implements ITaskContext {
         return findTasksInModule(module, _.extend({ oper: ctx.oper }, match || {}), this);
     }
 
-    findTasksInDir(dirs: Src, match?: ITaskInfo): Promise<ITask[]> {
+    findTasksInDir(dirs: TaskSource, match?: ITaskInfo): Promise<ITask[]> {
         let ctx = this;
-        return findTasksInDir(dirs, _.extend({ oper: ctx.oper }, match || {}), this);
+        return findTasksInDir(ctx.to(dirs), _.extend({ oper: ctx.oper }, match || {}), this);
     }
 
-    findTaskDefine(module: string | Object): Promise<IContextDefine> {
+    findTaskDefine(module: string | Object): Promise<ITaskDefine> {
         return findTaskDefineInModule(module);
     }
 
-    findTaskDefineInDir(dirs: Src): Promise<IContextDefine> {
-        return findTaskDefineInDir(dirs);
+    findTaskDefineInDir(dirs: TaskSource): Promise<ITaskDefine> {
+        return findTaskDefineInDir(this.to(dirs));
     }
 
     fileFilter(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]> {
         return files(express, filter, mapping);
     }
 
-    runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
-        return runSequence(gulp, tasks);
+    
+    /**
+     * to Sequence.
+     * 
+     * @param {ITask[]} tasks 
+     * @param {ZipTaskName} [zipName] 
+     * @returns {Src[]} 
+     * 
+     * @memberof TaskContext
+     */
+    toSequence(tasks: ITask[], zipName?: ZipTaskName): Src[] {
+        return toSequence(this.gulp, tasks, this, zipName);
     }
 
-    generateTask(tasks, match?) {
+    /**
+     * filter file in directory.  default implement in bindingConfig.
+     * 
+     * @param {Gulp} gulp
+     * @param {Src[]} tasks
+     * @returns {Promise<any>}
+     * 
+     * @memberOf ITaskContext
+     */
+    runSequence(tasks: Src[]): Promise<any> {
+        return runSequence(this.gulp, tasks);
+    }
+
+    /**
+     * run task sequence in this context.
+     * 
+     * @param {(ITask[] | Promise<ITask[]>)} tasks
+     * @param {ZipTaskName} [zipName]
+     * @returns {Promise<any>}
+     * 
+     * @memberof TaskContext
+     */
+    runTaskSequence(tasks: ITask[] | Promise<ITask[]>, zipName?: ZipTaskName): Promise<any> {
+        return runTaskSequence(this.gulp, tasks, this, zipName);
+    }
+
+    /**
+     * zip task sequence.
+     * 
+     * @param {Src[]} tasks 
+     * @param {ZipTaskName} [zipName] 
+     * @returns {string} 
+     * 
+     * @memberof ITaskContext
+     */
+    zipSequence(tasks: Src[], zipName?: ZipTaskName): string {
+        return zipSequence(this.gulp, tasks, this, zipName);
+    }
+
+    /**
+     * flattenSequence in this context.
+     * 
+     * @param {Src[]} tasks
+     * @param {ZipTaskName} [zipName]
+     * @returns {string[]}
+     * 
+     * @memberof ITaskContext
+     */
+    flattenSequence(tasks: Src[], zipName?: ZipTaskName): string[] {
+        return flattenSequence(this.gulp, tasks, this, zipName);
+    }
+
+
+    /**
+     * dynamic generate tasks.  default implement in bindingConfig.
+     * 
+     * @param {(IDynamicTaskOption | IDynamicTaskOption[])} tasks
+     * @param {ITaskInfo} [match]
+     * @returns {ITask[]}
+     * 
+     * @memberOf ITaskContext
+     */
+    generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[] {
         let ctx = this;
         return generateTask(tasks, _.extend({ oper: ctx.oper }, match || {}), this);
     }
 
+    /**
+     * add task result to task sequence. default implement in bindingConfig.
+     * 
+     * @param {Src[]} sequence  task sequence.
+     * @param {ITaskInfo} task
+     * @returns {Src[]}
+     * 
+     * @memberOf ITaskContext
+     */
     addToSequence(sequence: Src[], task: ITaskInfo): Src[] {
         if (this.cfg.addToSequence) {
             return this.cfg.addToSequence(sequence, task);

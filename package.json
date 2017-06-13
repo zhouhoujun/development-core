@@ -1,6 +1,6 @@
 {
     "name": "development-core",
-    "version": "1.1.2",
+    "version": "1.2.0",
     "description": "development tools, generate gulp tasks, gulp task manager, run tasks in sequence via Promise. useful gulp task util: zipSequence, runSequence, runTaskSequence, toSequence, flattenSequence.",
     "main": "./lib/index.js",
     "typings": "./lib/index",
@@ -52,7 +52,7 @@
         "gulp-watch": "^4.3.11",
         "lodash": "^4.13.1",
         "reflect-metadata": "^0.1.8",
-        "require-dir": "^0.3.1"
+        "require-dir": "^0.3.2"
     },
     "devDependencies": {
         "@types/chai": "^3.4.34",

@@ -1,5 +1,5 @@
 export * from './TaskConfig';
-export * from './bindingConfig';
+export * from './TaskContext';
 export * from './generateTask';
 export * from './taskSequence';
 export { sortOrder } from './utils';

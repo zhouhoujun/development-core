@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { ITask, ITaskDecorator, ITaskContext, IContextDefine, ITaskDefine, Src } from './TaskConfig';
+import { ITask, ITaskDecorator, ITaskContext, ITaskDefine, Src } from './TaskConfig';
 /**
  * task decorator.
  *
@@ -28,7 +28,7 @@ export declare function dynamicTask<T extends Function>(target?: (new <T>() => T
  */
 export declare function findTasks(target: any, match?: ITaskDecorator, ctx?: ITaskContext): ITask[];
 /**
- * decorator task define implements IContextDefine.
+ * decorator task define implements ITaskDefine.
  *
  * @export
  * @param {Function} constructor
@@ -41,7 +41,7 @@ export declare function taskdefine<T extends Function>(target?: (new <T>() => T)
  * @param {any} target
  * @returns
  */
-export declare function findTaskDefines(target: any): IContextDefine[];
+export declare function findTaskDefines(target: any): ITaskDefine[];
 /**
  * get one taskdefine in module.
  *
@@ -49,15 +49,15 @@ export declare function findTaskDefines(target: any): IContextDefine[];
  * @param {any} target
  * @returns
  */
-export declare function findTaskDefine(target: any): IContextDefine;
+export declare function findTaskDefine(target: any): ITaskDefine;
 /**
  * find one taskdefine in module.
  *
  * @export
  * @param {(string | Object)} md
- * @returns {Promise<IContextDefine>}
+ * @returns {Promise<ITaskDefine>}
  */
-export declare function findTaskDefineInModule(md: string | Object): Promise<IContextDefine>;
+export declare function findTaskDefineInModule(md: string | Object): Promise<ITaskDefine>;
 /**
  * fund tasks in module.
  *
@@ -73,9 +73,9 @@ export declare function findTasksInModule(md: string | Object, match?: ITaskDeco
  *
  * @export
  * @param {Src} dirs
- * @returns {Promise<IContextDefine>}
+ * @returns {Promise<ITaskDefine>}
  */
-export declare function findTaskDefineInDir(dirs: Src): Promise<IContextDefine>;
+export declare function findTaskDefineInDir(dirs: Src): Promise<ITaskDefine>;
 /**
  * find tasks in directories.
  *
@@ -86,11 +86,3 @@ export declare function findTaskDefineInDir(dirs: Src): Promise<IContextDefine>;
  * @returns {Promise<ITask[]>}
  */
 export declare function findTasksInDir(dirs: Src, match?: ITaskDecorator, ctx?: ITaskContext): Promise<ITask[]>;
-/**
- * task define context convert.
- *
- * @export
- * @param {ITaskDefine} tdef
- * @returns {IContextDefine}
- */
-export declare function taskDefine2Context(tdef: ITaskDefine): IContextDefine;

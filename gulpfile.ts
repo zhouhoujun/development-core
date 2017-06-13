@@ -1,6 +1,6 @@
 // DynamicTask 
 import * as gulp from 'gulp';
-import { bindingConfig, runTaskSequence, IEnvOption, Operation } from './src';
+import { createContext, IEnvOption, Operation } from './src';
 import * as mocha from 'gulp-mocha';
 import * as minimist from 'minimist';
 import * as _ from 'lodash';
@@ -22,14 +22,14 @@ gulp.task('build', () => {
 
 let createTask = (env) => {
     env.root = __dirname;
-    let config = bindingConfig({
+    let context = createContext({
         env: env,
         option: { src: 'src', dist: 'lib', buildDist: 'build' }
     });
 
-    console.log(config);
+    console.log(context);
 
-    let tasks = config.generateTask([
+    let tasks = context.generateTask([
         // {
         //     name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
         //     pipes: [() => cache('typescript'), () => sourcemaps.init(), () => tsProject()],
@@ -98,5 +98,5 @@ let createTask = (env) => {
         { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
     ]);
 
-    return runTaskSequence(gulp, tasks, config);
+    return context.runTaskSequence(tasks);
 }

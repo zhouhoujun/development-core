@@ -1,11 +1,11 @@
 import * as _ from 'lodash';
 import { Gulp } from 'gulp';
 import * as chalk from 'chalk';
-import { Src, RunWay, ITaskInfo, ITaskContext, ITask, Operation } from './TaskConfig';
+import { Src, RunWay, ITaskInfo, ITaskContext, ITask, Operation, ZipTaskName } from './TaskConfig';
 import { sortOrder } from './utils';
 import * as watch from 'gulp-watch';
 
-export type ZipTaskName = (name: string, runWay?: RunWay, ctx?: ITaskContext) => string
+
 /**
  * convert setup task result to run sequence src.
  * 

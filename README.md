@@ -446,7 +446,7 @@ runTaskSequence(gulp, tasks, tdfs.loadConfig({src:'src', dist:'lib'}, {watch:tru
 ```ts
 
 import * as gulp from 'gulp';
-import { bindingConfig, generateTask, runTaskSequence, IEnvOption, Operation } from 'development-core';
+import { createContext, generateTask, runTaskSequence, IEnvOption, Operation } from 'development-core';
 import * as mocha from 'gulp-mocha';
 import * as minimist from 'minimist';
 import * as _ from 'lodash';
@@ -469,7 +469,7 @@ gulp.task('build', () => {
 
 let createTask = (env) => {
 
-    let ctx = bindingConfig({
+    let ctx = createContext({
         env: env,
         option: {
             src: 'src',
@@ -524,7 +524,7 @@ let createTask = (env) => {
         { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (ctx) => del(ctx.getDist()) }
     ]);
 
-    return runTaskSequence(gulp, tasks, ctx);
+    return ctx.runTaskSequence(tasks);
 }
 
 ```
