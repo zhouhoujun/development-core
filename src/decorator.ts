@@ -341,21 +341,3 @@ export function findTasksInDir(dirs: Src, match?: ITaskDecorator, ctx?: ITaskCon
             return _.flatten(tasks);
         });
 }
-
-// /**
-//  * task define context convert.
-//  *
-//  * @export
-//  * @param {ITaskDefine} tdef
-//  * @returns {ITaskDefine}
-//  */
-// export function taskDefine2Context(tdef: ITaskDefine): ITaskDefine {
-//     let context: any = _.extend({}, tdef);
-//     context['getContext'] = (cfg: ITaskConfig) => {
-//         return bindingConfig(tdef.loadConfig(cfg.option, cfg.env));
-//     };
-
-//     context['tasks'] = tdef.loadTasks ? (context) => tdef.loadTasks(context) : null;
-
-//     return <ITaskDefine>context;
-// }

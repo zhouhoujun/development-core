@@ -210,7 +210,7 @@ export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], m
  * @param {IDynamicTaskOption} dt
  * @returns {ITask}
  */
-export function createTask(dt: IDynamicTaskOption): ITask {
+function createTask(dt: IDynamicTaskOption): ITask {
     let task: ITask;
     if (dt.oper & Operation.watch) {
         task = createWatchTask(dt);

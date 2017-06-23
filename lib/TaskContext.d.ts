@@ -28,16 +28,32 @@ export declare function createContext(cfg: ITaskConfig, parent?: ITaskContext): 
  */
 export declare class TaskContext implements ITaskContext {
     parent: ITaskContext;
+    protected cfg: ITaskConfig;
+    protected taskSequece: ITask[];
+    protected children: ITaskContext[];
     oper: Operation;
     option: IAsserts;
     env: IEnvOption;
-    protected cfg: ITaskConfig;
     globals: any;
-    protected setupTasks: ITask[];
-    protected children: ITaskContext[];
     constructor(cfg: ITaskConfig, parent?: ITaskContext);
     private _gulp;
     gulp: Gulp;
+    /**
+     * load config
+     *
+     * @param {ITaskConfig} cfg
+     *
+     * @memberof TaskContext
+     */
+    setConfig(cfg: ITaskConfig): void;
+    /**
+     * get config.
+     *
+     * @returns {ITaskConfig}
+     *
+     * @memberof TaskContext
+     */
+    getConfig(): ITaskConfig;
     /**
      * add sub ITaskContext
      *
@@ -55,41 +71,25 @@ export declare class TaskContext implements ITaskContext {
      */
     remove(context?: ITaskContext): ITaskContext[];
     /**
-     * load config
-     *
-     * @param {ITaskConfig} cfg
-     *
-     * @memberof TaskContext
-     */
-    loadConfig(cfg: ITaskConfig): void;
-    /**
-     * get config.
-     *
-     * @returns {ITaskConfig}
-     *
-     * @memberof TaskContext
-     */
-    getConfig(): ITaskConfig;
-    /**
      * find sub context via express.
      *
-     * @param {(ITaskContext | Express<ITaskContext, boolean>} express
-     * @param {Mode} [mode] default traverse.
-     * @returns {ITaskContext}
-     *
-     * @memberOf ITaskContext
+     * @template T
+     * @param {(T | Express<T, boolean>)} express
+     * @param {Mode} [mode]
+     * @returns {T}
+     * @memberof TaskContext
      */
-    find(express: ITaskContext | Express<ITaskContext, boolean>, mode?: Mode): ITaskContext;
+    find<T extends ITaskContext>(express: T | Express<T, boolean>, mode?: Mode): T;
     /**
      * filter items.
      *
-     * @param {Express<ITaskContext, void | boolean>} express
-     * @param {Mode} [mode] {enum:['route','children', traverse']} default traverse.
+     * @template T
+     * @param {(Express<T, void | boolean>)} express
+     * @param {Mode} [mode]
      * @returns {ITaskContext[]}
-     *
-     * @memberOf ITaskContext
+     * @memberof TaskContext
      */
-    filter(express: Express<ITaskContext, void | boolean>, mode?: Mode): ITaskContext[];
+    filter<T extends ITaskContext>(express: Express<T, void | boolean>, mode?: Mode): ITaskContext[];
     /**
      * find parent context via express.
      *
@@ -98,7 +98,7 @@ export declare class TaskContext implements ITaskContext {
      *
      * @memberOf ITaskContext
      */
-    each(express: Express<ITaskContext, void | boolean>, mode?: Mode): any;
+    each<T extends ITaskContext>(express: Express<T, void | boolean>, mode?: Mode): any;
     /**
      *map context.
      *
@@ -227,39 +227,3 @@ export declare class TaskContext implements ITaskContext {
     registerTasks(express?: (item: ITask) => boolean): ITask[];
     globalTasks(): string[];
 }
-/**
- * get current env Operation.
- *
- * @export
- * @param {EnvOption} env
- * @returns
- */
-export declare function currentOperation(env: IEnvOption): Operation;
-/**
- * filter fileName in directory.
- *
- * @export
- * @param {string} directory
- * @param {((fileName: string) => boolean)} [express]
- * @returns {string[]}
- */
-export declare function files(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]>;
-/**
- * task src, string or array string.
- *
- * @export
- * @param {TaskSource} src
- * @param {Operation} oper runtime Operation
- * @param {IEnvOption} [env]
- * @returns
- */
-export declare function taskSourceVal(src: TaskSource, ctx: ITaskContext): string | string[];
-/**
- * task string.
- *
- * @export
- * @param {TaskString} name
- * @param {ITaskContext} ctx
- * @returns
- */
-export declare function taskStringVal(name: TaskString, ctx: ITaskContext): string;

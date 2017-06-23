@@ -658,7 +658,7 @@ export interface ITaskConfig {
      * @type {EnvOption}
      * @memberOf ITaskConfig
      */
-    env: IEnvOption;
+    env?: IEnvOption;
     /**
      * Operation
      *
@@ -672,7 +672,7 @@ export interface ITaskConfig {
      * @type {IAsserts}
      * @memberOf ITaskConfig
      */
-    option: IAsserts;
+    option?: IAsserts;
     /**
      * add task result to task sequence. default implement in bindingConfig.
      *
@@ -777,13 +777,13 @@ export interface ITaskContext extends ITaskConfig {
      */
     remove(context?: ITaskContext): ITaskContext[];
     /**
-     * load task config.
+     * set task config.
      *
      * @param {ITaskConfig} config;
      *
      * @memberof ITaskContext
      */
-    loadConfig(config: ITaskConfig): any;
+    setConfig(config: ITaskConfig): any;
     /**
      * get the task config.
      *
@@ -795,32 +795,32 @@ export interface ITaskContext extends ITaskConfig {
     /**
      * find sub context via express.
      *
-     * @param {(ITaskContext | Express<ITaskContext, boolean>} express
-     * @param {string} [mode] {enum:['route','children', traverse']} default traverse.
-     * @returns {ITaskContext}
-     *
-     * @memberOf ITaskContext
+     * @template T
+     * @param {(T | Express<T, boolean>)} express
+     * @param {Mode} [mode]
+     * @returns {T}
+     * @memberof ITaskContext
      */
-    find(express: ITaskContext | Express<ITaskContext, boolean>, mode?: Mode): ITaskContext;
+    find<T extends ITaskContext>(express: T | Express<T, boolean>, mode?: Mode): T;
     /**
-     * filter items.
+     * filter<T extends ITaskContext>(express: Express<ITaskContext, void | boolean>, mode?: Mode): T[]
      *
-     * @param {Express<ITaskContext, void | boolean>} express
-     * @param {Mode} [mode] default traverse.
-     * @returns {ITaskContext[]}
-     *
-     * @memberOf ITaskContext
+     * @template T
+     * @param {(Express<T, void | boolean>)} express
+     * @param {Mode} [mode]
+     * @returns {T[]}
+     * @memberof ITaskContext
      */
-    filter(express: Express<ITaskContext, void | boolean>, mode?: Mode): ITaskContext[];
+    filter<T extends ITaskContext>(express: Express<T, void | boolean>, mode?: Mode): T[];
     /**
      * iteration context with express.
      *
-     * @param {(Express<ITaskContext, void | boolean>} express
-     * @param {Mode} [mode] default traverse.
-     *
-     * @memberOf ITaskContext
+     * @template T
+     * @param {(Express<T, void | boolean>)} express
+     * @param {Mode} [mode]
+     * @memberof ITaskContext
      */
-    each(express: Express<ITaskContext, void | boolean>, mode?: Mode): any;
+    each<T extends ITaskContext>(express: Express<T, void | boolean>, mode?: Mode): any;
     /**
      * map context.
      *
@@ -837,16 +837,14 @@ export interface ITaskContext extends ITaskConfig {
      * do express work in routing.
      *
      * @param {(Express<ITaskContext, void | boolean>)} express
-     *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     route(express: Express<ITaskContext, void | boolean>): any;
     /**
      * translate all sub context to do express work.
      *
      * @param {(Express<ITaskContext, void | boolean>)} express
-     *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     trans(express: Express<ITaskContext, void | boolean>): any;
     /**

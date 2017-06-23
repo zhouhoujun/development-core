@@ -62,7 +62,8 @@ function setupTask(gulp: Gulp, t: ITask, ctx: ITaskContext, callback: (name: Src
     let seq: string[] = [];
     let info = t.getInfo();
     if (info.oper & ctx.oper) {
-        let tname = ctx.setup(t, gulp); // t.setup(ctx, gulp);
+        ctx.addTask(t);
+        let tname = t.setup(ctx, gulp); // t.setup(ctx, gulp);
         if (tname) {
             // is watch task.
             if ((info.oper & Operation.watch)) {
