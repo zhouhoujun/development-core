@@ -759,7 +759,7 @@ export interface ITaskConfig {
 
     /**
      * Operation
-     * 
+     *
      * @type {Operation}
      * @memberof ITaskConfig
      */
@@ -847,7 +847,7 @@ export interface ITaskContext {
 
     /**
      * env.
-     * 
+     *
      * @type {IEnvOption}@memberof ITaskContext
      */
     env: IEnvOption;
@@ -885,7 +885,7 @@ export interface ITaskContext {
 
     /**
      * globals data.
-     * 
+     *
      * @type {*}@memberof ITaskContext
      */
     globals: any;
@@ -911,18 +911,18 @@ export interface ITaskContext {
 
     /**
      * set task config.
-     * 
+     *
      * @param {ITaskConfig} config;
-     * 
+     *
      * @memberof ITaskContext
      */
     setConfig(config: ITaskConfig);
 
     /**
      * get the task config.
-     * 
+     *
      * @returns {ITaskConfig}
-     * 
+     *
      * @memberof ITaskContext
      */
     getConfig(): ITaskConfig;
@@ -930,45 +930,45 @@ export interface ITaskContext {
 
     /**
      * find sub context via express.
-     * 
-     * @template T 
-     * @param {(T | Express<T, boolean>)} express 
-     * @param {Mode} [mode] 
-     * @returns {T} 
+     *
+     * @template T
+     * @param {(T | Express<T, boolean>)} express
+     * @param {Mode} [mode]
+     * @returns {T}
      * @memberof ITaskContext
      */
     find<T extends ITaskContext>(express: T | Express<T, boolean>, mode?: Mode): T
 
     /**
      * filter<T extends ITaskContext>(express: Express<ITaskContext, void | boolean>, mode?: Mode): T[]
-     * 
-     * @template T 
+     *
+     * @template T
      * @param {(Express<T, void | boolean>)} express
      * @param {Mode} [mode]
-     * @returns {T[]} 
+     * @returns {T[]}
      * @memberof ITaskContext
      */
     filter<T extends ITaskContext>(express: Express<T, void | boolean>, mode?: Mode): T[]
 
     /**
      * iteration context with express.
-     * 
-     * @template T 
-     * @param {(Express<T, void | boolean>)} express 
-     * @param {Mode} [mode] 
+     *
+     * @template T
+     * @param {(Express<T, void | boolean>)} express
+     * @param {Mode} [mode]
      * @memberof ITaskContext
      */
     each<T extends ITaskContext>(express: Express<T, void | boolean>, mode?: Mode);
 
     /**
      * map context.
-     * 
-     * @template T 
-     * @param {Express<ITaskContext, T>} express 
-     * @param {Mode} [mode] 
-     * @param {Express<ITaskContext, boolean>} [filter] 
-     * @returns {T[]} 
-     * 
+     *
+     * @template T
+     * @param {Express<ITaskContext, T>} express
+     * @param {Mode} [mode]
+     * @param {Express<ITaskContext, boolean>} [filter]
+     * @returns {T[]}
+     *
      * @memberof ITaskContext
      */
     map<T>(express: Express<ITaskContext, T>, mode?: Mode, filter?: Express<ITaskContext, boolean>): T[]
@@ -976,8 +976,8 @@ export interface ITaskContext {
 
     /**
      * do express work in routing.
-     * 
-     * @param {(Express<ITaskContext, void | boolean>)} express 
+     *
+     * @param {(Express<ITaskContext, void | boolean>)} express
      * @memberof ITaskContext
      */
     route(express: Express<ITaskContext, void | boolean>);
@@ -985,8 +985,8 @@ export interface ITaskContext {
 
     /**
      * translate all sub context to do express work.
-     * 
-     * @param {(Express<ITaskContext, void | boolean>)} express 
+     *
+     * @param {(Express<ITaskContext, void | boolean>)} express
      * @memberof ITaskContext
      */
     trans(express: Express<ITaskContext, void | boolean>);
@@ -1017,7 +1017,7 @@ export interface ITaskContext {
      * get dist of current state.  default implement in bindingConfig.
      *
      * @param {ITaskInfo} [task]
-     * @param {boolean} [relative] get relative path or absolute path. 
+     * @param {boolean} [relative] get relative path or absolute path.
      * @returns {string}
      *
      * @memberof ITaskContext
@@ -1044,6 +1044,27 @@ export interface ITaskContext {
     setup(): Promise<Src[]>;
 
     /**
+     * add task for this context.
+     *
+     * @param {ITask} task
+     * @param {Gulp} [gulp]
+     * @returns {TaskResult}
+     *
+     * @memberof ITaskContext
+     */
+    addTask(task: ITask);
+
+    /**
+     * remove task
+     *
+     * @param {ITask} task
+     * @returns {ITask[]}
+     *
+     * @memberof ITaskContext
+     */
+    removeTask(task: ITask): ITask[];
+
+    /**
      * run task in this context.
      *
      * @param {IEnvOption} env
@@ -1056,293 +1077,283 @@ export interface ITaskContext {
 
     /**
      * help tipe.
-     * 
+     *
      * @memberof ITaskContext
      */
     help();
 
     /**
      * find  task in module. default implement in bindingConfig.
-     * 
+     *
      * @param {(string | Object)} module
      * @param {ITaskInfo} [match]
      * @returns {Promise<ITask[]>}
-     * 
+     *
      * @memberof ITaskContext
      */
     findTasks(module: string | Object, match?: ITaskInfo): Promise<ITask[]>;
 
     /**
      * find  task in directories. default implement in bindingConfig.
-     * 
+     *
      * @param {TaskSource} dirs
      * @param {ITaskInfo} [match]
      * @returns {Promise<ITask[]>}
-     * 
+     *
      * @memberof ITaskContext
      */
     findTasksInDir(dirs: TaskSource, match?: ITaskInfo): Promise<ITask[]>;
 
     /**
      * find taskdefine in module. default implement in bindingConfig.
-     * 
+     *
      * @param {(string | Object)} module
      * @returns {Promise<ITaskDefine>}
-     * 
+     *
      * @memberof ITaskContext
      */
     findTaskDefine(module: string | Object): Promise<ITaskDefine>;
     /**
      * find taskdefine in directories.  default implement in bindingConfig.
-     * 
+     *
      * @param {TaskSource} dirs
      * @returns {Promise<ITaskDefine>}
-     * 
+     *
      * @memberof ITaskContext
      */
     findTaskDefineInDir(dirs: TaskSource): Promise<ITaskDefine>
 
     /**
      * filter file in directory.  default implement in bindingConfig.
-     * 
+     *
      * @param {Src} express
      * @param {(fileName: string) => boolean} [filter]
      * @param {(filename: string) => string} [mapping]
      * @returns {Promise<string[]>}
-     * 
+     *
      * @memberof ITaskContext
      */
     fileFilter(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]>;
 
     /**
      * to task sequence.
-     * 
-     * @param {ITask[]} tasks 
-     * @param {ZipTaskName} [zipName] 
-     * @returns {Src[]} 
-     * 
+     *
+     * @param {ITask[]} tasks
+     * @param {ZipTaskName} [zipName]
+     * @returns {Src[]}
+     *
      * @memberof ITaskContext
      */
     toSequence(tasks: ITask[], zipName?: ZipTaskName): Src[];
 
     /**
      * filter file in directory.  default implement in bindingConfig.
-     * 
+     *
      * @param {Src[]} tasks
      * @returns {Promise<any>}
-     * 
+     *
      * @memberof ITaskContext
      */
     runSequence(tasks: Src[]): Promise<any>;
 
     /**
      * run task sequence.
-     * 
-     * @param {(ITask[] | Promise<ITask[]>)} tasks 
-     * @param {ZipTaskName} [zipName] 
-     * @returns {Promise<any>} 
-     * 
+     *
+     * @param {(ITask[] | Promise<ITask[]>)} tasks
+     * @param {ZipTaskName} [zipName]
+     * @returns {Promise<any>}
+     *
      * @memberof ITaskContext
      */
     runTaskSequence(tasks: ITask[] | Promise<ITask[]>, zipName?: ZipTaskName): Promise<any>;
 
     /**
      * dynamic generate tasks.  default implement in bindingConfig.
-     * 
+     *
      * @param {(IDynamicTaskOption | IDynamicTaskOption[])} tasks
      * @param {ITaskInfo} [match]
      * @returns {ITask[]}
-     * 
+     *
      * @memberof ITaskContext
      */
     generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[];
 
     /**
      * zip task sequence.
-     * 
-     * @param {Src[]} tasks 
-     * @param {ZipTaskName} [zipName] 
-     * @returns {string} 
-     * 
+     *
+     * @param {Src[]} tasks
+     * @param {ZipTaskName} [zipName]
+     * @returns {string}
+     *
      * @memberof ITaskContext
      */
     zipSequence(tasks: Src[], zipName?: ZipTaskName): string;
 
     /**
      * flattenSequence in this context.
-     * 
+     *
      * @param {Src[]} tasks
      * @param {ZipTaskName} [zipName]
      * @returns {string[]}
-     * 
+     *
      * @memberof ITaskContext
      */
     flattenSequence(tasks: Src[], zipName?: ZipTaskName): string[];
     /**
      * add task result to task sequence. default implement in bindingConfig.
-     * 
+     *
      * @param {Src[]} sequence  task sequence.
      * @param {ITaskInfo} task
      * @returns {Src[]}
-     * 
+     *
      * @memberof ITaskContext
      */
     addToSequence(sequence: Src[], task: ITaskInfo): Src[];
 
     /**
      * get development root.
-     * 
+     *
      * @returns {string}
-     * 
+     *
      * @memberof ITaskContext
      */
     getRootPath(): string;
     /**
      * get root folders.
-     * 
+     *
      * @param {folderCallback} [express]
      * @returns {string[]}
-     * 
+     *
      * @memberof ITaskContext
      */
     getRootFolders(express?: folderCallback): string[];
     /**
      * get folders in path.
-     * 
+     *
      * @param {string} pathstr
      * @param {folderCallback} [express]
      * @returns {string[]}
-     * 
+     *
      * @memberof ITaskContext
      */
     getFolders(pathstr: string, express?: folderCallback): string[];
     /**
      * get context dist folders
-     * 
+     *
      * @param {folderCallback} [express]
      * @param {ITaskInfo} [task]
      * @returns {string[]}
-     * 
+     *
      * @memberof ITaskContext
      */
     getDistFolders(express?: folderCallback, task?: ITaskInfo): string[];
     /**
-     * join src to absolute path src with root( env.root ). 
-     * 
+     * join src to absolute path src with root( env.root ).
+     *
      * @param {Src} src
      * @returns {Src}
-     * 
+     *
      * @memberof ITaskContext
      */
     toRootSrc(src: Src): Src
 
     /**
-     * join pathstr to absolute path src with root( env.root ). 
-     * 
+     * join pathstr to absolute path src with root( env.root ).
+     *
      * @param {string} pathstr
      * @returns {string}
-     * 
+     *
      * @memberof ITaskContext
      */
     toRootPath(pathstr: string): string;
 
     /**
-     * join src to absolute path src with context dist root. 
-     * 
+     * join src to absolute path src with context dist root.
+     *
      * @param {Src} src
      * @param {ITaskInfo} [task]
      * @returns {Src}
-     * 
+     *
      * @memberof ITaskContext
      */
     toDistSrc(src: Src, task?: ITaskInfo): Src;
 
     /**
-     * join pathstr to absolute path src with dist root. 
-     * 
+     * join pathstr to absolute path src with dist root.
+     *
      * @param {string} pathstr
      * @param {ITaskInfo} [task]
      * @returns {string}
-     * 
+     *
      * @memberof ITaskContext
      */
     toDistPath(pathstr: string, task?: ITaskInfo): string;
 
     /**
      * parse to T type;
-     * 
+     *
      * @template T
      * @param {(T | ((ctx: ITaskContext) => T))} setting
      * @returns {T}
-     * 
+     *
      * @memberof ITaskContext
      */
     to<T>(setting: T | ((ctx: ITaskContext) => T)): T;
     /**
      * to src
-     * 
+     *
      * @param {any} TaskSource
      * @returns {Src}
-     * 
+     *
      * @memberof ITaskContext
      */
     toSrc(source: TaskSource): Src;
 
     /**
      * to string.
-     * 
+     *
      * @param {TaskString} name
      * @returns {string}
-     * 
+     *
      * @memberof ITaskContext
      */
     toStr(name: TaskString): string;
 
     /**
      * to relative url.
-     * 
+     *
      * @param {string} basePath
      * @param {string} [toPath]
      * @returns {string}
-     * 
+     *
      * @memberof ITaskContext
      */
     toUrl(basePath: string, toPath?: string): string
 
     /**
      * get package config. default root path file 'package.json'
-     * 
+     *
      * @param {TaskString} [filename]
      * @returns {*}
-     * 
+     *
      * @memberof ITaskContext
      */
     getPackage(filename?: TaskString): any;
 
-    /**
-     * add task for this context.
-     * 
-     * @param {ITask} task
-     * @param {Gulp} [gulp]
-     * @returns {TaskResult}
-     * 
-     * @memberof ITaskContext
-     */
-    addTask(task: ITask);
 
     /**
      * find and filter tasks in this context.
-     * 
+     *
      * @param {(item: ITask) => boolean} [express]
      * @returns {ITask[]}
-     * 
+     *
      * @memberof ITaskContext
      */
     tasks(express?: (item: ITask) => boolean): ITask[];
 
     /**
      * filter registered tasks in this context and sub context.
-     * 
+     *
      * @param {(item: ITask) => boolean} [express]
      * @returns {ITask[]}
      */
@@ -1350,9 +1361,9 @@ export interface ITaskContext {
 
     /**
      * get all global tasks registered in gulp.
-     * 
+     *
      * @returns {string[]}
-     * 
+     *
      * @memberof ITaskContext
      */
     globalTasks(): string[];
@@ -1360,21 +1371,21 @@ export interface ITaskContext {
 
 /**
  * event option
- * 
+ *
  * @export
  * @interface IEnvOption
  */
 export interface IEnvOption {
     /**
      * project root.
-     * 
+     *
      * @type {string}
      * @memberof IEnvOption
      */
     root?: string;
     /**
      * help doc
-     * 
+     *
      * @type {(boolean | string)}
      * @memberof IEnvOption
      */
@@ -1392,7 +1403,7 @@ export interface IEnvOption {
 
     /**
      * project config setting.
-     * 
+     *
      * @type {string}
      * @memberof IEnvOption
      */
@@ -1408,7 +1419,7 @@ export interface IEnvOption {
 
     /**
      * task group.
-     * 
+     *
      * @type {Src}
      * @memberof IEnvOption
      */
@@ -1416,7 +1427,7 @@ export interface IEnvOption {
 
     /**
      * group bundle.
-     * 
+     *
      * @type {Src}
      * @memberof IEnvOption
      */

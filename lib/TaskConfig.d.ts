@@ -89,28 +89,28 @@ export interface IOrder {
      * the value to sort sequence.
      *
      * @type {number}
-     * @memberOf IOrder
+     * @memberof IOrder
      */
     value?: number;
     /**
      * before the task to run.
      *
      * @type {string}
-     * @memberOf IOrder
+     * @memberof IOrder
      */
     before?: string;
     /**
      * afater the task to run.
      *
      * @type {string}
-     * @memberOf IOrder
+     * @memberof IOrder
      */
     after?: string;
     /**
      * run Way type.
      *
      * @type {RunWay}
-     * @memberOf IOrder
+     * @memberof IOrder
      */
     runWay?: RunWay;
 }
@@ -141,7 +141,7 @@ export interface IOperate {
      * operate name
      *
      * @type {TaskString}
-     * @memberOf IOperate
+     * @memberof IOperate
      */
     name?: TaskString;
     /**
@@ -149,28 +149,28 @@ export interface IOperate {
      *
      * enmu flags.
      * @type {Operation}
-     * @memberOf IOperate
+     * @memberof IOperate
      */
     oper?: Operation;
     /**
      * order index.
      *
      * @type {Order}
-     * @memberOf IOperate
+     * @memberof IOperate
      */
     order?: Order;
     /**
      * none pipe addation.
      *
      * @type {boolean}
-     * @memberOf IOperate
+     * @memberof IOperate
      */
     nonePipe?: boolean;
     /**
      * none output.
      *
      * @type {boolean}
-     * @memberOf IOperate
+     * @memberof IOperate
      */
     noneOutput?: boolean;
 }
@@ -186,7 +186,7 @@ export interface ITaskDecorator extends IOperate {
      * assert tasks. assert group name or extends name.
      *
      * @type {Src}
-     * @memberOf ITaskInfo
+     * @memberof ITaskInfo
      */
     group?: Src;
     /**
@@ -194,7 +194,7 @@ export interface ITaskDecorator extends IOperate {
      *
      * @param {ITaskDecorator} another
      *
-     * @memberOf ITaskInfo
+     * @memberof ITaskInfo
      */
     match?(another: ITaskDecorator): any;
 }
@@ -210,14 +210,14 @@ export interface ITaskInfo extends ITaskDecorator {
      * finally task name.
      *
      * @type {Src}
-     * @memberOf ITaskInfo
+     * @memberof ITaskInfo
      */
     taskName?: Src;
     /**
      * assert dist info.
      *
      * @type {IAssertDist}
-     * @memberOf ITaskInfo
+     * @memberof ITaskInfo
      */
     assert?: IAssertDist;
 }
@@ -232,7 +232,7 @@ export interface ITask {
      * old filed.
      *
      * @type {ITaskInfo}
-     * @memberOf ITask
+     * @memberof ITask
      */
     getInfo(): ITaskInfo;
     /**
@@ -240,7 +240,7 @@ export interface ITask {
      *
      * @param {ITaskInfo} info
      *
-     * @memberOf ITask
+     * @memberof ITask
      */
     setInfo?(info: ITaskInfo): any;
     /**
@@ -250,7 +250,7 @@ export interface ITask {
      * @param {Gulp} [gulp]
      * @returns {TaskResult}
      *
-     * @memberOf ITask
+     * @memberof ITask
      */
     setup(context: ITaskContext, gulp?: Gulp): TaskResult;
 }
@@ -281,7 +281,7 @@ export interface ITransform extends IOperate, NodeJS.ReadWriteStream {
      * @param {ITransform} ouputStream
      * @returns {ITransform}
      *
-     * @memberOf ITransform
+     * @memberof ITransform
      */
     transformPipe?(ouputStream: ITransform): ITransform;
     /**
@@ -290,7 +290,7 @@ export interface ITransform extends IOperate, NodeJS.ReadWriteStream {
      * @param {ITransform} sourceStream
      * @returns {ITransform}
      *
-     * @memberOf ITransform
+     * @memberof ITransform
      */
     transformSourcePipe?(sourceStream: ITransform): ITransform;
     /**
@@ -299,7 +299,7 @@ export interface ITransform extends IOperate, NodeJS.ReadWriteStream {
      * @param {NodeJS.ReadWriteStream} stream
      * @returns {ITransform}
      *
-     * @memberOf ITransform
+     * @memberof ITransform
      */
     pipe(stream: NodeJS.ReadWriteStream): ITransform;
 }
@@ -331,7 +331,7 @@ export interface IPipe extends IOperate {
      * @param {Gulp} [gulp]
      * @returns {(ITransform | Promise<ITransform>)}
      *
-     * @memberOf IPipe
+     * @memberof IPipe
      */
     toTransform?(context: ITaskContext, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
 }
@@ -352,7 +352,7 @@ export interface IOutputPipe extends IOperate {
      * @param {Gulp} [gulp]
      * @returns {(ITransform | Promise<ITransform>)}
      *
-     * @memberOf IOutputPipe
+     * @memberof IOutputPipe
      */
     toTransform?(stream: ITransform, context: ITaskContext, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
 }
@@ -369,49 +369,49 @@ export interface IAssertDist {
      * assert name
      *
      * @type {TaskString}
-     * @memberOf IOperate
+     * @memberof IOperate
      */
     name?: TaskString;
     /**
      * the src file filter string. default 'src'.
      *
      * @type {TaskSource}
-     * @memberOf IAssertDist
+     * @memberof IAssertDist
      */
     src?: TaskSource;
     /**
      * the e2e src file filter string. default 'src'.
      *
      * @type {TaskSource}
-     * @memberOf IAssertDist
+     * @memberof IAssertDist
      */
     e2eSrc?: TaskSource;
     /**
      * the test src file filter string. default 'src'.
      *
      * @type {TaskSource}
-     * @memberOf IAssertDist
+     * @memberof IAssertDist
      */
     testSrc?: TaskSource;
     /**
      * clean special source in 'dist'. if not setting, default clean 'dist' folder.
      *
      * @type {TaskSource}
-     * @memberOf IAssertDist
+     * @memberof IAssertDist
      */
     cleanSrc?: TaskSource;
     /**
      * auto create task to watch this source.
      *
      * @type {(boolean | Array<string | WatchCallback>)}
-     * @memberOf IAssertDist
+     * @memberof IAssertDist
      */
     watch?: boolean | Array<string | WatchCallback>;
     /**
      * the watch src file filter string. default 'src'.
      *
      * @type {TaskSource}
-     * @memberOf IAssertDist
+     * @memberof IAssertDist
      */
     watchSrc?: TaskSource;
     /**
@@ -422,35 +422,35 @@ export interface IAssertDist {
      * build output folder. if empty use parent setting, or ues 'dist'.
      *
      * @type {string}
-     * @memberOf Dist
+     * @memberof Dist
      */
     buildDist?: TaskString;
     /**
      * test output folder. if empty use parent setting, or ues 'dist'.
      *
      * @type {string}
-     * @memberOf Dist
+     * @memberof Dist
      */
     testDist?: TaskString;
     /**
      * e2e output folder. if empty use parent setting, or ues 'dist'.
      *
      * @type {string}
-     * @memberOf Dist
+     * @memberof Dist
      */
     e2eDist?: TaskString;
     /**
      * release output folder. if empty use parent setting, or ues 'dist'.
      *
      * @type {string}
-     * @memberOf Dist
+     * @memberof Dist
      */
     releaseDist?: TaskString;
     /**
      * deploy output folder. if empty use parent setting, or ues 'dist'.
      *
      * @type {string}
-     * @memberOf Dist
+     * @memberof Dist
      */
     deployDist?: TaskString;
 }
@@ -471,7 +471,7 @@ export interface ICustomPipe {
      * @param {TaskCallback} [callback]
      * @returns {(ITransform | Promise<ITransform> | void)}
      *
-     * @memberOf ICustomPipe
+     * @memberof ICustomPipe
     * */
     pipe?(gulpsrc: ITransform, context: ITaskContext, dist?: IAssertDist, gulp?: Gulp, callback?: TaskCallback): ITransform | Promise<ITransform> | void;
 }
@@ -486,19 +486,19 @@ export interface IPipeOption extends ICustomPipe {
     /**
      * task source stream config.
      *
-     * @memberOf IPipeOption
+     * @memberof IPipeOption
      */
     source?: TransformSource | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => TransformSource);
     /**
      * task pipe works.
      *
-     * @memberOf IDynamicTaskOption
+     * @memberof IDynamicTaskOption
      */
     pipes?: Pipe[] | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => Pipe[]);
     /**
      * output pipe task
      *
-     * @memberOf IPipeOption
+     * @memberof IPipeOption
      */
     output?: IOutputPipe[] | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => IOutputPipe[]);
 }
@@ -514,13 +514,13 @@ export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPip
      * IAsserts extends name. for register dynamic task.
      *
      * @type {TaskName}
-     * @memberOf IAsserts
+     * @memberof IAsserts
      */
     name: TaskString;
     /**
      * watch tasks
      *
-     * @memberOf IDynamicTaskOption
+     * @memberof IDynamicTaskOption
      */
     watchTasks?: Array<string | WatchCallback> | ((ctx?: ITaskContext, dt?: IDynamicTaskOption) => Array<string | WatchCallback>);
     /**
@@ -529,7 +529,7 @@ export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPip
      * @param {WatchEvent} event
      * @param {ITaskContext} context
      *
-     * @memberOf IDynamicTaskOption
+     * @memberof IDynamicTaskOption
      */
     watchChanged?(event: WatchEvent, context: ITaskContext): any;
     /**
@@ -540,14 +540,14 @@ export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPip
      * @param {Gulp} [gulp]
      * @returns {(void | ITransform | Promise<any>)}
      *
-     * @memberOf IDynamicTaskOption
+     * @memberof IDynamicTaskOption
      */
     task?(context: ITaskContext, dt?: IDynamicTaskOption, gulp?: Gulp): void | ITransform | Promise<any>;
     /**
      *  shell command task.
      *
      * @type {AsyncTaskSource}
-     * @memberOf IDynamicTaskOption
+     * @memberof IDynamicTaskOption
      */
     shell?: AsyncTaskSource;
 }
@@ -572,9 +572,15 @@ export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
      * the shell command run way. default parallel.
      *
      * @type {RunWay}
-     * @memberOf IAsserts
+     * @memberof IAsserts
      */
     shellRunWay?: RunWay;
+    /**
+     * task runway  in this context.
+     *
+     * @type {RunWay}@memberof IAsserts
+     */
+    runWay?: RunWay;
     /**
      * custom control how to match tasks.
      *
@@ -582,7 +588,7 @@ export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
      * @param {ITaskInfo} match
      * @returns {boolean}
      *
-     * @memberOf IAsserts
+     * @memberof IAsserts
      */
     match?(task: ITaskInfo, match: ITaskInfo): boolean;
 }
@@ -600,7 +606,7 @@ export interface ITaskDefine {
      * @param {IAsserts} option
      * @returns {ITaskContext}
      *
-     * @memberOf ITaskDefine
+     * @memberof ITaskDefine
      */
     loadConfig?(option: IAsserts, env: IEnvOption): ITaskConfig;
     /**
@@ -611,7 +617,7 @@ export interface ITaskDefine {
      * @param {tasksInDir} findInDir
      * @returns {Task[]}
      *
-     * @memberOf ITaskDefine
+     * @memberof ITaskDefine
      */
     loadTasks?(context: ITaskContext): Promise<ITask[]>;
     /**
@@ -620,7 +626,7 @@ export interface ITaskDefine {
      * @param {ITaskContext} context
      * @returns {Promise<ITask[]>}
      *
-     * @memberOf IContextDefine
+     * @memberof IContextDefine
      */
     tasks?(context: ITaskContext): Promise<ITask[]>;
 }
@@ -637,7 +643,7 @@ export interface IContextDefine extends ITaskDefine {
      * @param {ITaskConfig} config
      * @returns {ITaskContext}
      *
-     * @memberOf IContextDefine
+     * @memberof IContextDefine
      */
     getContext(config: ITaskConfig): ITaskContext;
 }
@@ -656,7 +662,7 @@ export interface ITaskConfig {
      * env
      *
      * @type {EnvOption}
-     * @memberOf ITaskConfig
+     * @memberof ITaskConfig
      */
     env?: IEnvOption;
     /**
@@ -670,7 +676,7 @@ export interface ITaskConfig {
      * task option setting.
      *
      * @type {IAsserts}
-     * @memberOf ITaskConfig
+     * @memberof ITaskConfig
      */
     option?: IAsserts;
     /**
@@ -680,7 +686,7 @@ export interface ITaskConfig {
      * @param {ITaskInfo} task
      * @returns {Src[]}
      *
-     * @memberOf ITaskConfig
+     * @memberof ITaskConfig
      */
     addToSequence?(sequence: Src[], task: ITaskInfo): Src[];
     /**
@@ -691,7 +697,7 @@ export interface ITaskConfig {
      * @param {ITaskInfo} [subGroupTask]
      * @returns {Src[]}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     runTasks?(tasks?: Src[], assertTasks?: ITaskInfo, subGroupTask?: ITaskInfo): Src[];
     /**
@@ -699,14 +705,14 @@ export interface ITaskConfig {
      *
      * @param {string} lang
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     printHelp?(lang: string): void;
     /**
      * package filename.
      *
      * @type {string}
-     * @memberOf ITaskConfig
+     * @memberof ITaskConfig
      */
     packageFile?: string;
     /**
@@ -716,7 +722,7 @@ export interface ITaskConfig {
      * @param {ITaskContext} [parent]
      * @returns {ITaskContext}
      *
-     * @memberOf ITaskConfig
+     * @memberof ITaskConfig
      */
     createContext?(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext;
 }
@@ -737,34 +743,52 @@ export interface Express<T, TResult> {
  * @export
  * @interface ITaskContext
  */
-export interface ITaskContext extends ITaskConfig {
+export interface ITaskContext {
+    /**
+     * env.
+     *
+     * @type {IEnvOption}@memberof ITaskContext
+     */
+    env: IEnvOption;
+    /**
+     * task option setting.
+     *
+     * @type {IAsserts}@memberof ITaskContext
+     */
+    option: IAsserts;
     /**
      * parent context.
      *
      * @type {ITaskContext}
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     parent?: ITaskContext;
     /**
      * run operation
      *
      * @type {Operation}
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     oper: Operation;
     /**
      * the gulp instance.
      *
      * @type {Gulp}
-     * @memberof IContext
+     * @memberof ITaskContext
      */
     gulp: Gulp;
+    /**
+     * globals data.
+     *
+     * @type {*}@memberof ITaskContext
+     */
+    globals: any;
     /**
      * add sub ITaskContext
      *
      * @param {ITaskContext} context
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     add(context: ITaskContext): void;
     /**
@@ -773,7 +797,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {ITaskContext} [context]
      * @returns {ITaskContext[]}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     remove(context?: ITaskContext): ITaskContext[];
     /**
@@ -854,7 +878,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {ITaskInfo} match
      * @returns {boolean}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     matchCompare(task: ITaskInfo, match: ITaskInfo): boolean;
     /**
@@ -864,7 +888,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {boolean} [relative] get relative path or absolute path.
      * @returns {Src}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     getSrc(task?: ITaskInfo, relative?: boolean): Src;
     /**
@@ -874,7 +898,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {boolean} [relative] get relative path or absolute path.
      * @returns {string}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     getDist(task?: ITaskInfo, relative?: boolean): string;
     /**
@@ -883,17 +907,32 @@ export interface ITaskContext extends ITaskConfig {
      * @param {string | ITaskInfo} task
      * @param {string} [ext] ext name.
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     subTaskName(task: string | ITaskInfo, ext?: string): any;
     /**
-     * custom print help.
+     * load tasks.
      *
-     * @param {string} lang
+     * @returns {Promise<Src[]>}
      *
-     * @memberOf ITaskContext
+     * @memberof IContext
      */
-    printHelp(lang: string): void;
+    setup(): Promise<Src[]>;
+    /**
+     * run task in this context.
+     *
+     * @param {IEnvOption} env
+     * @returns {Promise<any>}
+     *
+     * @memberof IContext
+     */
+    run(env: IEnvOption): Promise<any>;
+    /**
+     * help tipe.
+     *
+     * @memberof ITaskContext
+     */
+    help(): any;
     /**
      * find  task in module. default implement in bindingConfig.
      *
@@ -901,7 +940,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {ITaskInfo} [match]
      * @returns {Promise<ITask[]>}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     findTasks(module: string | Object, match?: ITaskInfo): Promise<ITask[]>;
     /**
@@ -911,7 +950,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {ITaskInfo} [match]
      * @returns {Promise<ITask[]>}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     findTasksInDir(dirs: TaskSource, match?: ITaskInfo): Promise<ITask[]>;
     /**
@@ -920,7 +959,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {(string | Object)} module
      * @returns {Promise<ITaskDefine>}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     findTaskDefine(module: string | Object): Promise<ITaskDefine>;
     /**
@@ -929,7 +968,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {TaskSource} dirs
      * @returns {Promise<ITaskDefine>}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     findTaskDefineInDir(dirs: TaskSource): Promise<ITaskDefine>;
     /**
@@ -940,7 +979,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {(filename: string) => string} [mapping]
      * @returns {Promise<string[]>}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     fileFilter(express: Src, filter?: (fileName: string) => boolean, mapping?: (filename: string) => string): Promise<string[]>;
     /**
@@ -959,7 +998,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {Src[]} tasks
      * @returns {Promise<any>}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     runSequence(tasks: Src[]): Promise<any>;
     /**
@@ -979,7 +1018,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {ITaskInfo} [match]
      * @returns {ITask[]}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[];
     /**
@@ -1009,7 +1048,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {ITaskInfo} task
      * @returns {Src[]}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     addToSequence(sequence: Src[], task: ITaskInfo): Src[];
     /**
@@ -1017,7 +1056,7 @@ export interface ITaskContext extends ITaskConfig {
      *
      * @returns {string}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     getRootPath(): string;
     /**
@@ -1026,7 +1065,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {folderCallback} [express]
      * @returns {string[]}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     getRootFolders(express?: folderCallback): string[];
     /**
@@ -1036,7 +1075,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {folderCallback} [express]
      * @returns {string[]}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     getFolders(pathstr: string, express?: folderCallback): string[];
     /**
@@ -1046,7 +1085,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {ITaskInfo} [task]
      * @returns {string[]}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     getDistFolders(express?: folderCallback, task?: ITaskInfo): string[];
     /**
@@ -1055,7 +1094,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {Src} src
      * @returns {Src}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     toRootSrc(src: Src): Src;
     /**
@@ -1064,7 +1103,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {string} pathstr
      * @returns {string}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     toRootPath(pathstr: string): string;
     /**
@@ -1074,7 +1113,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {ITaskInfo} [task]
      * @returns {Src}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     toDistSrc(src: Src, task?: ITaskInfo): Src;
     /**
@@ -1084,7 +1123,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {ITaskInfo} [task]
      * @returns {string}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     toDistPath(pathstr: string, task?: ITaskInfo): string;
     /**
@@ -1094,7 +1133,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {(T | ((ctx: ITaskContext) => T))} setting
      * @returns {T}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     to<T>(setting: T | ((ctx: ITaskContext) => T)): T;
     /**
@@ -1103,7 +1142,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {any} TaskSource
      * @returns {Src}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     toSrc(source: TaskSource): Src;
     /**
@@ -1112,7 +1151,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {TaskString} name
      * @returns {string}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     toStr(name: TaskString): string;
     /**
@@ -1122,7 +1161,7 @@ export interface ITaskContext extends ITaskConfig {
      * @param {string} [toPath]
      * @returns {string}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     toUrl(basePath: string, toPath?: string): string;
     /**
@@ -1131,26 +1170,26 @@ export interface ITaskContext extends ITaskConfig {
      * @param {TaskString} [filename]
      * @returns {*}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     getPackage(filename?: TaskString): any;
     /**
-     * setup task for this context.
+     * add task for this context.
      *
      * @param {ITask} task
      * @param {Gulp} [gulp]
      * @returns {TaskResult}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
-    setup(task: ITask, gulp?: Gulp): TaskResult;
+    addTask(task: ITask): any;
     /**
      * find and filter tasks in this context.
      *
      * @param {(item: ITask) => boolean} [express]
      * @returns {ITask[]}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     tasks(express?: (item: ITask) => boolean): ITask[];
     /**
@@ -1165,7 +1204,7 @@ export interface ITaskContext extends ITaskConfig {
      *
      * @returns {string[]}
      *
-     * @memberOf ITaskContext
+     * @memberof ITaskContext
      */
     globalTasks(): string[];
 }
@@ -1180,14 +1219,14 @@ export interface IEnvOption {
      * project root.
      *
      * @type {string}
-     * @memberOf IEnvOption
+     * @memberof IEnvOption
      */
     root?: string;
     /**
      * help doc
      *
      * @type {(boolean | string)}
-     * @memberOf IEnvOption
+     * @memberof IEnvOption
      */
     help?: boolean | string;
     test?: boolean | string;
@@ -1204,7 +1243,7 @@ export interface IEnvOption {
      * project config setting.
      *
      * @type {string}
-     * @memberOf IEnvOption
+     * @memberof IEnvOption
      */
     config?: string;
     publish?: boolean | string;
@@ -1212,14 +1251,14 @@ export interface IEnvOption {
      * task group.
      *
      * @type {Src}
-     * @memberOf IEnvOption
+     * @memberof IEnvOption
      */
     group?: Src;
     /**
      * group bundle.
      *
      * @type {Src}
-     * @memberOf IEnvOption
+     * @memberof IEnvOption
      */
     gb?: Src;
 }

@@ -1,6 +1,6 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { ITask, TaskResult, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
+import { ITask, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
 /**
  * binding Config, create task context.
  *
@@ -132,7 +132,6 @@ export declare class TaskContext implements ITaskContext {
     getSrc(task?: ITaskInfo, relative?: boolean): Src;
     getDist(task?: ITaskInfo, relative?: boolean): string;
     subTaskName(task: any, ext?: string): string;
-    printHelp(lang: string): void;
     findTasks(module: string | Object, match?: ITaskInfo): Promise<ITask[]>;
     findTasksInDir(dirs: TaskSource, match?: ITaskInfo): Promise<ITask[]>;
     findTaskDefine(module: string | Object): Promise<ITaskDefine>;
@@ -222,7 +221,17 @@ export declare class TaskContext implements ITaskContext {
     toUrl(basePath: string, toPath?: string): string;
     private packages;
     getPackage(filename?: TaskString): any;
-    setup(task: ITask, gulp?: Gulp): TaskResult;
+    setup(): Promise<Src[]>;
+    addTask(task: ITask): void;
+    /**
+     * run task in this context.
+     *
+     * @returns {Promise<any>}
+     *
+     * @memberof TaskContext
+     */
+    run(): Promise<any>;
+    help(): void;
     tasks(express?: (item: ITask) => boolean): ITask[];
     registerTasks(express?: (item: ITask) => boolean): ITask[];
     globalTasks(): string[];
