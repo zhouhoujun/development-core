@@ -1,6 +1,6 @@
 import 'mocha';
 import { expect } from 'chai';
-import { Operation, bindingConfig } from '../src';
+import { Operation, createContext } from '../src';
 import * as _ from 'lodash';
 import * as path from 'path';
 let root = __dirname;
@@ -10,7 +10,7 @@ describe('directives', () => {
 
     it('build directives', () => {
 
-        let ctx = bindingConfig({
+        let ctx = createContext({
             env: { root: root },
             option: { src: 'src', dist: 'lib' }
         });
@@ -23,7 +23,7 @@ describe('directives', () => {
 
     it('test directives', () => {
 
-        let ctx = bindingConfig({
+        let ctx = createContext({
             env: { root: root, test: true },
             option: { src: 'src', testSrc: 'test/**/*.spec.ts', dist: 'lib', testDist: 'testbuild' }
         });
@@ -35,7 +35,7 @@ describe('directives', () => {
 
     it('e2e directives', () => {
 
-        let ctx = bindingConfig({
+        let ctx = createContext({
             env: { root: root, e2e: true },
             option: { src: 'src', e2eSrc: 'e2e/**/*.spec.ts', dist: 'lib', e2eDist: 'e2ebuild' }
         });
@@ -46,7 +46,7 @@ describe('directives', () => {
 
     it('release directives', () => {
 
-        let ctx = bindingConfig({
+        let ctx = createContext({
             env: { root: root, release: true },
             option: { src: 'src', dist: 'lib', releaseDist: 'res' }
         });
@@ -59,7 +59,7 @@ describe('directives', () => {
 
     it('deploy directives', () => {
 
-        let ctx = bindingConfig({
+        let ctx = createContext({
             env: { root: root, deploy: true },
             option: { src: 'src', dist: 'lib', deployDist: 'deploy' }
         });
@@ -73,7 +73,7 @@ describe('directives', () => {
 
     it('release testsrc', () => {
 
-        let ctx = bindingConfig({
+        let ctx = createContext({
             env: { root: root, release: true },
             option: { src: 'src', testSrc: 'test/**/*.spec.ts', dist: 'lib', releaseDist: 'release' }
         });
@@ -88,7 +88,7 @@ describe('directives', () => {
 
     it('release testsrc with !', () => {
 
-        let ctx = bindingConfig({
+        let ctx = createContext({
             env: { root: root, release: true },
             option: { src: ['src', '!src/jspm'], testSrc: '!test/**/*.spec.ts', dist: 'lib', releaseDist: 'release' }
         });
@@ -102,7 +102,7 @@ describe('directives', () => {
 
     it('release testsrc with relative', () => {
 
-        let ctx = bindingConfig({
+        let ctx = createContext({
             env: { root: root, release: true },
             option: { src: ['src', '!src/jspm'], testSrc: '!test/**/*.spec.ts', dist: 'lib', releaseDist: 'release' }
         });

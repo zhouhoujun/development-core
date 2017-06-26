@@ -479,7 +479,7 @@ let createTask = (env) => {
         }
     });
 
-    let tasks = ctx.generateTask([
+    ctx.generateTask([
         {
             name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
             // auto create watch task for this asserts when watch in context.
@@ -524,7 +524,7 @@ let createTask = (env) => {
         { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (ctx) => del(ctx.getDist()) }
     ]);
 
-    return ctx.runTaskSequence(tasks);
+    return ctx.run();
 }
 
 ```

@@ -2,7 +2,7 @@ import { Gulp, WatchEvent, WatchCallback, TaskCallback } from 'gulp';
 
 
 /**
- * mutil source stream pipe task run way.
+ * mutil source stream pipe task run way, task runway, or same level context run way.
  *
  * @export
  * @enum {number}
@@ -16,6 +16,23 @@ export enum RunWay {
      * run mutil source stream by parallel.
      */
     parallel = 2
+}
+
+/**
+ * current context run sequence with children context node.
+ *
+ * @export
+ * @enum {number}
+ */
+export enum NodeSequence {
+    /**
+     * current context node run tasks before childe node run.
+     */
+    before = 1,
+    /**
+     * current context node run tasks after childe node run.
+     */
+    after = 2
 }
 
 
@@ -629,26 +646,24 @@ export interface IDynamicTasks {
  */
 export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
 
-    // /**
-    //  * tasks to deal with IAsserts.
-    //  *
-    //  * @type {IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>}
-    //  * @memberof IAsserts
-    //  */
-    // asserts?: IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>;
+    /**
+     * asser operation.
+     *
+     * @type {Operation}@memberof IAsserts
+     */
+    oper?: Operation;
 
-    // /**
-    //  * set sub asserts task order in this task sequence.
-    //  *
-    //  * @type {Order}
-    //  * @memberof IAsserts
-    //  */
-    // assertsOrder?: Order;
+    /**
+     * current assert order.
+     */
+    order?: Order;
 
-    // /**
-    //  * current assert order.
-    //  */
-    // order?: Order;
+    /**
+     * curr node run sequence with children context. default before children run.
+     *
+     * @type {NodeSequence}@memberof IAsserts
+     */
+    nodeSequence?: NodeSequence;
 
     /**
      * the shell command run way. default parallel.
@@ -734,7 +749,16 @@ export interface IContextDefine extends ITaskDefine {
      *
      * @memberof IContextDefine
      */
-    getContext(config: ITaskConfig): ITaskContext;
+    getContext?(config: ITaskConfig): ITaskContext;
+
+
+    /**
+     * set context.
+     * 
+     * @param {ITaskContext} config;
+     * @memberof IContextDefine
+     */
+    setContext?(config: ITaskContext): void;
 
 }
 
@@ -1035,6 +1059,13 @@ export interface ITaskContext {
     subTaskName(task: string | ITaskInfo, ext?: string);
 
     /**
+     * get run sequence, after setup.
+     *
+     * @returns {Src[]}
+     * @memberof ITaskContext
+     */
+    getRunSequence(): Src[];
+    /**
      * load tasks.
      *
      * @returns {Promise<Src[]>}
@@ -1044,35 +1075,38 @@ export interface ITaskContext {
     setup(): Promise<Src[]>;
 
     /**
-     * add task for this context.
+     * setup tasks of current context.
      *
-     * @param {ITask} task
-     * @param {Gulp} [gulp]
-     * @returns {TaskResult}
-     *
+     * @returns {(Src[] | Promise<Src[]>)}
      * @memberof ITaskContext
      */
-    addTask(task: ITask);
+    setupTasks(): Src[] | Promise<Src[]>;
+
+    /**
+     * add task for this context.
+     * 
+     * @param {...ITask[]} task
+     * @memberof ITaskContext
+     */
+    addTask(...task: ITask[]): void;
 
     /**
      * remove task
-     *
+     * 
      * @param {ITask} task
-     * @returns {ITask[]}
-     *
+     * @returns {(ITask[] | Promise<ITask[]>)}
      * @memberof ITaskContext
      */
-    removeTask(task: ITask): ITask[];
+    removeTask(task: ITask): ITask[] | Promise<ITask[]>;
 
     /**
      * run task in this context.
      *
-     * @param {IEnvOption} env
      * @returns {Promise<any>}
      *
      * @memberof IContext
      */
-    run(env: IEnvOption): Promise<any>;
+    run(): Promise<any>;
 
 
     /**

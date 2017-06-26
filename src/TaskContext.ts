@@ -2,13 +2,13 @@ import *as _ from 'lodash';
 import { Gulp } from 'gulp';
 import *as gulp from 'gulp';
 import {
-    ITask, TaskResult, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption
-    , RunWay, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
+    ITask, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption
+    , NodeSequence, RunWay, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
 } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { toSequence, runSequence, addToSequence, zipSequence, flattenSequence, runTaskSequence } from './taskSequence';
 import { sortOrder, matchCompare, absoluteSrc, absolutePath } from './utils';
-import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefineInDir } from './decorator';
+import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefineInDir } from './findTasks';
 import *as path from 'path';
 import *as fs from 'fs';
 const globby = require('globby');
@@ -54,7 +54,9 @@ let globals = {};
  */
 export class TaskContext implements ITaskContext {
     protected cfg: ITaskConfig;
-    protected taskSequece: ITask[] = [];
+    protected taskseq: ITask[] = [];
+
+    protected sequence: Src[] = [];
     protected children: ITaskContext[] = [];
 
     oper: Operation;
@@ -451,8 +453,8 @@ export class TaskContext implements ITaskContext {
     generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[] {
         let ctx = this;
         let gtask = generateTask(tasks, _.extend({ oper: ctx.oper }, match || {}), this);
-        this.taskSequece = this.taskSequece.concat(gtask);
-        return this.taskSequece;
+        this.taskseq = this.taskseq.concat(gtask);
+        return this.taskseq;
     }
 
     /**
@@ -546,63 +548,64 @@ export class TaskContext implements ITaskContext {
     }
 
     setup(): Promise<Src[]> {
-        let tasks = [];
-        return Promise.all(
-            tasks
-                .concat(
-                this.loadTasks(),
-                this.map(ctx => {
+        return Promise.all<any>(
+            [
+                this.setupTasks(),
+                ...this.map(ctx => {
                     return ctx.setup()
                         .then(seq => {
-                            return {
-                                opt: ctx.option,
-                                seq: seq
-                            }
+                            return ctx;
                         });
-                }, Mode.children)))
+                }, Mode.children)
+            ])
             .then(srcs => {
                 let opt = this.option as IAsserts;
                 let tseq = srcs.shift() as Src[];
-                let ordertask = sortOrder(srcs, itm => itm.opt.order, this);
+                let ordertask = sortOrder(<ITaskContext[]>srcs, ctx => ctx.option.order, this);
 
                 let subseq: Src[] = [];
                 _.each(ordertask, (t, idx) => {
                     if (_.isArray(t)) {
-                        subseq.push(_.filter(_.map(t, it => this.zipSequence(it['seq'])), it => it));
+                        subseq.push(_.filter(_.map(t, it => this.zipSequence(<Src[]>it.getRunSequence())), it => !!it));
                     } else {
-                        let tk = this.zipSequence(t.seq);
+                        let tk = this.zipSequence(t.getRunSequence());
                         if (tk) {
                             subseq.push(tk);
                         }
                     }
                 });
 
-                let children = this.zipSequence(subseq, (name, runway) => this.subTaskName(name, (runway === RunWay.sequence ? '-sub-seq' : '-sub-paral')));
-                if (children) {
-                    tseq = this.addToSequence(tseq, <ITaskInfo>{
-                        order: opt.runWay,
-                        taskName: children
-                    })
+                // let children = this.zipSequence(subseq, (name, runway) => this.subTaskName(name, (runway === RunWay.sequence ? '-sub-seq' : '-sub-paral')));
+                tseq = opt.runWay === RunWay.parallel ? [this.flattenSequence(tseq)] : tseq;
+                if (subseq && subseq.length > 0) {
+                    if (opt.nodeSequence === NodeSequence.after) {
+                        tseq.splice(0, 0, ...subseq);
+                    } else {
+                        tseq.push(...subseq);
+                    }
                 }
 
-                return tseq;
+                this.sequence = tseq;
+                return this.sequence;
             });
     }
 
-    loadTasks(): Promise<ITask[]> {
-        let opt = this.option;
-        opt
-        return this.findTaskDefineInDir('');
+    getRunSequence(): Src[] {
+        return this.sequence || [];
     }
 
-    addTask(task: ITask) {
-        this.taskSequece.push(task);
+    setupTasks(): Src[] | Promise<Src[]> {
+        return this.toSequence(this.taskseq);
     }
 
-    removeTask(task: ITask): ITask[] {
-        let idx = this.taskSequece.indexOf(task);
-        if (idx >= 0) {
-            return this.taskSequece.splice(idx, 1);
+    addTask(...task: ITask[]) {
+        this.taskseq.push(...task);
+    }
+
+    removeTask(task: ITask): ITask[] | Promise<ITask[]> {
+        let idx = this.taskseq.indexOf(task);
+        if (idx >= 0 && idx < this.taskseq.length) {
+            return this.taskseq.splice(idx, 1);
         }
 
         return [];
@@ -636,7 +639,7 @@ export class TaskContext implements ITaskContext {
     }
 
     tasks(express?: (item: ITask) => boolean): ITask[] {
-        return express ? _.filter(this.taskSequece, express) : this.taskSequece;
+        return express ? _.filter(this.taskseq, express) : this.taskseq;
     }
 
     registerTasks(express?: (item: ITask) => boolean): ITask[] {

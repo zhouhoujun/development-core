@@ -29,7 +29,7 @@ let createTask = (env) => {
 
     console.log(context);
 
-    let tasks = context.generateTask([
+    context.generateTask([
         // {
         //     name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
         //     pipes: [() => cache('typescript'), () => sourcemaps.init(), () => tsProject()],
@@ -98,5 +98,5 @@ let createTask = (env) => {
         { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
     ]);
 
-    return context.runTaskSequence(tasks);
+    return context.run(); // runTaskSequence(tasks);
 }

@@ -16,7 +16,7 @@ import * as path from 'path';
  */
 export function sortOrder<T>(sequence: T[], orderBy: (item: T) => Order, ctx: ITaskContext, forceSequence = false): Array<T | T[]> {
     let parall: IMap<T[]> = {};
-    sequence = _.filter(sequence, t => t);
+    sequence = _.filter(sequence, t => !!t);
     let rseq: Array<T | T[]> = _.orderBy(sequence, (t: T) => {
         if (_.isArray(t)) {
             return 0.5;
