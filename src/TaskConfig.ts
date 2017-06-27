@@ -762,6 +762,40 @@ export interface IContextDefine extends ITaskDefine {
 
 }
 
+
+/**
+ * assert option
+ * 
+ * @export
+ * @interface IAssertOption
+ * @extends {IAsserts}
+ */
+export interface IAssertOption extends IAsserts {
+
+    /**
+     * asserts tasks run way. default RunWay.parallel
+     *
+     * @type {RunWay}
+     * @memberOf IAssertOption
+     */
+    assertsRunWay?: RunWay;
+
+    /**
+     * tasks to deal with IAsserts.
+     *
+     * @type {IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>}
+     * @memberOf IAsserts
+     */
+    asserts?: IMap<Operation | Src | IAsserts | IDynamicTaskOption[]>;
+
+    /**
+     * set sub asserts task order in this task sequence.
+     *
+     * @type {Order}
+     * @memberOf IAsserts
+     */
+    assertsOrder?: Order;
+}
 /**
  * task config. runtime task config for setup task.
  *
@@ -794,7 +828,7 @@ export interface ITaskConfig {
      * @type {IAsserts}
      * @memberof ITaskConfig
      */
-    option?: IAsserts;
+    option?: IAssertOption;
 
     /**
      * add task result to task sequence. default implement in bindingConfig.

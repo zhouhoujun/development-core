@@ -39,6 +39,7 @@ export declare class TaskContext implements ITaskContext {
     constructor(cfg: ITaskConfig, parent?: ITaskContext);
     private _gulp;
     gulp: Gulp;
+    protected createEnv(): IEnvOption;
     /**
      *load config
      *

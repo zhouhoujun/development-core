@@ -1,6 +1,7 @@
 import *as _ from 'lodash';
 import { Gulp } from 'gulp';
 import *as gulp from 'gulp';
+import * as minimist from 'minimist';
 import {
     ITask, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption
     , NodeSequence, RunWay, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
@@ -65,7 +66,15 @@ export class TaskContext implements ITaskContext {
     globals: any;
 
     constructor(cfg: ITaskConfig, public parent?: ITaskContext) {
-        this.cfg = {};
+        if (parent) {
+            parent.add(this);
+            let pcfg: ITaskConfig = _.omit(parent.getConfig(), 'option');
+            pcfg.env = pcfg.env || this.createEnv();
+            this.setConfig(pcfg);
+        } else {
+            cfg = cfg || {};
+            cfg.env = cfg.env || this.createEnv();
+        }
         this.setConfig(cfg);
     }
 
@@ -77,6 +86,14 @@ export class TaskContext implements ITaskContext {
         this._gulp = gulp;
     }
 
+    protected createEnv(): IEnvOption {
+        let env: IEnvOption = minimist(process.argv.slice(2), {
+            string: 'env',
+            default: { env: process.env.NODE_ENV || 'development' }
+        });
+        return env;
+    }
+
     /**
      *load config
      *
@@ -85,10 +102,22 @@ export class TaskContext implements ITaskContext {
      *@memberof TaskContext
      */
     setConfig(cfg: ITaskConfig) {
-        this.env = _.extend(cfg.env, this.env || {});
-        this.oper = cfg.oper || currentOperation(cfg.env);
+        if (!cfg) {
+            return;
+        }
+        if (cfg.oper) {
+            this.oper = cfg.oper;
+        }
+        if (cfg.env) {
+            this.env = cfg.env = _.extend({}, cfg.env, this.env || {});
+            if (!this.oper) {
+                this.oper = currentOperation(cfg.env);
+            }
+        }
         this.globals = cfg.globals || globals;
-        this.option = _.extend(cfg.option, this.option || {});
+        if (cfg.option) {
+            this.option = cfg.option = _.extend({}, cfg.option, this.option || {});
+        }
         this.cfg = _.extend(cfg, this.cfg);
     }
 
@@ -100,7 +129,7 @@ export class TaskContext implements ITaskContext {
      *@memberof TaskContext
      */
     getConfig(): ITaskConfig {
-        return this.cfg;
+        return this.cfg || {};
     }
 
     /**
@@ -548,46 +577,51 @@ export class TaskContext implements ITaskContext {
     }
 
     setup(): Promise<Src[]> {
-        return Promise.all<any>(
-            [
-                this.setupTasks(),
-                ...this.map(ctx => {
-                    return ctx.setup()
-                        .then(seq => {
-                            return ctx;
-                        });
-                }, Mode.children)
-            ])
-            .then(srcs => {
-                let opt = this.option as IAsserts;
-                let tseq = srcs.shift() as Src[];
-                let ordertask = sortOrder(<ITaskContext[]>srcs, ctx => ctx.option.order, this);
 
-                let subseq: Src[] = [];
-                _.each(ordertask, (t, idx) => {
-                    if (_.isArray(t)) {
-                        subseq.push(_.filter(_.map(t, it => this.zipSequence(<Src[]>it.getRunSequence())), it => !!it));
-                    } else {
-                        let tk = this.zipSequence(t.getRunSequence());
-                        if (tk) {
-                            subseq.push(tk);
+        if (this.option.oper && (this.oper & this.option.oper) <= 0) {
+            return Promise.resolve([]);
+        } else {
+            return Promise.all<any>(
+                [
+                    this.setupTasks(),
+                    ...this.map(ctx => {
+                        return ctx.setup()
+                            .then(seq => {
+                                return ctx;
+                            });
+                    }, Mode.children)
+                ])
+                .then(srcs => {
+                    let opt = this.option as IAsserts;
+                    let tseq = srcs.shift() as Src[];
+                    let ordertask = sortOrder(<ITaskContext[]>srcs, ctx => ctx.option.order, this);
+
+                    let subseq: Src[] = [];
+                    _.each(ordertask, (t, idx) => {
+                        if (_.isArray(t)) {
+                            subseq.push(_.filter(_.map(t, it => this.zipSequence(<Src[]>it.getRunSequence())), it => !!it));
+                        } else {
+                            let tk = this.zipSequence(t.getRunSequence());
+                            if (tk) {
+                                subseq.push(tk);
+                            }
+                        }
+                    });
+
+                    // let children = this.zipSequence(subseq, (name, runway) => this.subTaskName(name, (runway === RunWay.sequence ? '-sub-seq' : '-sub-paral')));
+                    tseq = opt.runWay === RunWay.parallel ? [this.flattenSequence(tseq)] : tseq;
+                    if (subseq && subseq.length > 0) {
+                        if (opt.nodeSequence === NodeSequence.after) {
+                            tseq.splice(0, 0, ...subseq);
+                        } else {
+                            tseq.push(...subseq);
                         }
                     }
+
+                    this.sequence = tseq;
+                    return this.sequence;
                 });
-
-                // let children = this.zipSequence(subseq, (name, runway) => this.subTaskName(name, (runway === RunWay.sequence ? '-sub-seq' : '-sub-paral')));
-                tseq = opt.runWay === RunWay.parallel ? [this.flattenSequence(tseq)] : tseq;
-                if (subseq && subseq.length > 0) {
-                    if (opt.nodeSequence === NodeSequence.after) {
-                        tseq.splice(0, 0, ...subseq);
-                    } else {
-                        tseq.push(...subseq);
-                    }
-                }
-
-                this.sequence = tseq;
-                return this.sequence;
-            });
+        }
     }
 
     getRunSequence(): Src[] {
