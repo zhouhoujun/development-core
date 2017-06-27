@@ -1,4 +1,4 @@
-// DynamicTask 
+// DynamicTask
 import * as gulp from 'gulp';
 import { createContext, IEnvOption, Operation } from './src';
 import * as mocha from 'gulp-mocha';

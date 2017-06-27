@@ -503,7 +503,19 @@ export class TaskContext implements ITaskContext {
     }
 
     getRootPath() {
-        return this.env.root;
+        let root: string;
+        if (this.env && this.env.root) {
+            root = this.env.root
+        } else {
+            this.route(c => {
+                if (c.env && c.env.root) {
+                    root = this.env.root;
+                    return false;
+                }
+                return true;
+            });
+        }
+        return root;
     }
 
     getRootFolders(express?: folderCallback): string[] {
@@ -535,11 +547,11 @@ export class TaskContext implements ITaskContext {
     }
 
     toRootSrc(src: Src): Src {
-        return absoluteSrc(this.cfg.env.root, src);
+        return absoluteSrc(this.getRootPath(), src);
     }
 
     toRootPath(pathstr: string): string {
-        return absolutePath(this.cfg.env.root, pathstr);
+        return absolutePath(this.getRootPath(), pathstr);
     }
 
     toDistSrc(src: Src, task?: ITaskInfo): Src {
@@ -579,7 +591,8 @@ export class TaskContext implements ITaskContext {
     setup(): Promise<Src[]> {
 
         if (this.option.oper && (this.oper & this.option.oper) <= 0) {
-            return Promise.resolve([]);
+            this.sequence = null;
+            return Promise.resolve(this.sequence);
         } else {
             return Promise.all<any>(
                 [
@@ -599,23 +612,32 @@ export class TaskContext implements ITaskContext {
                     let subseq: Src[] = [];
                     _.each(ordertask, (t, idx) => {
                         if (_.isArray(t)) {
-                            subseq.push(_.filter(_.map(t, it => this.zipSequence(<Src[]>it.getRunSequence())), it => !!it));
+                            if (t.length > 0) {
+                                let ptasks = _.filter(_.map(t, it => this.zipSequence(<Src[]>it.getRunSequence())), it => !!it);
+                                if (ptasks.length > 0) {
+                                    subseq.push(ptasks);
+                                }
+                            }
                         } else {
                             let tk = this.zipSequence(t.getRunSequence());
-                            if (tk) {
-                                subseq.push(tk);
-                            }
+                            tk && subseq.push(tk);
                         }
                     });
 
                     // let children = this.zipSequence(subseq, (name, runway) => this.subTaskName(name, (runway === RunWay.sequence ? '-sub-seq' : '-sub-paral')));
-                    tseq = opt.runWay === RunWay.parallel ? [this.flattenSequence(tseq)] : tseq;
-                    if (subseq && subseq.length > 0) {
-                        if (opt.nodeSequence === NodeSequence.after) {
-                            tseq.splice(0, 0, ...subseq);
-                        } else {
-                            tseq.push(...subseq);
+                    subseq = this.flattenSequence(subseq);
+                    tseq = this.flattenSequence(tseq);
+                    if (tseq.length > 0) {
+                        tseq = opt.runWay === RunWay.parallel ? [this.flattenSequence(tseq)] : this.flattenSequence(tseq);
+                        if (subseq && subseq.length > 0) {
+                            if (opt.nodeSequence === NodeSequence.after) {
+                                tseq.splice(0, 0, ...subseq);
+                            } else {
+                                tseq.push(...subseq);
+                            }
                         }
+                    } else {
+                        tseq = subseq;
                     }
 
                     this.sequence = tseq;

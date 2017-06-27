@@ -754,7 +754,7 @@ export interface IContextDefine extends ITaskDefine {
 
     /**
      * set context.
-     * 
+     *
      * @param {ITaskContext} config;
      * @memberof IContextDefine
      */
@@ -765,7 +765,7 @@ export interface IContextDefine extends ITaskDefine {
 
 /**
  * assert option
- * 
+ *
  * @export
  * @interface IAssertOption
  * @extends {IAsserts}
@@ -1118,7 +1118,7 @@ export interface ITaskContext {
 
     /**
      * add task for this context.
-     * 
+     *
      * @param {...ITask[]} task
      * @memberof ITaskContext
      */
@@ -1126,7 +1126,7 @@ export interface ITaskContext {
 
     /**
      * remove task
-     * 
+     *
      * @param {ITask} task
      * @returns {(ITask[] | Promise<ITask[]>)}
      * @memberof ITaskContext

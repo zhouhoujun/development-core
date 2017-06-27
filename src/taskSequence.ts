@@ -8,7 +8,7 @@ import * as watch from 'gulp-watch';
 
 /**
  * convert setup task result to run sequence src.
- * 
+ *
  * @export
  * @param {Gulp} gulp
  * @param {ITask[]} tasks
@@ -119,7 +119,7 @@ function registerGlobals(ctx: ITaskContext, task: string) {
 
 /**
  * generate watch task for sequence
- * 
+ *
  * @export
  * @param {Gulp} gulp
  * @param {Src[]} tasks
@@ -178,7 +178,7 @@ function registerZipTask(gulp: Gulp, name: string, tasks: Src[], ctx: ITaskConte
 
 /**
  * zip tasks to a single task.
- * 
+ *
  * @export
  * @param {Gulp} gulp
  * @param {Src[]} tasks
@@ -218,7 +218,7 @@ export function zipSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext, zipName
 
 /**
  * flatten task Sequence.
- * 
+ *
  * @export
  * @param {Gulp} gulp
  * @param {Src[]} tasks
@@ -230,11 +230,14 @@ export function flattenSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext, zip
     let result: string[] = [];
     _.each(tasks, tk => {
         if (_.isArray(tk)) {
+            if (tk.length < 1) {
+                return;
+            }
             let zipSrc: Src[] = (_.some(tk, t => _.isArray(t))) ? tk : [tk];
             let taskname = zipSequence(gulp, zipSrc, ctx, zipName);
             taskname && result.push(taskname);
         } else {
-            result.push(tk);
+            tk && result.push(tk);
         }
     });
 
@@ -243,7 +246,7 @@ export function flattenSequence(gulp: Gulp, tasks: Src[], ctx: ITaskContext, zip
 
 /**
  * add task to task sequence.
- * 
+ *
  * @export
  * @param {Src[]} taskSequence
  * @param {ITaskInfo} rst
@@ -297,7 +300,7 @@ export function addToSequence(taskSequence: Src[], rst: ITaskInfo, ctx?: ITaskCo
 
 /**
  * filter task sequence. make sure no empty.
- * 
+ *
  * @param {Src[]} seq
  * @param {(str: string) => boolean} [filter]
  * @returns {Src[]}
@@ -319,12 +322,12 @@ function filterTaskSequence(seq: Src[], express?: (str: string) => boolean): Src
 }
 /**
  * run task sequence.
- * 
+ *
  * @protected
  * @param {Gulp} gulp
  * @param {Src[]} tasks
  * @returns {Promise<any>}
- * 
+ *
  * @memberOf Development
  */
 export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
@@ -357,7 +360,7 @@ export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
 
 /**
  * start task.
- * 
+ *
  * @param {Gulp} gulp
  * @param {Src} task
  * @returns {Promise<any>}
@@ -437,7 +440,7 @@ function startTask(gulp: Gulp, task: Src): Promise<any> {
 
 /**
  * run task sequence
- * 
+ *
  * @export
  * @param {Gulp} gulp
  * @param {(ITask[] | Promise<ITask[]>)} tasks
