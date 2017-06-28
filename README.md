@@ -78,7 +78,7 @@ export class TestDynamicTask implements IDynamicTasks {
  ```ts
 
  // module A
-import {PipeTask, IPipe, PipeTask, IAsserts, IAssertDist, taskdefine, bindingConfig, Operation, IEnvOption, ITaskContext, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from 'development-core';
+import {PipeTask, IPipe, PipeTask, IAsserts, IAssertDist, taskdefine, createContext, Operation, IEnvOption, ITaskContext, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from 'development-core';
 
 @task()
 export class TestPipeTask implements PipeTask {
@@ -172,7 +172,7 @@ export class TestDynamicTask implements IDynamicTasks {
 export class TaskDefine implements ITaskDefine {
     public fags = 'define';
     loadConfig(option: IAsserts, env: IEnvOption): ITaskContext {
-        return bindingConfig({
+        return createContext({
             option: option,
             env: env
         });
@@ -189,7 +189,7 @@ export class WebDefine implements IContextDefine {
         }, config.option.asserts);
 
 
-        return bindingConfig(config);
+        return createContext(config);
     }
 
     tasks(ctx: ITaskContext): Promise<ITask[]> {
@@ -388,41 +388,40 @@ special pipe work or add special output work with class implements IDynamicTasks
 ```ts
 
 // module use.
-import { findTasks, bindingConfig, Operation, runTaskSequence, findTaskDefine }  from 'development-core';
+import { findTasks, createContext, Operation, runTaskSequence, findTaskDefine }  from 'development-core';
 
-let ctx = bindingConfig({
+let ctx = createContext({
     env: env,
     option: {
-        src: 'src',dist: 'lib',
-        loader:{
-            module:'module a',
-            pipes:[
-                {
-                    name: 'tscompile'
-                    oper: Operation.build,
-                    order: 0.1,
-                    toTransform: ()=> tslint(),
-                },
-            ],
-            output:[
-                ...
-            ]
-        },
-        //also can setting here after v0.7.11
-        pipes:[
-            ...
-        ],
-        output:[
-            ...
-        ]
+        src: 'src',dist: 'lib'
     }
 });
-ctx.findTasks('module a')
-    .then(task =>{
-        // run task;
-        return runTaskSequence(gulp, tasks, tasks);
-    });
 
+ctx.generateTask([
+    // dymic
+    {
+        name: 'test', src: 'test/**/*spec.ts', order: 1,
+        oper: Operation.test | Operation.release | Operation.deploy,
+        pipe(src) {
+            return src.pipe(mocha())
+                .once('error', () => {
+                    process.exit(1);
+                });
+        }
+    },
+    { src: 'src/**/*.ts', name: 'watch', watchTasks: ['tscompile'] },
+    { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (ctx)
+    ...
+]);
+//ctx.run();
+ctx.findTasks('module a')
+    .then(module_task =>{
+        // run task;
+        return ctx.findTasksInDir('task path');
+    })
+    .then((dir_task)=>{
+        return ctx.run();
+    });
 
  ```
 
