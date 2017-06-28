@@ -43,7 +43,7 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
 
 ## define shell task with dynamic task
 ```ts
-@dynamicTask
+@dynamicTask()
 export class TestDynamicTask implements IDynamicTasks {
     tasks(): IDynamicTaskOption[] {
         return [
@@ -80,7 +80,7 @@ export class TestDynamicTask implements IDynamicTasks {
  // module A
 import {PipeTask, IPipe, PipeTask, IAsserts, IAssertDist, taskdefine, bindingConfig, Operation, IEnvOption, ITaskContext, ITaskDefine, ITask, ITaskInfo, TaskResult, task, dynamicTask, IDynamicTasks } from 'development-core';
 
-@task
+@task()
 export class TestPipeTask implements PipeTask {
     // override
     //source(context: ITaskContext, dist: IAssertDist, gulp: Gulp): TransformSource | Promise<TransformSource>{
@@ -101,7 +101,7 @@ export class TestPipeTask implements PipeTask {
 }
 
 
-@task
+@task()
 export class TestTaskA implements ITask {
     getInfo(): ITaskInfo { return this.info; }
     constructor(private info: ITaskInfo) {
@@ -129,7 +129,7 @@ export class TestTaskE implements ITask {
     }
 }
 
-@dynamicTask
+@dynamicTask()
 export class TestDynamicTask implements IDynamicTasks {
     tasks(): IDynamicTaskOption[] {
         return [
@@ -168,7 +168,7 @@ export class TestDynamicTask implements IDynamicTasks {
 }
 
 
-@taskdefine
+@taskdefine()
 export class TaskDefine implements ITaskDefine {
     public fags = 'define';
     loadConfig(option: IAsserts, env: IEnvOption): ITaskContext {
@@ -179,7 +179,7 @@ export class TaskDefine implements ITaskDefine {
     }
 }
 
-@taskdefine
+@taskdefine()
 export class WebDefine implements IContextDefine {
     getContext(config: ITaskConfig): ITaskContext {
         // register default asserts.
