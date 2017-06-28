@@ -397,8 +397,9 @@ let ctx = createContext({
     }
 });
 
+// dynamic
 ctx.generateTask([
-    // dymic
+    // dynamic
     {
         name: 'test', src: 'test/**/*spec.ts', order: 1,
         oper: Operation.test | Operation.release | Operation.deploy,
@@ -413,7 +414,18 @@ ctx.generateTask([
     { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (ctx)
     ...
 ]);
-//ctx.run();
+
+// compose context.
+let ctx2 = createContext({
+    env: env,
+    option: {
+        src: 'src',dist: 'lib'
+    }
+}, ctx);
+//or
+ctx.add(ctx2);
+
+//find module or dir.
 ctx.findTasks('module a')
     .then(module_task =>{
         // run task;
