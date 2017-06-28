@@ -1,5 +1,4 @@
 /// <reference types="gulp" />
-/// <reference types="node" />
 import { Gulp, WatchEvent, WatchCallback, TaskCallback } from 'gulp';
 /**
  * mutil source stream pipe task run way, task runway, or same level context run way.
@@ -309,15 +308,6 @@ export interface ITransform extends IOperate, NodeJS.ReadWriteStream {
      * @memberof ITransform
      */
     transformSourcePipe?(sourceStream: ITransform): ITransform;
-    /**
-     * transform pipe
-     *
-     * @param {NodeJS.ReadWriteStream} stream
-     * @returns {ITransform}
-     *
-     * @memberof ITransform
-     */
-    pipe(stream: NodeJS.ReadWriteStream): ITransform;
 }
 /**
  * transform source.

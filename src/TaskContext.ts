@@ -90,8 +90,36 @@ export class TaskContext implements ITaskContext {
         let env: IEnvOption = minimist(process.argv.slice(2), {
             string: 'env',
             default: { env: process.env.NODE_ENV || 'development' }
-        });
+        }) as IEnvOption;
         return env;
+    }
+
+    protected setEnvViaOperate(oper: Operation) {
+        this.env = this.env || {};
+        if ((oper & Operation.deploy) > 0) {
+            this.env.deploy = true;
+            this.env.release = false;
+        } else if ((oper & Operation.release) > 0) {
+            this.env.release = true;
+            this.env.deploy = false;
+            oper = Operation.release;
+        }
+
+        if ((oper & Operation.watch) > 0) {
+            this.env.watch = true;
+        }
+
+        if ((oper & Operation.test) > 0) {
+            this.env.test = true;
+        }
+
+        if ((oper & Operation.serve) > 0) {
+            this.env.serve = true;
+        }
+
+        if ((oper & Operation.e2e) > 0) {
+            this.env.e2e = true;
+        }
     }
 
     /**
@@ -105,20 +133,19 @@ export class TaskContext implements ITaskContext {
         if (!cfg) {
             return;
         }
+        if (cfg.env) {
+            this.env = cfg.env = _.extend({}, this.env || {}, cfg.env);
+            this.oper = currentOperation(this.env);
+        }
         if (cfg.oper) {
             this.oper = cfg.oper;
-        }
-        if (cfg.env) {
-            this.env = cfg.env = _.extend({}, cfg.env, this.env || {});
-            if (!this.oper) {
-                this.oper = currentOperation(cfg.env);
-            }
+            this.setEnvViaOperate(this.oper);
         }
         this.globals = cfg.globals || globals;
         if (cfg.option) {
-            this.option = cfg.option = _.extend({}, cfg.option, this.option || {});
+            this.option = cfg.option = _.extend({}, this.option || {}, cfg.option);
         }
-        this.cfg = _.extend(cfg, this.cfg);
+        this.cfg = _.extend(this.cfg, cfg);
     }
 
     /**
@@ -195,14 +222,14 @@ export class TaskContext implements ITaskContext {
      *@returns {ITaskContext[]}
      *@memberof TaskContext
      */
-    filter<T extends ITaskContext>(express: Express<T, void | boolean>, mode?: Mode): ITaskContext[] {
+    filter<T extends ITaskContext>(express: Express<T, void | boolean>, mode?: Mode): T[] {
         let contexts: ITaskContext[] = [];
         this.each<T>(item => {
             if (express(item)) {
                 contexts.push(item);
             }
         }, mode);
-        return contexts;
+        return contexts as T[];
     }
     /**
      *find parent context via express.

@@ -339,15 +339,16 @@ export interface ITransform extends IOperate, NodeJS.ReadWriteStream {
      * @memberof ITransform
      */
     transformSourcePipe?(sourceStream: ITransform): ITransform;
-    /**
-     * transform pipe
-     *
-     * @param {NodeJS.ReadWriteStream} stream
-     * @returns {ITransform}
-     *
-     * @memberof ITransform
-     */
-    pipe(stream: NodeJS.ReadWriteStream): ITransform;
+
+    // /**
+    //  * transform pipe
+    //  *
+    //  * @param {NodeJS.ReadWriteStream} stream
+    //  * @returns {ITransform}
+    //  *
+    //  * @memberof ITransform
+    //  */
+    // pipe(stream: NodeJS.ReadWriteStream): ITransform;
 }
 
 /**

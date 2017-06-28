@@ -40,6 +40,7 @@ export declare class TaskContext implements ITaskContext {
     private _gulp;
     gulp: Gulp;
     protected createEnv(): IEnvOption;
+    protected setEnvViaOperate(oper: Operation): void;
     /**
      *load config
      *
@@ -91,7 +92,7 @@ export declare class TaskContext implements ITaskContext {
      *@returns {ITaskContext[]}
      *@memberof TaskContext
      */
-    filter<T extends ITaskContext>(express: Express<T, void | boolean>, mode?: Mode): ITaskContext[];
+    filter<T extends ITaskContext>(express: Express<T, void | boolean>, mode?: Mode): T[];
     /**
      *find parent context via express.
      *

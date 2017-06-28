@@ -1,6 +1,6 @@
 {
     "name": "development-core",
-    "version": "2.0.0-beta",
+    "version": "2.0.0-beta1",
     "description": "development tools, generate gulp tasks, gulp task manager, run tasks in sequence via Promise. useful gulp task util: zipSequence, runSequence, runTaskSequence, toSequence, flattenSequence.",
     "main": "./lib/index.js",
     "typings": "./lib/index",
@@ -71,7 +71,7 @@
         "ts-node": "^3.1.0",
         "tslint": "^5.4.3",
         "tslint-stylish": "^2.1.0",
-        "typescript": "^2.1.5",
+        "typescript": "^2.4.1",
         "zone.js": "^0.8.12"
     },
     "homepage": "https://github.com/zhouhoujun/development-core#readme"

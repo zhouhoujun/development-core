@@ -1,9 +1,8 @@
-// DynamicTask
 import * as gulp from 'gulp';
 import { createContext, IEnvOption, Operation } from './src';
 import * as mocha from 'gulp-mocha';
 import * as minimist from 'minimist';
-import * as _ from 'lodash';
+// import * as _ from 'lodash';
 
 const del = require('del');
 const cache = require('gulp-cached');
@@ -13,10 +12,10 @@ let tsProject = ts.createProject('tsconfig.json');
 const uglify = require('gulp-uglify');
 
 gulp.task('build', () => {
-    var options: IEnvOption = minimist(process.argv.slice(2), {
+    let options: IEnvOption = minimist(process.argv.slice(2), {
         string: 'env',
         default: { env: process.env.NODE_ENV || 'development' }
-    });
+    }) as IEnvOption;
     return createTask(options);
 });
 

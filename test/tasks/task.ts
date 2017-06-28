@@ -49,7 +49,7 @@ export class TestTaskGC implements ITask {
         return config.subTaskName('TestTaskGC');
     }
 }
-@task
+@task()
 export class TestTaskA implements ITask {
     getInfo(): ITaskInfo { return this.info; }
     constructor(private info: ITaskInfo) {
@@ -85,7 +85,7 @@ export class TestPipeTask extends PipeTask {
     }
 }
 
-@dynamicTask
+@dynamicTask()
 export class TestDynamicTask implements IDynamicTasks {
     tasks(): IDynamicTaskOption[] {
         return [
@@ -121,7 +121,7 @@ export class TestDynamicTask implements IDynamicTasks {
 }
 
 
-@taskdefine
+@taskdefine()
 export class TaskDefine implements ITaskDefine {
     public fags = 'define';
     loadConfig(option: IAsserts, env: IEnvOption): ITaskContext {

@@ -229,7 +229,7 @@ export declare abstract class PipeTask implements IPipeTask {
      *
      * @memberOf PipeTask
      */
-    protected output2Promise(source: ITransform, context: ITaskContext, dist: IAssertDist, gulp: Gulp, output?: OutputPipe[]): Promise<ITransform[]>;
+    protected output2Promise(source: ITransform, context: ITaskContext, dist: IAssertDist, gulp: Gulp, output?: OutputPipe[]): Promise<{}[]>;
     /**
      * each one source stream works.
      *
@@ -244,7 +244,7 @@ export declare abstract class PipeTask implements IPipeTask {
      *
      * @memberOf PipeTask
      */
-    protected working(source: ITransform, ctx: ITaskContext, option: IAssertDist, gulp: Gulp, pipes?: Pipe[], output?: OutputPipe[]): Promise<void | ITransform[]>;
+    protected working(source: ITransform, ctx: ITaskContext, option: IAssertDist, gulp: Gulp, pipes?: Pipe[], output?: OutputPipe[]): Promise<void | {}[]>;
     /**
      * execute task working
      *
