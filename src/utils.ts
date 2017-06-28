@@ -5,7 +5,7 @@ import * as path from 'path';
 
 /**
  * sorting via order.
- * 
+ *
  * @export
  * @template T
  * @param {T[]} sequence
@@ -67,7 +67,7 @@ function contains(arr1: string[], arr2: string[]) {
 
 /**
  * convert old version Operation to new version Operation
- * 
+ *
  * @export
  * @param {ITaskDecorator} decor
  * @param {any} [def=Operation.default]
@@ -111,7 +111,7 @@ function convertMatchOper(match: ITaskDecorator) {
 
 /**
  * has some oper samed.
- * 
+ *
  * @export
  * @param {Operation} oper1
  * @param {Operation} oper2
@@ -124,7 +124,7 @@ export function someOper(oper1: Operation, oper2: Operation) {
 
 /**
  * match
- * 
+ *
  * @export
  * @param {ITaskDecorator} tinfo
  * @param {ITaskDecorator} match
@@ -148,7 +148,7 @@ export function matchCompare(tinfo: ITaskDecorator, match: ITaskDecorator, ctx?:
 
 /**
  * match task via task info.
- * 
+ *
  * @export
  * @param {ITaskDecorator} decor
  * @param {ITaskDecorator} match
@@ -242,7 +242,7 @@ function matchTaskGroup(tinfo: ITaskInfo, match: ITaskInfo): boolean {
 
 /**
  * convert path to absolute path.
- * 
+ *
  * @export
  * @param {string} root
  * @param {string} pathstr
@@ -257,7 +257,7 @@ export function absolutePath(root: string, pathstr: string): string {
 
 /**
  * convert src to absolute path src.
- * 
+ *
  * @export
  * @param {string} root
  * @param {Src} src

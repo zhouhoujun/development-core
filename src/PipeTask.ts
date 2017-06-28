@@ -265,10 +265,10 @@ export abstract class PipeTask implements IPipeTask {
 
     /**
      * match operate.
-     * @param p 
-     * @param name 
-     * @param ctx 
-     * @param isOutput 
+     * @param p
+     * @param name
+     * @param ctx
+     * @param isOutput
      */
     protected matchOperate(p: IOperate, name: string, ctx: ITaskContext, isOutput = false) {
         if (!p) {
