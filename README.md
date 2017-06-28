@@ -333,7 +333,6 @@ export class TestTaskGB implements ITask {
     }
 }
 
-
 @task({
     group: ['test', 'node'],
     oper: Operation.build | Operation.test
@@ -381,7 +380,7 @@ export class TestTaskC implements IDynamicTasks {
 
 ```
 
-## user task, add special pipe work or add special output
+## Compose Context, generateTask, loader in module or load in dir
 
 special pipe work or add special output work with class implements IDynamicTasks, class extends PipeTask. also you can implements IPipeTask or ITask by youself.
 

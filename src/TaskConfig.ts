@@ -704,12 +704,12 @@ export interface ITaskDefine {
     /**
      * load config in modules
      *
-     * @param {IAsserts} option
+     * @param {IAssertOption} option
      * @returns {ITaskContext}
      *
      * @memberof ITaskDefine
      */
-    loadConfig?(option: IAsserts, env: IEnvOption): ITaskConfig
+    loadConfig?(option: IAssertOption, env: IEnvOption): ITaskConfig
 
     /**
      * load task in modules.
@@ -953,11 +953,10 @@ export interface ITaskContext {
     /**
      * add sub ITaskContext
      *
-     * @param {ITaskContext} context
-     *
+     * @param {(ITaskContext | ITaskConfig)} context
      * @memberof ITaskContext
      */
-    add(context: ITaskContext): void;
+    add(context: ITaskContext | ITaskConfig): void;
     /**
      * remove sub ITaskContext.
      *
@@ -968,6 +967,15 @@ export interface ITaskContext {
      */
     remove(context?: ITaskContext): ITaskContext[];
 
+    /**
+     * create new context;
+     *
+     * @param {ITaskConfig} cfg
+     * @param {ITaskContext} [parent] default current context.
+     * @returns {ITaskContext}
+     * @memberof ITaskContext
+     */
+    createContext(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext;
     /**
      * set task config.
      *
@@ -986,6 +994,15 @@ export interface ITaskContext {
      */
     getConfig(): ITaskConfig;
 
+
+    /**
+     * is task class.
+     *
+     * @param {*} obj
+     * @returns {boolean}
+     * @memberof ITaskContext
+     */
+    isTask(obj: any): boolean;
 
     /**
      * find sub context via express.

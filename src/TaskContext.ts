@@ -166,9 +166,27 @@ export class TaskContext implements ITaskContext {
      *
      *@memberOf ITaskContext
      */
-    add(context: ITaskContext): void {
-        context.parent = this;
-        this.children.push(context);
+    add(context: ITaskContext | ITaskConfig): void {
+        let ctx: ITaskContext;
+        if (context instanceof TaskContext) {
+            ctx = context;
+        } else {
+            ctx = this.createContext(context, null);
+        }
+        ctx.parent = this;
+        this.children.push(ctx);
+    }
+
+    /**
+     * create new context;
+     *
+     * @param {ITaskConfig} cfg
+     * @param {ITaskContext} [parent] default current context.
+     * @returns {ITaskContext}
+     * @memberof TaskContext
+     */
+    createContext(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext {
+        return new TaskContext(cfg, _.isUndefined(parent) ? this : parent);
     }
     /**
      *remove sub ITaskContext.
@@ -185,6 +203,23 @@ export class TaskContext implements ITaskContext {
             }
         });
         return items;
+    }
+
+    /**
+     * is task class.
+     *
+     * @param {any} obj
+     * @returns {boolean}
+     * @memberof TaskContext
+     */
+    isTask(obj: any): boolean {
+        if (!obj) {
+            return false;
+        }
+        if (!_.isFunction(obj)) {
+            return false;
+        }
+        return obj['__task'] || obj['__dynamictask']
     }
 
 

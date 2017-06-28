@@ -64,7 +64,16 @@ export declare class TaskContext implements ITaskContext {
      *
      *@memberOf ITaskContext
      */
-    add(context: ITaskContext): void;
+    add(context: ITaskContext | ITaskConfig): void;
+    /**
+     * create new context;
+     *
+     * @param {ITaskConfig} cfg
+     * @param {ITaskContext} [parent] default current context.
+     * @returns {ITaskContext}
+     * @memberof TaskContext
+     */
+    createContext(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext;
     /**
      *remove sub ITaskContext.
      *
@@ -73,6 +82,14 @@ export declare class TaskContext implements ITaskContext {
      *@memberOf ITaskContext
      */
     remove(context?: ITaskContext): ITaskContext[];
+    /**
+     * is task class.
+     *
+     * @param {any} obj
+     * @returns {boolean}
+     * @memberof TaskContext
+     */
+    isTask(obj: any): boolean;
     /**
      *find sub context via express.
      *
