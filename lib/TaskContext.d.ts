@@ -1,6 +1,6 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { ITask, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
+import { ITask, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, Builder, IAssertOption, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
 /**
  *binding Config, create task context.
  *
@@ -14,11 +14,11 @@ export declare function bindingConfig(cfg: ITaskConfig, parent?: ITaskContext): 
  *create Task context.
  *
  *@export
- *@param {ITaskConfig} cfg
+ *@param {ITaskConfig | IAssertOption} cfg
  *@param {ITaskContext} [parent]
  *@returns {ITaskContext}
  */
-export declare function createContext(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext;
+export declare function createContext(cfg: ITaskConfig | IAssertOption, parent?: ITaskContext): ITaskContext;
 /**
  *TaskContext
  *
@@ -39,6 +39,8 @@ export declare class TaskContext implements ITaskContext {
     constructor(cfg: ITaskConfig, parent?: ITaskContext);
     private _gulp;
     gulp: Gulp;
+    protected _builder: Builder;
+    builder: Builder;
     protected createEnv(): IEnvOption;
     protected setEnvViaOperate(oper: Operation): void;
     /**
@@ -68,12 +70,12 @@ export declare class TaskContext implements ITaskContext {
     /**
      * create new context;
      *
-     * @param {ITaskConfig} cfg
+     * @param {ITaskConfig | IAssertOption} cfg
      * @param {ITaskContext} [parent] default current context.
      * @returns {ITaskContext}
      * @memberof TaskContext
      */
-    createContext(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext;
+    createContext(cfg: ITaskConfig | IAssertOption, parent?: ITaskContext): ITaskContext;
     /**
      *remove sub ITaskContext.
      *

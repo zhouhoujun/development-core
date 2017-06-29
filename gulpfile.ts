@@ -59,6 +59,12 @@ let createTask = (env) => {
         //     ]
         // },
         {
+            name: 'test', src: 'test/**/*spec.ts',
+            oper: Operation.test | Operation.default,
+            pipes: [mocha],
+            output: null
+        },
+        {
             name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
             oper: Operation.build,
             pipes: [
@@ -86,12 +92,6 @@ let createTask = (env) => {
                     .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
                     .pipe(gulp.dest(config.getDist(dt)))
             ]
-        },
-        {
-            name: 'test', src: 'test/**/*spec.ts', order: 1,
-            oper: Operation.test | Operation.default,
-            pipes: [mocha],
-            output: null
         },
         { src: 'src/**/*.ts', name: 'watch', watchTasks: ['tscompile'] },
         { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }

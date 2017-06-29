@@ -3,8 +3,8 @@ import { Gulp } from 'gulp';
 import *as gulp from 'gulp';
 import * as minimist from 'minimist';
 import {
-    ITask, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption
-    , NodeSequence, RunWay, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
+    ITask, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, Builder
+    , IAssertOption, NodeSequence, RunWay, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
 } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { toSequence, runSequence, addToSequence, zipSequence, flattenSequence, runTaskSequence } from './taskSequence';
@@ -30,17 +30,35 @@ export function bindingConfig(cfg: ITaskConfig, parent?: ITaskContext): ITaskCon
  *create Task context.
  *
  *@export
- *@param {ITaskConfig} cfg
+ *@param {ITaskConfig | IAssertOption} cfg
  *@param {ITaskContext} [parent]
  *@returns {ITaskContext}
  */
-export function createContext(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext {
-    if (cfg.createContext) {
-        return cfg.createContext(cfg, parent);
+export function createContext(cfg: ITaskConfig | IAssertOption, parent?: ITaskContext): ITaskContext {
+    let opt: ITaskConfig = (cfg && cfg['option']) ? (cfg as ITaskConfig) : ({ option: cfg } as ITaskConfig);
+    if (opt.createContext) {
+        return opt.createContext(cfg, parent);
     }
-    return new TaskContext(cfg, parent);
+    return new TaskContext(opt, parent);
 }
 
+const NULLBuilder = <Builder>{
+    build<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext {
+        return node;
+    },
+
+    // buildChildren<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext {
+    //     return node;
+    // },
+
+    isBuilt(node: ITaskContext): boolean {
+        return false;
+    },
+
+    clean(node: ITaskContext) {
+
+    }
+}
 /**
  *global data.
  */
@@ -84,6 +102,15 @@ export class TaskContext implements ITaskContext {
     }
     set gulp(gulp: Gulp) {
         this._gulp = gulp;
+    }
+
+    protected _builder: Builder;
+    get builder(): Builder {
+        return this._builder || NULLBuilder;
+    }
+
+    set builder(builder: Builder) {
+        this._builder = builder;
     }
 
     protected createEnv(): IEnvOption {
@@ -144,6 +171,7 @@ export class TaskContext implements ITaskContext {
         this.globals = cfg.globals || globals;
         if (cfg.option) {
             this.option = cfg.option = _.extend({}, this.option || {}, cfg.option);
+            // this.builder.clean(this);
         }
         this.cfg = _.extend(this.cfg, cfg);
     }
@@ -174,19 +202,22 @@ export class TaskContext implements ITaskContext {
             ctx = this.createContext(context, null);
         }
         ctx.parent = this;
+        if (!ctx.builder.isBuilt(ctx)) {
+            ctx.builder.build(ctx);
+        }
         this.children.push(ctx);
     }
 
     /**
      * create new context;
      *
-     * @param {ITaskConfig} cfg
+     * @param {ITaskConfig | IAssertOption} cfg
      * @param {ITaskContext} [parent] default current context.
      * @returns {ITaskContext}
      * @memberof TaskContext
      */
-    createContext(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext {
-        return new TaskContext(cfg, _.isUndefined(parent) ? this : parent);
+    createContext(cfg: ITaskConfig | IAssertOption, parent?: ITaskContext): ITaskContext {
+        return createContext(cfg, _.isUndefined(parent) ? this : parent);
     }
     /**
      *remove sub ITaskContext.
@@ -651,25 +682,33 @@ export class TaskContext implements ITaskContext {
     }
 
     setup(): Promise<Src[]> {
-
         if (this.option.oper && (this.oper & this.option.oper) <= 0) {
             this.sequence = null;
             return Promise.resolve(this.sequence);
         } else {
-            return Promise.all<any>(
-                [
-                    this.setupTasks(),
-                    ...this.map(ctx => {
+            return Promise.resolve(this.setupTasks())
+                .then(tasks => {
+                    // if (!this.builder.isBuilt(this)) {
+                    //     this.builder.build(this);
+                    // }
+                    return Promise.all(this.map(ctx => {
                         return ctx.setup()
                             .then(seq => {
                                 return ctx;
                             });
-                    }, Mode.children)
-                ])
+                    }, Mode.children))
+                        .then(subtasks => {
+                            return {
+                                tseq: tasks,
+                                subtasks: subtasks
+                            }
+                        })
+
+                })
                 .then(srcs => {
                     let opt = this.option as IAsserts;
-                    let tseq = srcs.shift() as Src[];
-                    let ordertask = sortOrder(<ITaskContext[]>srcs, ctx => ctx.option.order, this);
+                    let tseq = srcs.tseq;
+                    let ordertask = sortOrder(srcs.subtasks, ctx => ctx.option.order, this);
 
                     let subseq: Src[] = [];
                     _.each(ordertask, (t, idx) => {
@@ -740,6 +779,9 @@ export class TaskContext implements ITaskContext {
         if (this.env.help) {
             return Promise.resolve(this.help())
         } else {
+            if (!this.builder.isBuilt(this)) {
+                this.builder.build(this);
+            }
             return this.setup()
                 .then(tseq => {
                     let opt = this.option as IAsserts;

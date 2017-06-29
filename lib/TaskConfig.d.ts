@@ -797,6 +797,39 @@ export interface Express<T, TResult> {
     (item: T): TResult;
 }
 /**
+ * Builder for task context
+ *
+ * @export
+ * @interface Builder
+ */
+export interface Builder {
+    /**
+     * build context component.
+     *
+     * @template T
+     * @param {ITaskContext} node
+     * @param {T} [option]
+     * @returns {ITaskContext}
+     * @memberof Builder
+     */
+    build<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext;
+    /**
+     * the context is built or not.
+     *
+     * @param {ITaskContext} node
+     * @returns {boolean}
+     * @memberof Builder
+     */
+    isBuilt(node: ITaskContext): boolean;
+    /**
+     * clean built context;
+     *
+     * @param {ITaskContext} node
+     * @memberof Builder
+     */
+    clean(node: ITaskContext): any;
+}
+/**
  * runtime task context.
  *
  * @export
@@ -842,6 +875,12 @@ export interface ITaskContext {
      * @type {*}@memberof ITaskContext
      */
     globals: any;
+    /**
+     * builder of context.
+     *
+     * @memberof ITaskContext
+     */
+    builder: Builder;
     /**
      * add sub ITaskContext
      *
