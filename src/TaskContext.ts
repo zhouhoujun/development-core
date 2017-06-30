@@ -688,9 +688,9 @@ export class TaskContext implements ITaskContext {
         } else {
             return Promise.resolve(this.setupTasks())
                 .then(tasks => {
-                    // if (!this.builder.isBuilt(this)) {
-                    //     this.builder.build(this);
-                    // }
+                    if (!this.builder.isBuilt(this)) {
+                        this.builder.build(this);
+                    }
                     return Promise.all(this.map(ctx => {
                         return ctx.setup()
                             .then(seq => {
@@ -779,9 +779,9 @@ export class TaskContext implements ITaskContext {
         if (this.env.help) {
             return Promise.resolve(this.help())
         } else {
-            if (!this.builder.isBuilt(this)) {
-                this.builder.build(this);
-            }
+            // if (!this.builder.isBuilt(this)) {
+            //     this.builder.build(this);
+            // }
             return this.setup()
                 .then(tseq => {
                     let opt = this.option as IAsserts;
