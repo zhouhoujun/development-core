@@ -27,7 +27,6 @@ export declare function createContext(cfg: ITaskConfig | IAssertOption, parent?:
  *@implements {ITaskContext}
  */
 export declare class TaskContext implements ITaskContext {
-    parent: ITaskContext;
     protected cfg: ITaskConfig;
     protected taskseq: ITask[];
     protected sequence: Src[];
@@ -36,7 +35,8 @@ export declare class TaskContext implements ITaskContext {
     option: IAsserts;
     env: IEnvOption;
     globals: any;
-    constructor(cfg: ITaskConfig, parent?: ITaskContext);
+    parent: ITaskContext;
+    constructor(cfg: ITaskConfig);
     private _gulp;
     gulp: Gulp;
     protected _builder: Builder;
@@ -59,23 +59,24 @@ export declare class TaskContext implements ITaskContext {
      *@memberof TaskContext
      */
     getConfig(): ITaskConfig;
+    protected isConfig(obj: any): boolean;
     /**
-     *add sub ITaskContext
+     * add sub ITaskContext
      *
-     *@param {ITaskContext} context
-     *
-     *@memberOf ITaskContext
+     * @param {(ITaskContext | ITaskConfig | IAssertOption)} context
+     * @returns {ITaskContext} sub context.
+     * @memberof TaskContext
      */
-    add(context: ITaskContext | ITaskConfig): void;
+    add(context: ITaskContext | ITaskConfig | IAssertOption): ITaskContext;
     /**
-     * create new context;
+     * create context.
      *
-     * @param {ITaskConfig | IAssertOption} cfg
-     * @param {ITaskContext} [parent] default current context.
+     * @protected
+     * @param {(ITaskConfig)} cfg
      * @returns {ITaskContext}
      * @memberof TaskContext
      */
-    createContext(cfg: ITaskConfig | IAssertOption, parent?: ITaskContext): ITaskContext;
+    protected createContext(cfg: ITaskConfig): ITaskContext;
     /**
      *remove sub ITaskContext.
      *
@@ -153,7 +154,8 @@ export declare class TaskContext implements ITaskContext {
     matchCompare(task: ITaskInfo, match: ITaskInfo): boolean;
     getSrc(task?: ITaskInfo, relative?: boolean): Src;
     getDist(task?: ITaskInfo, relative?: boolean): string;
-    subTaskName(task: any, ext?: string): string;
+    subTaskName(task: string | ITaskInfo, ext?: string): string;
+    taskName(task: string | ITaskInfo, ext?: string): string;
     findTasks(module: string | Object, match?: ITaskInfo): Promise<ITask[]>;
     findTasksInDir(dirs: TaskSource, match?: ITaskInfo): Promise<ITask[]>;
     findTaskDefine(module: string | Object): Promise<ITaskDefine>;

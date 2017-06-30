@@ -821,13 +821,6 @@ export interface Builder {
      * @memberof Builder
      */
     isBuilt(node: ITaskContext): boolean;
-    /**
-     * clean built context;
-     *
-     * @param {ITaskContext} node
-     * @memberof Builder
-     */
-    clean(node: ITaskContext): any;
 }
 /**
  * runtime task context.
@@ -884,10 +877,11 @@ export interface ITaskContext {
     /**
      * add sub ITaskContext
      *
-     * @param {(ITaskContext | ITaskConfig)} context
+     * @param {(ITaskContext | ITaskConfig | IAssertOption)} context
+     * @returns {ITaskContext} sub context
      * @memberof ITaskContext
      */
-    add(context: ITaskContext | ITaskConfig): void;
+    add(context: ITaskContext | ITaskConfig | IAssertOption): ITaskContext;
     /**
      * remove sub ITaskContext.
      *
@@ -897,15 +891,6 @@ export interface ITaskContext {
      * @memberof ITaskContext
      */
     remove(context?: ITaskContext): ITaskContext[];
-    /**
-     * create new context;
-     *
-     * @param {ITaskConfig} cfg
-     * @param {ITaskContext} [parent] default current context.
-     * @returns {ITaskContext}
-     * @memberof ITaskContext
-     */
-    createContext(cfg: ITaskConfig, parent?: ITaskContext): ITaskContext;
     /**
      * set task config.
      *
@@ -1016,14 +1001,23 @@ export interface ITaskContext {
      */
     getDist(task?: ITaskInfo, relative?: boolean): string;
     /**
-     * generate sub task name. default implement in bindingConfig.
+     * generate task name. use taskName instead.
      *
-     * @param {string | ITaskInfo} task
-     * @param {string} [ext] ext name.
-     *
+     * @param {(string | ITaskInfo)} task
+     * @param {string} [ext]
+     * @returns {string}
      * @memberof ITaskContext
      */
-    subTaskName(task: string | ITaskInfo, ext?: string): any;
+    subTaskName(task: string | ITaskInfo, ext?: string): string;
+    /**
+     * generate task name. default implement in bindingConfig.
+     *
+     * @param {(string | ITaskInfo)} task
+     * @param {string} [ext]
+     * @returns {string}
+     * @memberof ITaskContext
+     */
+    taskName(task: string | ITaskInfo, ext?: string): string;
     /**
      * get run sequence, after setup.
      *

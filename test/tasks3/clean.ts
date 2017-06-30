@@ -18,7 +18,7 @@ export class Clean implements ITask {
     }
     setup(ctx: ITaskContext, gulp: Gulp) {
         let info = this.getInfo();
-        let tkn = ctx.subTaskName(info);
+        let tkn = ctx.taskName(info);
         gulp.task(tkn, () => {
             return del(ctx.getSrc(info));
         });

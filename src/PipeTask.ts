@@ -370,7 +370,7 @@ export abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     protected pipes2Promise(source: ITransform, ctx: ITaskContext, dist: IAssertDist, gulp: Gulp, pipes?: Pipe[]) {
-        let name = ctx.subTaskName(dist, this.name);
+        let name = ctx.taskName(dist, this.name);
         let oper = this.getTransformOperate(source);
         if (!this.match(oper, name, ctx)) {
             return Promise.resolve(source);
@@ -427,7 +427,7 @@ export abstract class PipeTask implements IPipeTask {
      * @memberOf PipeTask
      */
     protected output2Promise(source: ITransform, context: ITaskContext, dist: IAssertDist, gulp: Gulp, output?: OutputPipe[]) {
-        let name = context.subTaskName(dist, this.name);
+        let name = context.taskName(dist, this.name);
         let oper = this.getTransformOperate(source);
         let outputs = output || this.output(context, dist, gulp);
         return Promise.all(_.map(outputs, output => {
@@ -536,7 +536,7 @@ export abstract class PipeTask implements IPipeTask {
     setup(context: ITaskContext, gulp?: Gulp): TaskResult {
         gulp = gulp || coregulp;
         // let option = this.getOption(context);
-        let tk = context.subTaskName(this.getInfo());
+        let tk = context.taskName(this.getInfo());
         console.log(`register ${this.name || ''} task:`, chalk.cyan(tk));
 
         gulp.task(tk, () => {

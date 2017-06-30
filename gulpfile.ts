@@ -26,7 +26,7 @@ let createTask = (env) => {
         option: { src: 'src', dist: 'lib', buildDist: 'build' }
     });
 
-    console.log(context);
+    // console.log(context);
 
     context.generateTask([
         // {

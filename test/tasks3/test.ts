@@ -24,7 +24,7 @@ export class KaramTest implements ITask {
     setup(ctx: ITaskContext, gulp: Gulp) {
         // let option = <IWebTaskOption>ctx.option;
 
-        let tkn = ctx.subTaskName(this.getInfo());
+        let tkn = ctx.taskName(this.getInfo());
         gulp.task(tkn, (callback: TaskCallback) => {
         //     let karmaConfigFile = option.karmaConfigFile || path.join(ctx.env.root, './karma.conf.js');
         //     if (!path.isAbsolute(karmaConfigFile)) {

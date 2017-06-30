@@ -45,7 +45,7 @@ export class StartService implements ITask {
         if (option.browsersync) {
             browsersyncOption = _.extend(browsersyncOption, _.isFunction(option.browsersync) ? option.browsersync(ctx, browsersyncOption) : option.browsersync);
         }
-        let tkn = ctx.subTaskName(this.info);
+        let tkn = ctx.taskName(this.info);
         gulp.task(tkn, (callback: TaskCallback) => {
             callback();
             // browserSync(browsersyncOption, (err, bs) => {

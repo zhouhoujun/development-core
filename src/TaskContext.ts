@@ -39,7 +39,7 @@ export function createContext(cfg: ITaskConfig | IAssertOption, parent?: ITaskCo
     if (opt.createContext) {
         return opt.createContext(cfg, parent);
     }
-    return new TaskContext(opt, parent);
+    return parent ? parent.add(opt) : new TaskContext(opt);
 }
 
 const NULLBuilder = <Builder>{
@@ -53,11 +53,11 @@ const NULLBuilder = <Builder>{
 
     isBuilt(node: ITaskContext): boolean {
         return false;
-    },
-
-    clean(node: ITaskContext) {
-
     }
+
+    // clean(node: ITaskContext) {
+
+    // }
 }
 /**
  *global data.
@@ -82,17 +82,11 @@ export class TaskContext implements ITaskContext {
     option: IAsserts;
     env: IEnvOption;
     globals: any;
+    parent: ITaskContext;
 
-    constructor(cfg: ITaskConfig, public parent?: ITaskContext) {
-        if (parent) {
-            parent.add(this);
-            let pcfg: ITaskConfig = _.omit(parent.getConfig(), 'option');
-            pcfg.env = pcfg.env || this.createEnv();
-            this.setConfig(pcfg);
-        } else {
-            cfg = cfg || {};
-            cfg.env = cfg.env || this.createEnv();
-        }
+    constructor(cfg: ITaskConfig) {
+        cfg = cfg || {};
+        cfg.env = cfg.env || this.createEnv();
         this.setConfig(cfg);
     }
 
@@ -164,6 +158,10 @@ export class TaskContext implements ITaskContext {
             this.env = cfg.env = _.extend({}, this.env || {}, cfg.env);
             this.oper = currentOperation(this.env);
         }
+        // make sure root.
+        if (!this.env.root) {
+            this.env.root = this.getRootPath();
+        }
         if (cfg.oper) {
             this.oper = cfg.oper;
             this.setEnvViaOperate(this.oper);
@@ -171,7 +169,6 @@ export class TaskContext implements ITaskContext {
         this.globals = cfg.globals || globals;
         if (cfg.option) {
             this.option = cfg.option = _.extend({}, this.option || {}, cfg.option);
-            // this.builder.clean(this);
         }
         this.cfg = _.extend(this.cfg, cfg);
     }
@@ -187,38 +184,51 @@ export class TaskContext implements ITaskContext {
         return this.cfg || {};
     }
 
-    /**
-     *add sub ITaskContext
-     *
-     *@param {ITaskContext} context
-     *
-     *@memberOf ITaskContext
-     */
-    add(context: ITaskContext | ITaskConfig): void {
-        let ctx: ITaskContext;
-        if (context instanceof TaskContext) {
-            ctx = context;
-        } else {
-            ctx = this.createContext(context, null);
-        }
-        ctx.parent = this;
-        if (!ctx.builder.isBuilt(ctx)) {
-            ctx.builder.build(ctx);
-        }
-        this.children.push(ctx);
+    protected isConfig(obj: any): boolean {
+        return obj && obj['option'];
     }
 
     /**
-     * create new context;
+     * add sub ITaskContext
      *
-     * @param {ITaskConfig | IAssertOption} cfg
-     * @param {ITaskContext} [parent] default current context.
+     * @param {(ITaskContext | ITaskConfig | IAssertOption)} context
+     * @returns {ITaskContext} sub context.
+     * @memberof TaskContext
+     */
+    add(context: ITaskContext | ITaskConfig | IAssertOption): ITaskContext {
+        let ctx: ITaskContext;
+        let curcfg: ITaskConfig = _.omit(this.getConfig(), 'option');
+        if (context instanceof TaskContext) {
+            ctx = context;
+            if (ctx.parent) {
+                ctx.parent.remove(ctx);
+            }
+            ctx.setConfig(_.extend({}, curcfg, ctx.getConfig()));
+        } else {
+            let opt: ITaskConfig = (this.isConfig(context) ? context : { option: context }) as ITaskConfig;
+            opt = _.extend({}, curcfg, opt);
+            ctx = this.createContext(opt);
+        }
+        ctx.parent = this;
+        this.children.push(ctx);
+        // if (!ctx.builder.isBuilt(ctx)) {
+        //     ctx.builder.build(ctx);
+        // }
+        return ctx;
+    }
+
+    /**
+     * create context.
+     *
+     * @protected
+     * @param {(ITaskConfig)} cfg
      * @returns {ITaskContext}
      * @memberof TaskContext
      */
-    createContext(cfg: ITaskConfig | IAssertOption, parent?: ITaskContext): ITaskContext {
-        return createContext(cfg, _.isUndefined(parent) ? this : parent);
+    protected createContext(cfg: ITaskConfig): ITaskContext {
+        return new TaskContext(cfg)
     }
+
     /**
      *remove sub ITaskContext.
      *
@@ -436,10 +446,17 @@ export class TaskContext implements ITaskContext {
         return (relative !== false) ? dist : absolutePath(ctx.env.root, dist);
     }
 
-    subTaskName(task, ext = '') {
+    subTaskName(task: string | ITaskInfo, ext?: string) {
+        return this.taskName(task, ext);
+    }
+
+    taskName(task: string | ITaskInfo, ext = ''): string {
         let ctx = this;
         let name = '';
-        // let oper = context.oper;
+        let names = _.filter(this.map(c => {
+            return c.toStr(c.option.name);
+        }, Mode.route), t => !!t).reverse();
+
         if (_.isString(task)) {
             name = task;
         } else if (task && task !== ctx.option) {
@@ -451,27 +468,17 @@ export class TaskContext implements ITaskContext {
                 name = taskStringVal(task.assert.name, ctx)
             }
         }
-        let optName: string;
-        this.route(c => {
-            optName = taskStringVal(c.option.name, c);
-            if (optName) {
-                return false;
-            }
-            return true;
-        })
 
-        if (optName) {
-            if (name.indexOf(optName + '-') === 0) {
-                return name;
-            }
-            // avoid soma name.
-            if (name && optName !== name) {
-                return `${optName}-${name}` + ext;
-            }
-            return optName + ext;
-        } else {
-            return name + ext;
+        if (name) {
+            names.push(name);
         }
+        if (ext) {
+            names.push(ext);
+        }
+
+        // console.log('taskName:----------------------\n', names);
+
+        return names.join('-');
     }
 
     findTasks(module: string | Object, match?: ITaskInfo): Promise<ITask[]> {
@@ -600,13 +607,13 @@ export class TaskContext implements ITaskContext {
         if (this.env && this.env.root) {
             root = this.env.root
         } else {
-            this.route(c => {
+            this.each(c => {
                 if (c.env && c.env.root) {
                     root = this.env.root;
                     return false;
                 }
                 return true;
-            });
+            }, Mode.route);
         }
         return root;
     }

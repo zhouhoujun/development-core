@@ -42,7 +42,7 @@ class ShellTask implements ITask {
     setup(ctx: ITaskContext, gulp?: Gulp) {
         gulp = gulp || coregulp;
         // let option = this.getOption(context);
-        let tk = ctx.subTaskName(this.getInfo());
+        let tk = ctx.taskName(this.getInfo());
         console.log(`register shell task:`, chalk.cyan(tk));
 
         gulp.task(tk, () => {
@@ -235,7 +235,7 @@ function createTask(dt: IDynamicTaskOption): ITask {
  */
 function createCustomTask(dt: IDynamicTaskOption): ITask {
     let factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => {
-        let tk = ctx.subTaskName(info);
+        let tk = ctx.taskName(info);
         console.log('register custom dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
             return dt.task(ctx, dt, gulp);
@@ -274,11 +274,11 @@ function createWatchTask(dt: IDynamicTaskOption): ITask {
 
         watchs = _.map(watchs, w => {
             if (_.isString(w)) {
-                return ctx.subTaskName(w);
+                return ctx.taskName(w);
             }
             return w;
         })
-        let tk = ctx.subTaskName(info);
+        let tk = ctx.taskName(info);
         console.log('register watch  dynamic task:', chalk.cyan(tk));
         gulp.task(tk, () => {
             let src = ctx.getSrc(info);

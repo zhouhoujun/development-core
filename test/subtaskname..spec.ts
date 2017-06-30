@@ -16,8 +16,8 @@ describe('sub task name', () => {
         });
 
 
-        expect(ctx.subTaskName('test')).eq('test');
-        expect(ctx.subTaskName(<ITaskInfo>{ assert: { name: 'test' } })).eq('test');
+        expect(ctx.taskName('test')).eq('test');
+        expect(ctx.taskName(<ITaskInfo>{ assert: { name: 'test' } })).eq('test');
 
     })
 
@@ -28,7 +28,7 @@ describe('sub task name', () => {
             option: { name: 'appname', src: 'src', dist: 'lib' }
         });
 
-        expect(ctx.subTaskName('test')).eq('appname-test');
-        expect(ctx.subTaskName(<ITaskInfo>{ assert: { name: 'test' } })).eq('appname-test');
+        expect(ctx.taskName('test')).eq('appname-test');
+        expect(ctx.taskName(<ITaskInfo>{ assert: { name: 'test' } })).eq('appname-test');
     })
 });

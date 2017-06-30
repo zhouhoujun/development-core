@@ -20,7 +20,7 @@ export class TestTaskGA implements ITask {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
-        return config.subTaskName('TestTaskGA');
+        return config.taskName('TestTaskGA');
     }
 }
 @task({
@@ -32,7 +32,7 @@ export class TestTaskGB implements ITask {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
-        return config.subTaskName('TestTaskGB');
+        return config.taskName('TestTaskGB');
     }
 }
 
@@ -46,7 +46,7 @@ export class TestTaskGC implements ITask {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
-        return config.subTaskName('TestTaskGC');
+        return config.taskName('TestTaskGC');
     }
 }
 @task()
@@ -67,7 +67,7 @@ export class TestTaskE implements ITask {
     }
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
-        return config.subTaskName('TestTaskE');
+        return config.taskName('TestTaskE');
     }
 }
 
@@ -143,7 +143,7 @@ export class TestTaskB implements ITask {
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return config.subTaskName('TestTaskB');
+        return config.taskName('TestTaskB');
     }
 }
 
@@ -158,7 +158,7 @@ export class TestTaskC implements ITask {
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return config.subTaskName('TestTaskC');
+        return config.taskName('TestTaskC');
     }
 }
 
@@ -172,7 +172,7 @@ export class TestTaskD implements ITask {
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return config.subTaskName('TestTaskD');
+        return config.taskName('TestTaskD');
     }
 }
 
@@ -187,7 +187,7 @@ export class TestTaskW implements ITask {
     setup(config: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return config.subTaskName('TestTaskW');
+        return config.taskName('TestTaskW');
     }
 }
 
