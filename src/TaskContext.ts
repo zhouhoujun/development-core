@@ -375,7 +375,7 @@ export class TaskContext implements ITaskContext {
      *@memberOf ITaskContext
      */
     route(express: Express<ITaskContext, void | boolean>) {
-        if (!express(this)) {
+        if (express(this) === false) {
             return false;
         };
         if (this.parent && this.parent.route) {
