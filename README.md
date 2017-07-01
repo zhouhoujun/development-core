@@ -167,35 +167,59 @@ export class TestDynamicTask implements IDynamicTasks {
     }
 }
 
+```
+
+```typescript
+
+import * as _ from 'lodash';
+import { ITask, IAssertOption, IEnvOption, IContextDefine, ITaskContext, ITaskConfig, taskdefine } from 'development-core';
+
+import { INodeTaskOption } from './NodeTaskOption';
+export * from './NodeTaskOption';
+
+import { CleanDynamicTasks, TestDynamicTasks } from './tasks/nodeDefaultTask';
 
 @taskdefine()
-export class TaskDefine implements ITaskDefine {
-    public fags = 'define';
-    loadConfig(option: IAsserts, env: IEnvOption): ITaskContext {
-        return createContext({
+export class NodeContextDefine implements IContextDefine {
+
+    loadConfig(option: IAssertOption, env: IEnvOption): ITaskConfig {
+        // register default asserts.
+        option.asserts = _.extend({
+            ts: { loader: 'development-assert-ts' }
+        }, option.asserts || {});
+
+        return <ITaskConfig>{
             option: option,
             env: env
+        };
+    }
+    // set add component or same task for this context.
+    setContext(ctx: ITaskContext) {
+        let nodeOption = ctx.option as INodeTaskOption
+        if (nodeOption.test === false) {
+            return;
+        }
+        ctx.add(<ITaskConfig>{
+            option: <IAssertOption>{
+                name: 'test',
+                order: nodeOption.testOrder || (total => 2 / total),
+                loader: (ctx) => {
+                    return ctx.findTasks(TestDynamicTasks);
+                }
+            }
         });
+        //...
+        //ctx.addTask(task)
+        //ctx.removeTask(task)
+    }
+    // custome load current context tasks
+    tasks(context: ITaskContext): Promise<ITask[]> {
+        // current context tasks
+        return context.findTasks(CleanDynamicTasks);
     }
 }
 
-@taskdefine()
-export class WebDefine implements IContextDefine {
-    getContext(config: ITaskConfig): ITaskContext {
-        // register default asserts.
-        config.option.asserts = _.extend({
-            ts: 'development-assert-ts',
-            js: 'development-assert-js'
-        }, config.option.asserts);
 
-
-        return createContext(config);
-    }
-
-    tasks(ctx: ITaskContext): Promise<ITask[]> {
-        return ctx.findTasks(webTasks);
-    }
-}
 
 ```
 
