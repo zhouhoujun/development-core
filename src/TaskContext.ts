@@ -934,6 +934,67 @@ function getCurrentDist(ds: IAssertDist, ctx: ITaskContext) {
 }
 
 
+// /**
+//  *get dist.
+//  *
+//  *@param {IAssertDist} ds
+//  *@param {ITaskContext} ctx
+//  *@returns
+//  */
+// function getCurrentDist(ds: IAssertDist, ctx: ITaskContext) {
+//     let dist: string;
+//     let env = ctx.env;
+//     let oper = ctx.oper;
+//     if (env.deploy || (oper & Operation.deploy) > 0) {
+//         dist = routeDist(ctx, (c) => {
+//             return c.toStr(ds.deployDist);
+//         });
+//     }
+//     if (!dist && (env.release || (oper & Operation.release) > 0)) {
+//         dist = routeDist(ctx, (c) => {
+//             return c.toStr(ds.releaseDist);
+//         });
+//     }
+//     if (!dist && (env.e2e || (oper & Operation.e2e) > 0)) {
+//         dist = routeDist(ctx, (c) => {
+//             return c.toStr(ds.e2eDist);
+//         });
+//     }
+//     if (!dist && (env.test || (oper & Operation.test) > 0)) {
+//         dist = routeDist(ctx, (c) => {
+//             return c.toStr(ds.testDist);
+//         });
+//     }
+//     if (!dist && ((oper & Operation.build) > 0)) {
+//         dist = routeDist(ctx, (c) => {
+//             return c.toStr(ds.buildDist);
+//         });
+//     }
+//     if (!dist) {
+//         // dist = taskStringVal(ds.dist, ctx);
+//         dist = routeDist(ctx, (c) => {
+//             return c.toStr(ds.dist);
+//         })
+//     }
+
+//     return dist;
+// }
+
+
+// function routeDist(ctx: ITaskContext, express: (ctx: ITaskContext) => string) {
+//     let dist = '';
+//     ctx.each((c) => {
+//         dist = express(c);
+//         if (dist) {
+//             return false;
+//         }
+//         return true;
+//     }, Mode.route);
+//     return dist;
+// }
+
+
+
 /**
  *filter fileName in directory.
  *
