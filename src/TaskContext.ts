@@ -119,10 +119,10 @@ export class TaskContext implements ITaskContext {
         this.env = this.env || {};
         if ((oper & Operation.deploy) > 0) {
             this.env.deploy = true;
-            this.env.release = false;
+            this.env.release = undefined;
         } else if ((oper & Operation.release) > 0) {
             this.env.release = true;
-            this.env.deploy = false;
+            this.env.deploy = undefined;
             oper = Operation.release;
         }
 
