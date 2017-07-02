@@ -675,6 +675,14 @@ export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
     shellRunWay?: RunWay;
 
     /**
+     * set default task name. if current context task has no name.
+     *
+     * @type {TaskString}
+     * @memberof IAsserts
+     */
+    defaultTaskName?: TaskString;
+
+    /**
      * task runway  in this context.
      *
      * @type {RunWay}@memberof IAsserts
@@ -1134,23 +1142,23 @@ export interface ITaskContext {
     /**
      * generate task name. use taskName instead.
      *
-     * @param {(string | ITaskInfo)} task
+     * @param {(TaskString | ITaskInfo)} task
      * @param {string} [ext]
      * @returns {string}
      * @memberof ITaskContext
      */
-    subTaskName(task: string | ITaskInfo, ext?: string): string;
+    subTaskName(task: TaskString | ITaskInfo, ext?: string): string;
 
 
     /**
      * generate task name. default implement in bindingConfig.
      *
-     * @param {(string | ITaskInfo)} task
+     * @param {(TaskString | ITaskInfo)} task
      * @param {string} [ext]
      * @returns {string}
      * @memberof ITaskContext
      */
-    taskName(task: string | ITaskInfo, ext?: string): string;
+    taskName(task: TaskString | ITaskInfo, ext?: string): string;
 
     /**
      * get run sequence, after setup.

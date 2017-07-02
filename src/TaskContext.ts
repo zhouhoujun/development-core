@@ -446,19 +446,19 @@ export class TaskContext implements ITaskContext {
         return (relative !== false) ? dist : absolutePath(ctx.env.root, dist);
     }
 
-    subTaskName(task: string | ITaskInfo, ext?: string) {
+    subTaskName(task: TaskString | ITaskInfo, ext?: string) {
         return this.taskName(task, ext);
     }
 
-    taskName(task: string | ITaskInfo, ext = ''): string {
+    taskName(task: TaskString | ITaskInfo, ext = ''): string {
         let ctx = this;
         let name = '';
         let names = _.filter(this.map(c => {
             return c.toStr(c.option.name);
         }, Mode.route), t => !!t).reverse();
 
-        if (_.isString(task)) {
-            name = task;
+        if (_.isString(task) || _.isFunction(task)) {
+            name = this.toStr(task);
         } else if (task && task !== ctx.option) {
             // oper = task.oper || context.oper;
             if (task.name) {
@@ -467,6 +467,9 @@ export class TaskContext implements ITaskContext {
             if (!name && task.assert && task.assert.name) {
                 name = taskStringVal(task.assert.name, ctx)
             }
+        }
+        if (!name) {
+            name = ctx.toStr(ctx.option.defaultTaskName);
         }
 
         if (name) {

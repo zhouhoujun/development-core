@@ -154,8 +154,8 @@ export declare class TaskContext implements ITaskContext {
     matchCompare(task: ITaskInfo, match: ITaskInfo): boolean;
     getSrc(task?: ITaskInfo, relative?: boolean): Src;
     getDist(task?: ITaskInfo, relative?: boolean): string;
-    subTaskName(task: string | ITaskInfo, ext?: string): string;
-    taskName(task: string | ITaskInfo, ext?: string): string;
+    subTaskName(task: TaskString | ITaskInfo, ext?: string): string;
+    taskName(task: TaskString | ITaskInfo, ext?: string): string;
     findTasks(module: string | Object, match?: ITaskInfo): Promise<ITask[]>;
     findTasksInDir(dirs: TaskSource, match?: ITaskInfo): Promise<ITask[]>;
     findTaskDefine(module: string | Object): Promise<ITaskDefine>;
