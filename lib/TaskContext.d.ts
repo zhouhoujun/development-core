@@ -247,7 +247,7 @@ export declare class TaskContext implements ITaskContext {
     getPackage(filename?: TaskString): any;
     setup(): Promise<Src[]>;
     getRunSequence(): Src[];
-    setupTasks(): Src[] | Promise<Src[]>;
+    load(): Src[] | Promise<Src[]>;
     addTask(...task: ITask[]): void;
     removeTask(task: ITask): ITask[] | Promise<ITask[]>;
     /**

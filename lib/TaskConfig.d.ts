@@ -812,7 +812,7 @@ export interface Builder {
      * @returns {ITaskContext}
      * @memberof Builder
      */
-    build<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext;
+    build<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext | Promise<ITaskContext>;
     /**
      * the context is built or not.
      *
@@ -1034,12 +1034,12 @@ export interface ITaskContext {
      */
     setup(): Promise<Src[]>;
     /**
-     * setup tasks of current context.
+     * load tasks of current context.
      *
      * @returns {(Src[] | Promise<Src[]>)}
      * @memberof ITaskContext
      */
-    setupTasks(): Src[] | Promise<Src[]>;
+    load(): Src[] | Promise<Src[]>;
     /**
      * add task for this context.
      *

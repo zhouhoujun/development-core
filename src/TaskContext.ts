@@ -4,7 +4,7 @@ import *as gulp from 'gulp';
 import * as minimist from 'minimist';
 import {
     ITask, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, Builder
-    , IAssertOption, NodeSequence, RunWay, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
+    , ITaskDecorator, IAssertOption, NodeSequence, RunWay, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
 } from './TaskConfig';
 import { generateTask } from './generateTask';
 import { toSequence, runSequence, addToSequence, zipSequence, flattenSequence, runTaskSequence } from './taskSequence';
@@ -482,13 +482,26 @@ export class TaskContext implements ITaskContext {
     }
 
     findTasks(module: string | Object, match?: ITaskInfo): Promise<ITask[]> {
-        let ctx = this;
-        return findTasksInModule(module, _.extend({ oper: ctx.oper }, match || {}), this);
+        let envmatch: ITaskDecorator = {};
+        if (this.env.group) {
+            envmatch.group = this.env.group;
+        }
+        if (this.oper) {
+            envmatch.oper = this.oper;
+        }
+
+        return findTasksInModule(module, _.extend(envmatch, match || {}), this);
     }
 
     findTasksInDir(dirs: TaskSource, match?: ITaskInfo): Promise<ITask[]> {
-        let ctx = this;
-        return findTasksInDir(ctx.to(dirs), _.extend({ oper: ctx.oper }, match || {}), this);
+        let envmatch: ITaskDecorator = {};
+        if (this.env.group) {
+            envmatch.group = this.env.group;
+        }
+        if (this.oper) {
+            envmatch.oper = this.oper;
+        }
+        return findTasksInDir(this.to(dirs), _.extend(envmatch, match || {}), this);
     }
 
     findTaskDefine(module: string | Object): Promise<ITaskDefine> {
@@ -690,14 +703,11 @@ export class TaskContext implements ITaskContext {
 
     setup(): Promise<Src[]> {
         if (this.option.oper && (this.oper & this.option.oper) <= 0) {
-            this.sequence = null;
-            return Promise.resolve(this.sequence);
+            // this.sequence = null;
+            return Promise.resolve(null);
         } else {
-            return Promise.resolve(this.setupTasks())
+            return Promise.resolve(this.load())
                 .then(tasks => {
-                    if (!this.builder.isBuilt(this)) {
-                        this.builder.build(this);
-                    }
                     return Promise.all(this.map(ctx => {
                         return ctx.setup()
                             .then(seq => {
@@ -758,8 +768,15 @@ export class TaskContext implements ITaskContext {
         return this.sequence || [];
     }
 
-    setupTasks(): Src[] | Promise<Src[]> {
-        return this.toSequence(this.taskseq);
+    load(): Src[] | Promise<Src[]> {
+        if (!this.builder.isBuilt(this)) {
+            return Promise.resolve(this.builder.build(this))
+                .then(ctx => {
+                    return this.toSequence(this.taskseq);
+                });
+        } else {
+            return this.toSequence(this.taskseq);
+        }
     }
 
     addTask(...task: ITask[]) {

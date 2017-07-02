@@ -911,18 +911,7 @@ export interface Builder {
      * @returns {ITaskContext}
      * @memberof Builder
      */
-    build<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext;
-
-    // /**
-    //  * only build level one chileren context.
-    //  *
-    //  * @template T
-    //  * @param {ITaskContext} node
-    //  * @param {T} [option]
-    //  * @returns {ITaskContext}
-    //  * @memberof Builder
-    //  */
-    // buildChildren<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext;
+    build<T extends IAsserts>(node: ITaskContext, option?: T): ITaskContext | Promise<ITaskContext>;
 
     /**
      * the context is built or not.
@@ -933,13 +922,6 @@ export interface Builder {
      */
     isBuilt(node: ITaskContext): boolean;
 
-    // /**
-    //  * clean built context;
-    //  *
-    //  * @param {ITaskContext} node
-    //  * @memberof Builder
-    //  */
-    // clean(node: ITaskContext);
 }
 
 
@@ -1187,12 +1169,12 @@ export interface ITaskContext {
     setup(): Promise<Src[]>;
 
     /**
-     * setup tasks of current context.
+     * load tasks of current context.
      *
      * @returns {(Src[] | Promise<Src[]>)}
      * @memberof ITaskContext
      */
-    setupTasks(): Src[] | Promise<Src[]>;
+    load(): Src[] | Promise<Src[]>;
 
     /**
      * add task for this context.
