@@ -239,7 +239,7 @@ export class TestTaskB implements ITask {
     setup(ctx: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return ctx.subTaskName('TestTaskB');
+        return ctx.taskName('TestTaskB');
     }
 }
 
@@ -256,7 +256,7 @@ export class TestTaskC implements ITask {
     setup(ctx: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return ctx.subTaskName('TestTaskC');
+        return ctx.taskName('TestTaskC');
     }
 }
 
@@ -271,7 +271,7 @@ export class TestTaskD implements ITask {
     setup(ctx: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return ctx.subTaskName('TestTaskD');
+        return ctx.taskName('TestTaskD');
     }
 }
 
@@ -287,7 +287,7 @@ export class TestTaskW implements ITask {
     setup(ctx: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return ctx.subTaskName('TestTaskW');
+        return ctx.taskName('TestTaskW');
     }
 }
 
@@ -302,7 +302,7 @@ export class TestTaskB implements ITask {
     setup(ctx: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return ctx.subTaskName('TestTaskor1');
+        return ctx.taskName('TestTaskor1');
     }
 }
 
@@ -317,7 +317,7 @@ export class TestTaskB implements ITask {
     setup(ctx: ITaskContext, gulp): TaskResult {
         // todo...
 
-        return ctx.subTaskName('TestTaskor2');
+        return ctx.taskName('TestTaskor2');
     }
 }
 
@@ -447,6 +447,8 @@ let ctx2 = createContext({
 }, ctx);
 //or
 ctx.add(ctx2);
+ctx.add(option);
+ctx.add(ITaskConfig);
 
 //find module or dir.
 ctx.findTasks('module a')
