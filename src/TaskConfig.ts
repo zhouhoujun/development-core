@@ -1,4 +1,5 @@
 import { Gulp, WatchEvent, WatchCallback, TaskCallback } from 'gulp';
+import { ExecOptions, ExecFileOptions } from 'child_process';
 
 
 /**
@@ -624,7 +625,15 @@ export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPip
      * @type {AsyncTaskSource}
      * @memberof IDynamicTaskOption
      */
-    shell?: AsyncTaskSource
+    shell?: AsyncTaskSource;
+
+    /**
+     * exec file task.
+     *
+     * @type {AsyncTaskSource}
+     * @memberof IDynamicTaskOption
+     */
+    execFiles?: AsyncTaskSource;
 }
 
 /**
@@ -665,14 +674,6 @@ export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
      * @type {NodeSequence}@memberof IAsserts
      */
     nodeSequence?: NodeSequence;
-
-    /**
-     * the shell command run way. default parallel.
-     *
-     * @type {RunWay}
-     * @memberof IAsserts
-     */
-    shellRunWay?: RunWay;
 
     /**
      * set default task name. if current context task has no name.
@@ -772,6 +773,7 @@ export interface IContextDefine extends ITaskDefine {
 }
 
 
+
 /**
  * assert option
  *
@@ -805,6 +807,53 @@ export interface IAssertOption extends IAsserts {
      */
     assertsOrder?: Order;
 }
+
+/**
+ * shell option.
+ *
+ * @export
+ * @interface IShellOption
+ * @extends {IAssertOption}
+ */
+export interface IShellOption extends IAssertOption {
+    /**
+     * the shell command run way. default parallel.
+     *
+     * @type {RunWay}
+     * @memberof IShellOption
+     */
+    shellRunWay?: RunWay;
+
+    /**
+     * exec options.
+     *
+     * @type {ExecOptions}
+     * @memberof IShellOption
+     */
+    execOptions?: ExecOptions;
+
+}
+
+export interface IExecFileOption extends IAssertOption {
+    /**
+     * the file exec run way. default parallel.
+     *
+     * @type {RunWay}
+     * @memberof IExecFileOption
+     */
+    fileRunWay?: RunWay;
+
+    args?: string[];
+    /**
+     * exec file options.
+     *
+     * @type {ExecFileOptions}
+     * @memberof IExecFileOption
+     */
+    execFileOptions?: ExecFileOptions;
+
+}
+
 /**
  * task config. runtime task config for setup task.
  *
@@ -1210,6 +1259,26 @@ export interface ITaskContext {
      */
     run(): Promise<any>;
 
+    /**
+     * execute shell.
+     *
+     * @param {string} cmd
+     * @param {ExecOptions} [options]
+     * @returns {Promise<any>}
+     * @memberof ITaskContext
+     */
+    execShell(cmd: string, options?: ExecOptions): Promise<any>;
+
+    /**
+     * execute file.
+     *
+     * @param {string} cmd
+     * @param {string[]} [args]
+     * @param {ExecFileOptions} [options]
+     * @returns {Promise<any>}
+     * @memberof ITaskContext
+     */
+    execFile(cmd: string, args?: string[], options?: ExecFileOptions): Promise<any>;
 
     /**
      * help tipe.

@@ -3,12 +3,11 @@ import { Gulp, WatchEvent } from 'gulp';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
 
-import { IAssertDist, IOutputPipe, Operation, AsyncSrc, ITaskInfo, ITransform, RunWay, AsyncTaskSource, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
+import { IAssertDist, IShellOption, IExecFileOption, IOutputPipe, Operation, AsyncSrc, ITaskInfo, ITransform, RunWay, AsyncTaskSource, TaskResult, IPipe, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
 import { matchCompare } from './utils';
 import { PipeTask } from './PipeTask';
 import { runSequence } from './taskSequence';
 import * as watch from 'gulp-watch';
-import { exec } from 'child_process';
 
 type factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => TaskResult;
 
@@ -41,7 +40,7 @@ class ShellTask implements ITask {
      */
     setup(ctx: ITaskContext, gulp?: Gulp) {
         gulp = gulp || coregulp;
-        // let option = this.getOption(context);
+        let option = ctx.option as IShellOption;
         let tk = ctx.taskName(this.getInfo());
         console.log(`register shell task:`, chalk.cyan(tk));
 
@@ -50,16 +49,16 @@ class ShellTask implements ITask {
             return Promise.resolve(cmd)
                 .then(cmds => {
                     if (_.isString(cmds)) {
-                        return this.execShell(cmds);
+                        return ctx.execShell(cmds, option.execOptions);
                     } else if (_.isArray(cmds)) {
-                        if (ctx.option.shellRunWay === RunWay.sequence) {
+                        if (option.shellRunWay === RunWay.sequence) {
                             let pip = Promise.resolve();
                             _.each(cmds, cmd => {
-                                pip = pip.then(() => this.execShell(cmd));
+                                pip = pip.then(() => ctx.execShell(cmd, option.execOptions));
                             });
                             return pip;
                         } else {
-                            return Promise.all(_.map(cmds, cmd => this.execShell(cmd)));
+                            return Promise.all(_.map(cmds, cmd => ctx.execShell(cmd, option.execOptions)));
                         }
                     } else {
 
@@ -74,30 +73,69 @@ class ShellTask implements ITask {
         return tk;
     }
 
+}
 
-    execShell(cmd: string): Promise<any> {
-        if (!cmd) {
-            return Promise.resolve();
-        }
-        return new Promise((resolve, reject) => {
-            console.log('execute shell:', chalk.cyan(cmd));
-            let shell = exec(cmd, (err, stdout, stderr) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(stdout);
-                }
-            });
+/**
+ * exec file Task
+ *
+ * @class ExecFileTask
+ * @implements {ITask}
+ */
+class ExecFileTask implements ITask {
+    constructor(protected info: ITaskInfo, protected files: AsyncTaskSource) {
 
-            shell.stdout.on('data', data => {
-                console.log(data);
-            });
-
-            shell.stderr.on('data', data => {
-                console.log(data);
-            });
-        });
     }
+
+    /**
+     * get task info.
+     */
+    public getInfo(): ITaskInfo {
+        return this.info;
+    }
+
+    /**
+     * setup shell task.
+     *
+     * @param {ITaskContext} ctx
+     * @param {Gulp} [gulp]
+     * @returns
+     *
+     * @memberOf ShellTask
+     */
+    setup(ctx: ITaskContext, gulp?: Gulp) {
+        gulp = gulp || coregulp;
+        let option = ctx.option as IExecFileOption;
+        let tk = ctx.taskName(this.getInfo());
+        console.log(`register exec file task:`, chalk.cyan(tk));
+
+        gulp.task(tk, () => {
+            let files = ctx.to<AsyncSrc>(this.files);
+            return Promise.resolve(files)
+                .then(files => {
+                    if (_.isString(files)) {
+                        return ctx.execFile(files, option.args, option.execFileOptions);
+                    } else if (_.isArray(files)) {
+                        if (option.fileRunWay === RunWay.sequence) {
+                            let pip = Promise.resolve();
+                            _.each(files, file => {
+                                pip = pip.then(() => ctx.execFile(file, option.args, option.execFileOptions));
+                            });
+                            return pip;
+                        } else {
+                            return Promise.all(_.map(files, file => ctx.execFile(file, option.args, option.execFileOptions)));
+                        }
+                    } else {
+                        return Promise.reject('exec file task config error');
+                    }
+                });
+
+        });
+
+        this.info.taskName = tk;
+
+        return tk;
+    }
+
 }
 
 /**
@@ -216,6 +254,8 @@ function createTask(dt: IDynamicTaskOption): ITask {
         task = createWatchTask(dt);
     } else if (dt.shell) {
         task = new ShellTask(dt, dt.shell);
+    } else if (dt.execFiles) {
+        task = new ExecFileTask(dt, dt.execFiles);
     } else if (_.isFunction(dt.task)) {
         // custom task
         task = createCustomTask(dt);

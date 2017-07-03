@@ -66,6 +66,28 @@ export class TestDynamicTask implements IDynamicTasks {
 }
 ```
 
+## define exec file task with dynamic task
+
+```ts
+
+@dynamicTask()
+export class TestDynamicTask implements IDynamicTasks {
+    tasks(): IDynamicTaskOption[] {
+        return [
+            {
+                name: 'test-tscompile', src: 'src/**/*.ts', dist: 'lib',
+                execFiles:'./a/task.ts'
+            },
+            {
+                name: 'test-test', src: 'test/**/*task.ts', order: total => 1 / total, //second.
+                execFiles:(ctx)=>{
+                    return ctx.fileFilter(ctx.getSrc());
+                }
+            }
+        ];
+    }
+}
+```
 
 ## define task and taskdefine
 

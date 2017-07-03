@@ -1,5 +1,7 @@
 /// <reference types="gulp" />
+/// <reference types="node" />
 import { Gulp } from 'gulp';
+import { ExecOptions, ExecFileOptions } from 'child_process';
 import { ITask, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, Builder, IAssertOption, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
 /**
  *binding Config, create task context.
@@ -245,6 +247,7 @@ export declare class TaskContext implements ITaskContext {
     toUrl(basePath: string, toPath?: string): string;
     private packages;
     getPackage(filename?: TaskString): any;
+    protected setupChildren(): Promise<ITaskContext[]>;
     setup(): Promise<Src[]>;
     getRunSequence(): Src[];
     load(): Src[] | Promise<Src[]>;
@@ -258,6 +261,8 @@ export declare class TaskContext implements ITaskContext {
      *@memberof TaskContext
      */
     run(): Promise<any>;
+    execShell(cmd: string, options?: ExecOptions): Promise<any>;
+    execFile(file: string, args?: string[], options?: ExecFileOptions): Promise<any>;
     help(): void;
     tasks(express?: (item: ITask) => boolean): ITask[];
     registerTasks(express?: (item: ITask) => boolean): ITask[];

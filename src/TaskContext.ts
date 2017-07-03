@@ -1,6 +1,8 @@
 import *as _ from 'lodash';
 import { Gulp } from 'gulp';
 import *as gulp from 'gulp';
+import * as chalk from 'chalk';
+import { exec, execFile, ExecOptions, ExecFileOptions } from 'child_process';
 import * as minimist from 'minimist';
 import {
     ITask, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, Builder
@@ -704,6 +706,15 @@ export class TaskContext implements ITaskContext {
         return this.packages[name]
     }
 
+    protected setupChildren(): Promise<ITaskContext[]> {
+        return Promise.all(this.map(ctx => {
+            return ctx.setup()
+                .then(seq => {
+                    return ctx;
+                });
+        }, Mode.children))
+    }
+
     setup(): Promise<Src[]> {
         if (this.option.oper && (this.oper & this.option.oper) <= 0) {
             // this.sequence = null;
@@ -711,12 +722,7 @@ export class TaskContext implements ITaskContext {
         } else {
             return Promise.resolve(this.load())
                 .then(tasks => {
-                    return Promise.all(this.map(ctx => {
-                        return ctx.setup()
-                            .then(seq => {
-                                return ctx;
-                            });
-                    }, Mode.children))
+                    return this.setupChildren()
                         .then(subtasks => {
                             return {
                                 tseq: tasks,
@@ -820,6 +826,56 @@ export class TaskContext implements ITaskContext {
                 });
         }
     }
+
+    execShell(cmd: string, options?: ExecOptions): Promise<any> {
+        if (!cmd) {
+            return Promise.resolve();
+        }
+        return new Promise((resolve, reject) => {
+            console.log('execute shell:', chalk.cyan(cmd));
+            let shell = exec(cmd, options, (err, stdout, stderr) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(stdout);
+                }
+            });
+
+            shell.stdout.on('data', data => {
+                console.log(data);
+            });
+
+            shell.stderr.on('data', data => {
+                console.log(data);
+            });
+        });
+    }
+
+    execFile(file: string, args?: string[], options?: ExecFileOptions): Promise<any> {
+        if (!file && !fs.existsSync(file)) {
+            console.log('file:', chalk.yellow(file), 'no exists.');
+            return Promise.resolve();
+        }
+        return new Promise((resolve, reject) => {
+            console.log('execute shell:', chalk.cyan(file));
+            let proc = execFile(file, args, options, (err, stdout, stderr) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(stdout);
+                }
+            });
+
+            proc.stdout.on('data', data => {
+                console.log(data);
+            });
+
+            proc.stderr.on('data', data => {
+                console.log(data);
+            });
+        });
+    }
+
 
     help() {
         this.cfg.printHelp && this.cfg.printHelp(_.isBoolean(this.env.help) ? '' : this.env.help);
