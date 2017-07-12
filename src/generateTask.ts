@@ -214,27 +214,27 @@ class DynamicPipeTask extends PipeTask {
  * dynamic build tasks.
  *
  * @export
+ * @param {ITaskContext} ctx
  * @param {(IDynamicTaskOption | IDynamicTaskOption[])} tasks
  * @param {ITaskInfo} [match]
- * @param {ITaskContext} [ctx]
  * @returns {ITask[]}
  */
-export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo, ctx?: ITaskContext): ITask[] {
+export function generateTask(ctx: ITaskContext, tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[] {
     let taskseq: ITask[] = [];
     _.each(_.isArray(tasks) ? tasks : [tasks], dt => {
-
+        dt.oper = dt.oper ? ctx.to(dt.oper) : Operation.default;
         if (dt.watchTasks) {
-            dt.oper = (dt.oper || Operation.default) | Operation.watch;
+            dt.oper = dt.oper | Operation.watch;
         }
 
-        if (!matchCompare(dt, match, ctx)) {
+        if (!matchCompare(ctx, dt, match)) {
             return;
         }
 
         if (dt.watch && !(dt.oper & Operation.watch)) {
             dt.oper = dt.oper | Operation.autoWatch;
         }
-        taskseq.push(createTask(dt));
+        taskseq.push(createTask(ctx, dt));
 
     });
 
@@ -244,13 +244,13 @@ export function generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], m
 /**
  * create task by dynamic option.
  *
- * @export
+ * @param {ITaskContext} ctx
  * @param {IDynamicTaskOption} dt
  * @returns {ITask}
  */
-function createTask(dt: IDynamicTaskOption): ITask {
+function createTask(ctx: ITaskContext, dt: IDynamicTaskOption): ITask {
     let task: ITask;
-    if (dt.oper & Operation.watch) {
+    if (ctx.to(dt.oper) & Operation.watch) {
         task = createWatchTask(dt);
     } else if (dt.shell) {
         task = new ShellTask(dt, dt.shell);

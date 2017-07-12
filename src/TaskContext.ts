@@ -165,7 +165,7 @@ export class TaskContext implements ITaskContext {
             this.env.root = this.getRootPath();
         }
         if (cfg.oper) {
-            this.oper = cfg.oper;
+            this.oper = this.to(cfg.oper);
             this.setEnvViaOperate(this.oper);
         }
         this.globals = cfg.globals || globals;
@@ -405,13 +405,13 @@ export class TaskContext implements ITaskContext {
         if (this.option.match) {
             return this.option.match(task, match);
         }
-        return matchCompare(task, match);
+        return matchCompare(this, task, match);
     }
 
     getSrc(task?: ITaskInfo, relative = false): Src {
         let src: Src;
         let ctx = this;
-        let oper = task ? (task.oper || ctx.oper) : ctx.oper;
+        let oper = this.to<Operation>(task ? (task.oper || ctx.oper) : ctx.oper);
         if (task && task.assert) {
             src = taskSourceVal(getAssertSrc(task.assert, oper), ctx)
         }
@@ -599,7 +599,7 @@ export class TaskContext implements ITaskContext {
      */
     generateTask(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[] {
         let ctx = this;
-        let gtask = generateTask(tasks, _.extend({ oper: ctx.oper }, match || {}), this);
+        let gtask = generateTask(this, tasks, _.extend({ oper: ctx.oper }, match || {}));
         this.taskseq = this.taskseq.concat(gtask);
         return this.taskseq;
     }
@@ -716,7 +716,7 @@ export class TaskContext implements ITaskContext {
     }
 
     setup(): Promise<Src[]> {
-        if (this.option.oper && (this.oper & this.option.oper) <= 0) {
+        if (this.option.oper && (this.oper & this.to(this.option.oper)) <= 0) {
             // this.sequence = null;
             return Promise.resolve(null);
         } else {

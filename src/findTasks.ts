@@ -21,7 +21,7 @@ function findTaskset(tasks: Map<any, Taskitem>, target: any, match?: ITaskDecora
             let tinfo: ITaskDecorator = target['__task'];
             tinfo = _.isBoolean(tinfo) ? {} : tinfo;
 
-            if (!matchCompare(tinfo, match, ctx)) {
+            if (!matchCompare(ctx, tinfo, match)) {
                 return;
             }
             if (tasks.has(target)) {
@@ -38,7 +38,7 @@ function findTaskset(tasks: Map<any, Taskitem>, target: any, match?: ITaskDecora
         } else if (target['__dynamictask']) {
             let tinfo: ITaskDecorator = target['__dynamictask'];
 
-            if (!matchCompare(tinfo, match, ctx)) {
+            if (!matchCompare(ctx, tinfo, match)) {
                 return;
             }
 
@@ -51,7 +51,7 @@ function findTaskset(tasks: Map<any, Taskitem>, target: any, match?: ITaskDecora
                 // tk.group = tk.group || tinfo.group;
                 return tk;
             });
-            tasks.set(target, generateTask(dyts, match, ctx));
+            tasks.set(target, generateTask(ctx, dyts, match));
         }
     } else if (_.isArray(target)) {
         _.each(target, sm => {

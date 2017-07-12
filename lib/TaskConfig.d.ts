@@ -148,6 +148,10 @@ export declare type Src = string | string[];
  */
 export declare type AsyncSrc = Src | Promise<Src>;
 /**
+ * task opertion.
+ */
+export declare type TaskOperation = Operation | ((ctx: ITaskContext) => Operation);
+/**
  * operate.
  *
  * @export
@@ -165,10 +169,10 @@ export interface IOperate {
      * operation
      *
      * enmu flags.
-     * @type {Operation}
+     * @type {TaskOperation}
      * @memberof IOperate
      */
-    oper?: Operation;
+    oper?: TaskOperation;
     /**
      * order index.
      *
@@ -586,9 +590,10 @@ export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
     /**
      * asser operation.
      *
-     * @type {Operation}@memberof IAsserts
+     * @type {TaskOperation}
+     * @memberof IAsserts
      */
-    oper?: Operation;
+    oper?: TaskOperation;
     /**
      * current assert order.
      */
@@ -776,10 +781,10 @@ export interface ITaskConfig {
     /**
      * Operation
      *
-     * @type {Operation}
+     * @type {TaskOperation}
      * @memberof ITaskConfig
      */
-    oper?: Operation;
+    oper?: TaskOperation;
     /**
      * task option setting.
      *

@@ -61,12 +61,13 @@ export function toSequence(gulp: Gulp, tasks: ITask[], ctx: ITaskContext, zipNam
 function setupTask(gulp: Gulp, t: ITask, ctx: ITaskContext, callback: (name: Src) => void): string[] {
     let seq: string[] = [];
     let info = t.getInfo();
-    if (info.oper & ctx.oper) {
+    let infoOper = ctx.to(info.oper);
+    if (infoOper & ctx.oper) {
         // ctx.addTask(t);
         let tname = t.setup(ctx, gulp); // t.setup(ctx, gulp);
         if (tname) {
             // is watch task.
-            if ((info.oper & Operation.watch)) {
+            if ((infoOper & Operation.watch)) {
                 callback(tname);
             }
             registerTasks(ctx, tname);
@@ -76,7 +77,7 @@ function setupTask(gulp: Gulp, t: ITask, ctx: ITaskContext, callback: (name: Src
                 seq.push(tname);
             }
             // autoWatch
-            if ((ctx.oper & Operation.watch) && (info.oper & Operation.autoWatch)) {
+            if ((ctx.oper & Operation.watch) && (infoOper & Operation.autoWatch)) {
                 let wname = tname + '-twatch';
                 registerTasks(ctx, wname);
                 gulp.task(wname, () => {

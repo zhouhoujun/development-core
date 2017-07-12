@@ -278,7 +278,7 @@ export abstract class PipeTask implements IPipeTask {
             return false;
         }
 
-        if (p.oper && (p.oper & ctx.oper) <= 0) {
+        if (p.oper && (ctx.to(p.oper) & ctx.oper) <= 0) {
             return false;
         }
 

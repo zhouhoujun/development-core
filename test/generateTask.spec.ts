@@ -66,7 +66,11 @@ describe('generateTask', () => {
     })
 
     it('generate build tasks', () => {
-        let tks = generateTask(tasks, { oper: Operation.build });
+        let ctx = createContext({
+            env: { root: root },
+            option: {src: 'src', dist: 'lib' }
+        });
+        let tks = ctx.generateTask(tasks, { oper: Operation.build });
 
         expect(tks).to.not.null;
         expect(tks).to.not.undefined;
@@ -82,7 +86,11 @@ describe('generateTask', () => {
 
 
     it('generate build tasks with watch', () => {
-        let tks = generateTask(tasks, { oper: Operation.build | Operation.watch });
+        let ctx = createContext({
+            env: { root: root },
+            option: {src: 'src', dist: 'lib' }
+        });
+        let tks = ctx.generateTask(tasks, { oper: Operation.build | Operation.watch });
 
         expect(tks).to.not.null;
         expect(tks).to.not.undefined;
@@ -98,7 +106,11 @@ describe('generateTask', () => {
     });
 
     it('generate test tasks', () => {
-        let tks = generateTask(tasks, { oper: Operation.test | Operation.watch });
+        let ctx = createContext({
+            env: { root: root },
+            option: {src: 'src', dist: 'lib' }
+        });
+        let tks = ctx.generateTask(tasks, { oper: Operation.test | Operation.watch });
 
         expect(tks.length).to.equals(3);
 
@@ -109,7 +121,11 @@ describe('generateTask', () => {
     });
 
     it('generate release tasks', () => {
-        let tks = generateTask(tasks, { oper: Operation.release | Operation.watch });
+        let ctx = createContext({
+            env: { root: root },
+            option: {src: 'src', dist: 'lib' }
+        });
+        let tks = ctx.generateTask(tasks, { oper: Operation.release | Operation.watch });
 
         expect(tks).to.not.null;
         expect(tks).to.not.undefined;
@@ -125,7 +141,11 @@ describe('generateTask', () => {
 
 
     it('generate build test tasks with auto watch', () => {
-        let tks = generateTask({
+        let ctx = createContext({
+            env: { root: root },
+            option: {src: 'src', dist: 'lib' }
+        });
+        let tks = ctx.generateTask({
             name: 'gtest', src: 'test/**/*spec.ts', order: 1,
             oper: Operation.build | Operation.test,
             watch: true,
@@ -149,7 +169,11 @@ describe('generateTask', () => {
     });
 
     it('generate build test tasks with auto watch', () => {
-        let tks = generateTask({
+        let ctx = createContext({
+            env: { root: root },
+            option: {src: 'src', dist: 'lib' }
+        });
+        let tks = ctx.generateTask({
             name: 'gtest', src: 'test/**/*spec.ts', order: 1,
             oper: Operation.release | Operation.test,
             watch: true,
@@ -170,7 +194,11 @@ describe('generateTask', () => {
     });
 
     it('generate build tasks with auto watch', () => {
-        let btks = generateTask({
+        let ctx = createContext({
+            env: { root: root },
+            option: {src: 'src', dist: 'lib' }
+        });
+        let btks = ctx.generateTask({
             name: 'bgtest', src: 'test/**/*spec.ts', order: total => 1 / total,
             watch: true,
             oper: Operation.build,
@@ -191,7 +219,11 @@ describe('generateTask', () => {
     });
 
     it('generate build tasks with auto watch by Operation autoWatch', () => {
-        let btks = generateTask({
+        let ctx = createContext({
+            env: { root: root },
+            option: {src: 'src', dist: 'lib' }
+        });
+        let btks = ctx.generateTask({
             name: 'bgtest', src: 'test/**/*spec.ts', order: total => 1 / total,
             oper: Operation.build | Operation.autoWatch,
             pipe(src) {
@@ -211,7 +243,11 @@ describe('generateTask', () => {
     });
 
     it('generate build tasks with auto watch with option name', () => {
-        let btks = generateTask({
+        let ctx = createContext({
+            env: { root: root },
+            option: {src: 'src', dist: 'lib' }
+        });
+        let btks = ctx.generateTask({
             name: 'bgtest', src: 'test/**/*spec.ts', order: total => 0.1,
             oper: Operation.build | Operation.autoWatch,
             pipe(src) {
@@ -232,7 +268,11 @@ describe('generateTask', () => {
 
 
     it('generate build tasks with paralle order', () => {
-        let btks = generateTask([{
+        let ctx = createContext({
+            env: { root: root },
+            option: {src: 'src', dist: 'lib' }
+        });
+        let btks = ctx.generateTask([{
             name: 'bgtest', src: 'test/**/*spec.ts', order: total => 0.1,
             oper: Operation.build | Operation.autoWatch,
             pipe(src) {
@@ -360,7 +400,11 @@ describe('addToSequence', () => {
 
 
     it('generate build tasks with auto watch with option name and add sequence', () => {
-        let btks = generateTask({
+        let ctx = createContext({
+            env: { root: root },
+            option: {src: 'src', dist: 'lib' }
+        });
+        let btks = ctx.generateTask({
             name: 'bgtest', src: 'test/**/*spec.ts', order: total => 0,
             watch: true,
             oper: Operation.build,

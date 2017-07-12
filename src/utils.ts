@@ -91,20 +91,21 @@ export function convertOper(decor: ITaskDecorator, def = Operation.default) {
     return decor;
 }
 
-function convertMatchOper(match: ITaskDecorator) {
-    if ((match.oper & Operation.test) && !(match.oper & Operation.release)) {
-        match.oper = match.oper | Operation.build;
+function convertMatchOper(ctx: ITaskContext, match: ITaskDecorator) {
+    let matchOper = ctx.to(match.oper);
+    if ((matchOper & Operation.test) && !(matchOper & Operation.release)) {
+        matchOper = matchOper | Operation.build;
     }
-    if ((match.oper & Operation.e2e) && !(match.oper & Operation.release)) {
-        match.oper = match.oper | Operation.build;
+    if ((matchOper & Operation.e2e) && !(matchOper & Operation.release)) {
+        matchOper = matchOper | Operation.build;
     }
-    if (match.oper & Operation.deploy) {
-        match.oper = match.oper | Operation.test | Operation.e2e;
+    if (matchOper & Operation.deploy) {
+        matchOper = matchOper | Operation.test | Operation.e2e;
     }
-    if (match.oper & Operation.release) {
-        match.oper = match.oper | Operation.test;
+    if (matchOper & Operation.release) {
+        matchOper = matchOper | Operation.test;
     }
-
+    match.oper = matchOper;
     return match;
 }
 
@@ -126,35 +127,33 @@ export function someOper(oper1: Operation, oper2: Operation) {
  * match
  *
  * @export
+ * @param {ITaskContext} ctx
  * @param {ITaskDecorator} tinfo
  * @param {ITaskDecorator} match
- * @param {ITaskContext} [ctx]
  * @returns
  */
-export function matchCompare(tinfo: ITaskDecorator, match: ITaskDecorator, ctx?: ITaskContext) {
-    if (ctx) {
-        return ctx.matchCompare(tinfo, match);
-    } else {
-        if (!matchTaskInfo(tinfo, match)) {
-            return false;
-        }
+export function matchCompare(ctx: ITaskContext, tinfo: ITaskDecorator, match: ITaskDecorator) {
 
-        if (!matchTaskGroup(tinfo, match)) {
-            return false;
-        }
-        return true;
+    if (!matchTaskInfo(ctx, tinfo, match)) {
+        return false;
     }
+
+    if (!matchTaskGroup(tinfo, match)) {
+        return false;
+    }
+    return true;
+
 }
 
 /**
  * match task via task info.
  *
- * @export
+ * @param {ITaskContext} ctx
  * @param {ITaskDecorator} decor
  * @param {ITaskDecorator} match
  * @returns
  */
-function matchTaskInfo(decor: ITaskDecorator, match: ITaskDecorator) {
+function matchTaskInfo(ctx: ITaskContext, decor: ITaskDecorator, match: ITaskDecorator) {
 
     match = convertOper(match, Operation.build);
     decor = convertOper(decor);
@@ -164,17 +163,19 @@ function matchTaskInfo(decor: ITaskDecorator, match: ITaskDecorator) {
     } else if (decor.match) {
         return decor.match(match);
     } else {
-        match = convertMatchOper(match);
+        match = convertMatchOper(ctx, match);
     }
 
-    let eq = decor.oper & match.oper;
+    let decorOper = ctx.to(decor.oper);
+    let matchOper = ctx.to(match.oper);
+    let eq = decorOper & matchOper;
     // console.log('eq------->:', eq);
     if (eq <= 0) {
         return false;
     }
 
-    if (decor.oper & Operation.watch) {
-        if ((match.oper & Operation.watch) <= 0) {
+    if (decorOper & Operation.watch) {
+        if ((matchOper & Operation.watch) <= 0) {
             return false;
         } else {
             if (eq <= Operation.watch) {
@@ -183,8 +184,8 @@ function matchTaskInfo(decor: ITaskDecorator, match: ITaskDecorator) {
         }
     }
 
-    if (decor.oper & Operation.serve) {
-        if (!(match.oper & Operation.serve)) {
+    if (decorOper & Operation.serve) {
+        if (!(matchOper & Operation.serve)) {
             return false;
         } else {
             if (eq <= Operation.serve) {
@@ -193,8 +194,8 @@ function matchTaskInfo(decor: ITaskDecorator, match: ITaskDecorator) {
         }
     }
 
-    if (decor.oper & Operation.test) {
-        if (!(match.oper & Operation.test)) {
+    if (decorOper & Operation.test) {
+        if (!(matchOper & Operation.test)) {
             return false;
         } else {
             if (eq <= Operation.test) {
@@ -203,8 +204,8 @@ function matchTaskInfo(decor: ITaskDecorator, match: ITaskDecorator) {
         }
     }
 
-    if (decor.oper & Operation.e2e) {
-        if (!(match.oper & Operation.e2e)) {
+    if (decorOper & Operation.e2e) {
+        if (!(matchOper & Operation.e2e)) {
             return false;
         } else {
             if (eq <= Operation.e2e) {

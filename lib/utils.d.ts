@@ -33,12 +33,12 @@ export declare function someOper(oper1: Operation, oper2: Operation): boolean;
  * match
  *
  * @export
+ * @param {ITaskContext} ctx
  * @param {ITaskDecorator} tinfo
  * @param {ITaskDecorator} match
- * @param {ITaskContext} [ctx]
  * @returns
  */
-export declare function matchCompare(tinfo: ITaskDecorator, match: ITaskDecorator, ctx?: ITaskContext): boolean;
+export declare function matchCompare(ctx: ITaskContext, tinfo: ITaskDecorator, match: ITaskDecorator): boolean;
 /**
  * convert path to absolute path.
  *
