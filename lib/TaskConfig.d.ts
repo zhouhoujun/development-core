@@ -336,6 +336,13 @@ export interface IOutput extends ITransform {
  */
 export interface IPipe extends IOperate {
     /**
+     * the pipe for some task with named as the taskName.
+     *
+     * @type {TaskString}
+     * @memberof IPipe
+     */
+    taskName?: TaskString;
+    /**
      * transform to pipe work
      *
      * @param {ITaskContext} context
@@ -346,6 +353,16 @@ export interface IPipe extends IOperate {
      * @memberof IPipe
      */
     toTransform?(context: ITaskContext, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
+    /**
+     * transform to pipe work
+     *
+     * @param {ITaskContext} context
+     * @param {IAssertDist} [dist]
+     * @param {Gulp} [gulp]
+     * @returns {(ITransform | Promise<ITransform>)}
+     * @memberof IPipe
+     */
+    pipe?(context: ITaskContext, dist?: IAssertDist, gulp?: Gulp): ITransform | Promise<ITransform>;
 }
 export declare type Pipe = IPipe | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => ITransform | Promise<ITransform>);
 /**

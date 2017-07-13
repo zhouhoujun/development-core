@@ -1,5 +1,5 @@
 import { Gulp } from 'gulp';
-import { TransformSource, RunWay, IAssertDist, ITaskInfo, TaskResult, ITaskContext, IOperate, ICustomPipe, Pipe, OutputPipe, ITask, ITransform, IPipeOption } from './TaskConfig';
+import { TransformSource, RunWay, IAssertDist, ITaskInfo, TaskResult, ITaskContext, IPipe, ICustomPipe, Pipe, OutputPipe, ITask, ITransform, IPipeOption } from './TaskConfig';
 import { sortOrder } from './utils';
 import * as coregulp from 'gulp';
 import * as chalk from 'chalk';
@@ -249,16 +249,16 @@ export abstract class PipeTask implements IPipeTask {
      * match pipe Operate
      *
      * @protected
-     * @param {IOperate} p
+     * @param {IPipe} p
      * @param {string} name
      * @param {ITaskContext} ctx
-     * @param {IOperate} [trsOperate]
+     * @param {IPipe} [trsOperate]
      * @param {boolean} [isOutput=false]
      * @returns
      *
      * @memberOf PipeTask
      */
-    protected match(p: IOperate, name: string, ctx: ITaskContext, trsOperate?: IOperate, isOutput = false) {
+    protected match(p: IPipe, name: string, ctx: ITaskContext, trsOperate?: IPipe, isOutput = false) {
         // return this.matchOperate(p, name, ctx, isOutput) && (!trsOperate || (trsOperate && this.matchOperate(trsOperate, name, ctx, isOutput)));
         return this.matchOperate(p, name, ctx, isOutput) || (trsOperate && this.matchOperate(trsOperate, name, ctx, isOutput));
     }
@@ -270,11 +270,11 @@ export abstract class PipeTask implements IPipeTask {
      * @param ctx
      * @param isOutput
      */
-    protected matchOperate(p: IOperate, name: string, ctx: ITaskContext, isOutput = false) {
+    protected matchOperate(p: IPipe, name: string, ctx: ITaskContext, isOutput = false) {
         if (!p) {
             return false;
         }
-        if (p.name && !name.endsWith(ctx.toStr(p.name))) {
+        if (p.name && !name.endsWith(ctx.toStr(p.taskName || p.name))) {
             return false;
         }
 
@@ -320,38 +320,44 @@ export abstract class PipeTask implements IPipeTask {
     }
 
 
+    protected operateKey = 'pipe_operate';
     protected operateFileds = ['name', 'oper', 'order', 'nonePipe', 'noneOutput'];
     /**
      * get transform Operate.
      *
      * @protected
-     * @param {ITransform} source
-     * @returns {IOperate}
+     * @param {ITransform | OutputPipe} source
+     * @returns {IPipe}
      *
      * @memberOf PipeTask
      */
-    protected getTransformOperate(source: ITransform): IOperate {
-        return _.pick(source, this.operateFileds) as IOperate;
+    protected getTransformOperate(source: ITransform | OutputPipe): IPipe {
+        if (!source) {
+            return null;
+        }
+        return (source[this.operateKey] ? source[this.operateKey] : _.pick(source, this.operateFileds)) as IPipe;
     }
 
     /**
      * set transform Operate.
      *
      * @protected
-     * @param {ITransform} source
-     * @param {IOperate} operate
+     * @param {ITransform | OutputPipe} source
+     * @param {IPipe} operate
      * @returns
      *
      * @memberOf PipeTask
      */
-    protected setTransformOperate(source: ITransform, operate: IOperate) {
+    protected setTransformOperate(source: ITransform | OutputPipe, operate: IPipe) {
         if (!source) {
             return;
         }
 
+        let soperate = source[this.operateKey] = source[this.operateKey] || {};
+
         _.each(this.operateFileds, n => {
             if (!_.isUndefined(operate[n])) {
-                source[n] = operate[n];
+                soperate[n] = operate[n];
             }
         });
     }
@@ -375,15 +381,21 @@ export abstract class PipeTask implements IPipeTask {
         if (!this.match(oper, name, ctx)) {
             return Promise.resolve(source);
         }
-        return Promise.all(_.map(pipes || this.pipes(ctx, dist, gulp), (p: Pipe) => {
+        pipes = pipes || this.pipes(ctx, dist, gulp);
+        return Promise.all(_.map(pipes, (p: Pipe) => {
             if (_.isFunction(p)) {
                 return p(ctx, dist, gulp);
             } else {
                 if (!this.match(p, name, ctx)) {
                     return null;
                 } else {
-                    return Promise.resolve(p.toTransform(ctx, dist, gulp))
+                    p.pipe = p.pipe || p.toTransform;
+                    if (!p.pipe) {
+                        return null;
+                    }
+                    return Promise.resolve(p.pipe(ctx, dist, gulp))
                         .then(trs => {
+                            // trs.order = ctx.to(p.order)
                             this.setTransformOperate(trs, p);
                             // trs.order = p.order;
                             return trs;
@@ -393,10 +405,10 @@ export abstract class PipeTask implements IPipeTask {
         }))
             .then(tanseq => {
 
-                let tans = sortOrder<ITransform>(tanseq, it => it.order, ctx, true);
+                let tans = sortOrder<ITransform>(tanseq, it => this.getTransformOperate(it).order, ctx, true);
 
                 _.each(tans, (stream: ITransform) => {
-                    if (!this.match(stream, name, ctx, oper)) {
+                    if (!this.match(this.getTransformOperate(stream), name, ctx, oper)) {
                         return;
                     }
 
@@ -421,20 +433,20 @@ export abstract class PipeTask implements IPipeTask {
      * @param {ITaskContext} context
      * @param {IAssertDist} dist
      * @param {Gulp} gulp
-     * @param {OutputPipe[]} [output]
+     * @param {OutputPipe[]} [outputs]
      * @returns
      *
      * @memberOf PipeTask
      */
-    protected output2Promise(source: ITransform, context: ITaskContext, dist: IAssertDist, gulp: Gulp, output?: OutputPipe[]) {
+    protected output2Promise(source: ITransform, context: ITaskContext, dist: IAssertDist, gulp: Gulp, outputs?: OutputPipe[]) {
         let name = context.taskName(dist, this.name);
         let oper = this.getTransformOperate(source);
-        let outputs = output || this.output(context, dist, gulp);
+        outputs = outputs || this.output(context, dist, gulp);
         return Promise.all(_.map(outputs, output => {
             if (_.isFunction(output)) {
                 return output(source, context, dist, gulp);
             } else {
-                if (!this.match(output, name, context, oper, true)) {
+                if (!this.match(this.getTransformOperate(output), name, context, oper, true)) {
                     return null;
                 } else {
                     return output.toTransform(source, context, dist, gulp);
