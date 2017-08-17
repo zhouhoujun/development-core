@@ -334,7 +334,7 @@ function filterTaskSequence(seq: Src[], express?: (str: string) => boolean): Src
 export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
     tasks = filterTaskSequence(tasks);
     console.log(chalk.cyan('run tasks : '), tasks);
-    let run = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         let ps: Promise<any> = null;
         if (tasks && tasks.length > 0) {
             _.each(tasks, task => {
@@ -353,10 +353,6 @@ export function runSequence(gulp: Gulp, tasks: Src[]): Promise<any> {
             .then(resolve)
             .catch(reject);
     });
-    return run.catch(err => {
-        console.error(chalk.red(err));
-        // process.exit(0);
-    });
 }
 
 /**
@@ -374,8 +370,6 @@ function startTask(gulp: Gulp, task: Src): Promise<any> {
             tskmap[t] = false;
         });
         taskErr = (err) => {
-            process.exit(err);
-            console.error(chalk.red(err));
             reject(err);
         };
         taskStop = (e: any) => {
@@ -398,12 +392,14 @@ function startTask(gulp: Gulp, task: Src): Promise<any> {
                 gulp['removeListener']('task_stop', taskStop);
                 gulp['removeListener']('task_err', taskErr);
             }
-        }, err => {
+        })
+        .catch(err => {
             if (gulp['removeListener']) {
                 gulp['removeListener']('task_stop', taskStop);
                 gulp['removeListener']('task_err', taskErr);
             }
-            // process.exit(0);
+            // console.log(err);
+            process.exit(_.isNumber(err) ? err : 1);
         });
 }
 

@@ -855,6 +855,11 @@ export interface IShellOption extends IAssertOption {
      */
     execOptions?: ExecOptions;
 
+    /**
+     * all child process has error.
+     */
+    allowError?: boolean;
+
 }
 
 export interface IExecFileOption extends IAssertOption {
@@ -874,6 +879,11 @@ export interface IExecFileOption extends IAssertOption {
      * @memberof IExecFileOption
      */
     execFileOptions?: ExecFileOptions;
+
+    /**
+     * all child process has error.
+     */
+    allowError?: boolean;
 
 }
 
@@ -1287,10 +1297,11 @@ export interface ITaskContext {
      *
      * @param {string} cmd
      * @param {ExecOptions} [options]
+     * @param {boolean} [allowError]
      * @returns {Promise<any>}
      * @memberof ITaskContext
      */
-    execShell(cmd: string, options?: ExecOptions): Promise<any>;
+    execShell(cmd: string, options?: ExecOptions, allowError?: boolean): Promise<any>;
 
     /**
      * execute file.
@@ -1298,10 +1309,11 @@ export interface ITaskContext {
      * @param {string} cmd
      * @param {string[]} [args]
      * @param {ExecFileOptions} [options]
+     * @param {boolean} [allowError]
      * @returns {Promise<any>}
      * @memberof ITaskContext
      */
-    execFile(cmd: string, args?: string[], options?: ExecFileOptions): Promise<any>;
+    execFile(cmd: string, args?: string[], options?: ExecFileOptions, allowError?: boolean): Promise<any>;
 
     /**
      * help tipe.

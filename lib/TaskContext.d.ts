@@ -261,8 +261,8 @@ export declare class TaskContext implements ITaskContext {
      *@memberof TaskContext
      */
     run(): Promise<any>;
-    execShell(cmd: string, options?: ExecOptions): Promise<any>;
-    execFile(file: string, args?: string[], options?: ExecFileOptions): Promise<any>;
+    execShell(cmd: string, options?: ExecOptions, allowError?: boolean): Promise<any>;
+    execFile(file: string, args?: string[], options?: ExecFileOptions, allowError?: boolean): Promise<any>;
     help(): void;
     tasks(express?: (item: ITask) => boolean): ITask[];
     registerTasks(express?: (item: ITask) => boolean): ITask[];

@@ -245,7 +245,7 @@ export declare abstract class PipeTask implements IPipeTask {
      *
      * @memberOf PipeTask
      */
-    protected working(source: ITransform, ctx: ITaskContext, option: IAssertDist, gulp: Gulp, pipes?: Pipe[], output?: OutputPipe[]): Promise<void | {}[]>;
+    protected working(source: ITransform, ctx: ITaskContext, option: IAssertDist, gulp: Gulp, pipes?: Pipe[], output?: OutputPipe[]): Promise<{}[]>;
     /**
      * execute task working
      *

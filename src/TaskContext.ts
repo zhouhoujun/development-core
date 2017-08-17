@@ -827,7 +827,7 @@ export class TaskContext implements ITaskContext {
         }
     }
 
-    execShell(cmd: string, options?: ExecOptions): Promise<any> {
+    execShell(cmd: string, options?: ExecOptions, allowError = true): Promise<any> {
         if (!cmd) {
             return Promise.resolve();
         }
@@ -845,13 +845,23 @@ export class TaskContext implements ITaskContext {
                 console.log(data);
             });
 
-            shell.stderr.on('data', data => {
-                console.log(data);
+            shell.stderr.on('data', err => {
+                console.log(err);
+                if (!allowError) {
+                    reject(err);
+                }
+            });
+
+            shell.on('exit', (code) => {
+                console.log(`exit child process with code：${code}`);
+                if (code > 0) {
+                    reject(code);
+                }
             });
         });
     }
 
-    execFile(file: string, args?: string[], options?: ExecFileOptions): Promise<any> {
+    execFile(file: string, args?: string[], options?: ExecFileOptions, allowError = true): Promise<any> {
         if (!file && !fs.existsSync(file)) {
             console.log('file:', chalk.yellow(file), 'no exists.');
             return Promise.resolve();
@@ -872,6 +882,16 @@ export class TaskContext implements ITaskContext {
 
             proc.stderr.on('data', data => {
                 console.log(data);
+                if (!allowError) {
+                    reject(data);
+                }
+            });
+
+            proc.on('exit', (code) => {
+                console.log(`exit child process with code：${code}`);
+                if (code > 0) {
+                    reject(code);
+                }
             });
         });
     }

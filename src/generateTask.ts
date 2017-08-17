@@ -49,7 +49,7 @@ class ShellTask implements ITask {
             return Promise.resolve(cmd)
                 .then(cmds => {
                     if (_.isString(cmds)) {
-                        return ctx.execShell(cmds, option.execOptions);
+                        return ctx.execShell(cmds, option.execOptions, option.allowError !== false);
                     } else if (_.isArray(cmds)) {
                         if (option.shellRunWay === RunWay.sequence) {
                             let pip = Promise.resolve();
@@ -58,7 +58,7 @@ class ShellTask implements ITask {
                             });
                             return pip;
                         } else {
-                            return Promise.all(_.map(cmds, cmd => ctx.execShell(cmd, option.execOptions)));
+                            return Promise.all(_.map(cmds, cmd => ctx.execShell(cmd, option.execOptions, option.allowError !== false)));
                         }
                     } else {
 
@@ -113,16 +113,16 @@ class ExecFileTask implements ITask {
             return Promise.resolve(files)
                 .then(files => {
                     if (_.isString(files)) {
-                        return ctx.execFile(files, option.args, option.execFileOptions);
+                        return ctx.execFile(files, option.args, option.execFileOptions, option.allowError !== false);
                     } else if (_.isArray(files)) {
                         if (option.fileRunWay === RunWay.sequence) {
                             let pip = Promise.resolve();
                             _.each(files, file => {
-                                pip = pip.then(() => ctx.execFile(file, option.args, option.execFileOptions));
+                                pip = pip.then(() => ctx.execFile(file, option.args, option.execFileOptions, option.allowError !== false));
                             });
                             return pip;
                         } else {
-                            return Promise.all(_.map(files, file => ctx.execFile(file, option.args, option.execFileOptions)));
+                            return Promise.all(_.map(files, file => ctx.execFile(file, option.args, option.execFileOptions, option.allowError !== false)));
                         }
                     } else {
                         return Promise.reject('exec file task config error');

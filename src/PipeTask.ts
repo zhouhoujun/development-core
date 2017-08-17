@@ -493,10 +493,6 @@ export abstract class PipeTask implements IPipeTask {
             .then(psrc => this.customPipe(psrc, ctx, option, gulp))
             .then(psrc => this.pipes2Promise(psrc, ctx, option, gulp, pipes))
             .then(psrc => this.output2Promise(psrc, ctx, option, gulp, output))
-            .catch(err => {
-                console.log(chalk.red(err));
-                process.exit(0);
-            });
     }
 
     /**
