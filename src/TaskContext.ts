@@ -12,6 +12,7 @@ import { generateTask } from './generateTask';
 import { toSequence, runSequence, addToSequence, zipSequence, flattenSequence, runTaskSequence } from './taskSequence';
 import { sortOrder, matchCompare, absoluteSrc, absolutePath } from './utils';
 import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefineInDir } from './findTasks';
+import { IPipeTask } from './PipeTask';
 import *as path from 'path';
 import *as fs from 'fs';
 const globby = require('globby');
@@ -825,6 +826,22 @@ export class TaskContext implements ITaskContext {
                     }
                 });
         }
+    }
+
+    /**
+     * just run task. not register on global tasks.
+     * @param tasks
+     * @param match
+     */
+    runDynamic(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): Promise<any> {
+        let gtask = generateTask(this, tasks, _.extend({ oper: this.oper }, match || {}));
+        let ps = Promise.resolve();
+        _.each(gtask, (t: IPipeTask) => {
+            ps = ps.then(() => {
+                return t.execute(this, gulp);
+            });
+        });
+        return ps;
     }
 
     execShell(cmd: string, options?: ExecOptions, allowError = true): Promise<any> {
