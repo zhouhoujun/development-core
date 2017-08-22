@@ -1143,6 +1143,15 @@ export interface ITaskContext {
      */
     run(): Promise<any>;
     /**
+     * run dynamic task. not register as global.
+     *
+     * @param {(IDynamicTaskOption | IDynamicTaskOption[])} tasks
+     * @param {ITaskInfo} [match]
+     * @returns {Promise<any>}
+     * @memberof ITaskContext
+     */
+    runDynamic(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): Promise<any>;
+    /**
      * execute shell.
      *
      * @param {string} cmd

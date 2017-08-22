@@ -261,6 +261,12 @@ export declare class TaskContext implements ITaskContext {
      *@memberof TaskContext
      */
     run(): Promise<any>;
+    /**
+     * just run task. not register on global tasks.
+     * @param tasks
+     * @param match
+     */
+    runDynamic(tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): Promise<any>;
     execShell(cmd: string, options?: ExecOptions, allowError?: boolean): Promise<any>;
     execFile(file: string, args?: string[], options?: ExecFileOptions, allowError?: boolean): Promise<any>;
     help(): void;
