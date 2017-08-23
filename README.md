@@ -41,6 +41,61 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
 
 ```
 
+## New Features
+
+* v2.0.6 can execute dynamic work.
+
+```ts
+
+     let context = createContext({
+        env: env,
+        option: { src: 'src', dist: 'lib', buildDist: 'build' }
+    });
+
+    // console.log(context);
+
+    context.runDynamic([
+        {
+            name: 'test', src: 'test/**/*spec.ts',
+            oper: Operation.test | Operation.default,
+            pipes: [mocha],
+            output: null
+        },
+        {
+            name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
+            oper: Operation.build,
+            pipes: [
+                () => cache('typescript'),
+                sourcemaps.init,
+                (config) => {
+                    let transform = tsProject();
+                    transform.transformSourcePipe = (source) => source.pipe(transform)['js'];
+                    return transform;
+                },
+                (config) => sourcemaps.write('./sourcemaps')
+            ]
+        },
+        {
+            name: 'tscompile', src: 'src/**/*.ts', dist: 'lib',
+            oper: Operation.release | Operation.deploy,
+            pipes: [
+                () => cache('typescript'),
+                sourcemaps.init,
+                (config) => tsProject()
+            ],
+            output: [
+                (tsmap, config, dt, gulp) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
+                (tsmap, config, dt, gulp) => tsmap.js
+                    .pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))
+                    .pipe(gulp.dest(config.getDist(dt)))
+            ]
+        },
+        { src: 'src/**/*.ts', name: 'watch', watchTasks: ['tscompile'] },
+        { name: 'clean', order: 0, src: 'src', dist: 'lib', task: (config) => del(config.getDist()) }
+    ]);
+
+```
+
 ## define shell task with dynamic task
 ```ts
 @dynamicTask()
