@@ -9,7 +9,7 @@ import { PipeTask } from './PipeTask';
 import { runSequence } from './taskSequence';
 import * as watch from 'gulp-watch';
 
-type factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => TaskResult;
+// type factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => TaskResult;
 
 /**
  * Shell Task
@@ -29,6 +29,30 @@ class ShellTask implements ITask {
         return this.info;
     }
 
+    execute(ctx: ITaskContext, gulp?: Gulp): Promise<any> {
+        let option = ctx.option as IShellOption;
+        let cmd = ctx.to<AsyncSrc>(this.cmd);
+        return Promise.resolve(cmd)
+            .then(cmds => {
+                if (_.isString(cmds)) {
+                    return ctx.execShell(cmds, option.execOptions, option.allowError !== false);
+                } else if (_.isArray(cmds)) {
+                    if (option.shellRunWay === RunWay.sequence) {
+                        let pip = Promise.resolve();
+                        _.each(cmds, cmd => {
+                            pip = pip.then(() => ctx.execShell(cmd, option.execOptions));
+                        });
+                        return pip;
+                    } else {
+                        return Promise.all(_.map(cmds, cmd => ctx.execShell(cmd, option.execOptions, option.allowError !== false)));
+                    }
+                } else {
+
+                    return Promise.reject('shell task config error');
+                }
+            });
+    }
+
     /**
      * setup shell task.
      *
@@ -40,32 +64,11 @@ class ShellTask implements ITask {
      */
     setup(ctx: ITaskContext, gulp?: Gulp) {
         gulp = gulp || coregulp;
-        let option = ctx.option as IShellOption;
         let tk = ctx.taskName(this.getInfo());
         console.log(`register shell task:`, chalk.cyan(tk));
 
         gulp.task(tk, () => {
-            let cmd = ctx.to<AsyncSrc>(this.cmd);
-            return Promise.resolve(cmd)
-                .then(cmds => {
-                    if (_.isString(cmds)) {
-                        return ctx.execShell(cmds, option.execOptions, option.allowError !== false);
-                    } else if (_.isArray(cmds)) {
-                        if (option.shellRunWay === RunWay.sequence) {
-                            let pip = Promise.resolve();
-                            _.each(cmds, cmd => {
-                                pip = pip.then(() => ctx.execShell(cmd, option.execOptions));
-                            });
-                            return pip;
-                        } else {
-                            return Promise.all(_.map(cmds, cmd => ctx.execShell(cmd, option.execOptions, option.allowError !== false)));
-                        }
-                    } else {
-
-                        return Promise.reject('shell task config error');
-                    }
-                });
-
+            return this.execute(ctx, gulp);
         });
 
         this.info.taskName = tk;
@@ -93,6 +96,29 @@ class ExecFileTask implements ITask {
         return this.info;
     }
 
+    execute(ctx: ITaskContext, gulp?: Gulp): Promise<any> {
+        let option = ctx.option as IExecFileOption;
+        let files = ctx.to<AsyncSrc>(this.files);
+        return Promise.resolve(files)
+            .then(files => {
+                if (_.isString(files)) {
+                    return ctx.execFile(files, option.args, option.execFileOptions, option.allowError !== false);
+                } else if (_.isArray(files)) {
+                    if (option.fileRunWay === RunWay.sequence) {
+                        let pip = Promise.resolve();
+                        _.each(files, file => {
+                            pip = pip.then(() => ctx.execFile(file, option.args, option.execFileOptions, option.allowError !== false));
+                        });
+                        return pip;
+                    } else {
+                        return Promise.all(_.map(files, file => ctx.execFile(file, option.args, option.execFileOptions, option.allowError !== false)));
+                    }
+                } else {
+                    return Promise.reject('exec file task config error');
+                }
+            });
+    }
+
     /**
      * setup shell task.
      *
@@ -104,31 +130,12 @@ class ExecFileTask implements ITask {
      */
     setup(ctx: ITaskContext, gulp?: Gulp) {
         gulp = gulp || coregulp;
-        let option = ctx.option as IExecFileOption;
+
         let tk = ctx.taskName(this.getInfo());
         console.log(`register exec file task:`, chalk.cyan(tk));
 
         gulp.task(tk, () => {
-            let files = ctx.to<AsyncSrc>(this.files);
-            return Promise.resolve(files)
-                .then(files => {
-                    if (_.isString(files)) {
-                        return ctx.execFile(files, option.args, option.execFileOptions, option.allowError !== false);
-                    } else if (_.isArray(files)) {
-                        if (option.fileRunWay === RunWay.sequence) {
-                            let pip = Promise.resolve();
-                            _.each(files, file => {
-                                pip = pip.then(() => ctx.execFile(file, option.args, option.execFileOptions, option.allowError !== false));
-                            });
-                            return pip;
-                        } else {
-                            return Promise.all(_.map(files, file => ctx.execFile(file, option.args, option.execFileOptions, option.allowError !== false)));
-                        }
-                    } else {
-                        return Promise.reject('exec file task config error');
-                    }
-                });
-
+            return this.execute(ctx, gulp);
         });
 
         this.info.taskName = tk;
@@ -145,7 +152,7 @@ class ExecFileTask implements ITask {
  * @implements {ITask}
  */
 class DynamicTask implements ITask {
-    constructor(protected info: ITaskInfo, private factory: factory) {
+    constructor(protected info: ITaskInfo, protected dt: IDynamicTaskOption) {
     }
 
     /**
@@ -158,12 +165,86 @@ class DynamicTask implements ITask {
         return this.info;
     }
 
-    setup(ctx: ITaskContext, gulp?: Gulp) {
-        let name = this.factory(ctx, this.getInfo(), gulp || coregulp);
-        if (name) {
-            this.info.taskName = name;
+    execute(ctx: ITaskContext, gulp?: Gulp): Promise<any> {
+        let rt = this.dt.task(ctx, this.dt, gulp);
+        if (rt && rt['then']) {
+            return rt as Promise<any>;
+        } else {
+            return Promise.resolve(rt);
         }
-        return name;
+    }
+
+    setup(ctx: ITaskContext, gulp?: Gulp) {
+        let tk = ctx.taskName(this.getInfo());
+        console.log('register custom dynamic task:', chalk.cyan(tk));
+        gulp.task(tk, () => {
+            return this.execute(ctx, gulp);
+        });
+
+        this.info.taskName = tk;
+
+        return tk;
+    }
+}
+
+/**
+ * custom dynamic watch task.
+ *
+ * @class DynamicWatchTask
+ * @implements {ITask}
+ */
+class DynamicWatchTask implements ITask {
+    constructor(protected info: ITaskInfo, protected dt: IDynamicTaskOption) {
+    }
+
+    /**
+     * get task info.
+     *
+     * @type {ITaskInfo}
+     * @memberOf PipeTask
+     */
+    public getInfo(): ITaskInfo {
+        return this.info;
+    }
+
+    execute(ctx: ITaskContext, gulp?: Gulp): Promise<any> {
+        return Promise.resolve();
+    }
+
+    setup(ctx: ITaskContext, gulp?: Gulp) {
+        let dt = this.dt;
+        let watchs = _.isFunction(dt.watchTasks) ? dt.watchTasks(ctx, dt) : dt.watchTasks;
+        let callback;
+        if (!_.isFunction(_.last(watchs))) {
+            callback = (event: WatchEvent) => {
+                dt.watchChanged && dt.watchChanged(event, ctx);
+            };
+        } else {
+            callback = watchs.pop();
+        }
+
+        watchs = _.map(watchs, w => {
+            if (_.isString(w)) {
+                return ctx.taskName(w);
+            }
+            return w;
+        })
+        let info = this.getInfo();
+        let tk = ctx.taskName(info);
+        console.log('register watch  dynamic task:', chalk.cyan(tk));
+        gulp.task(tk, () => {
+            let src = ctx.getSrc(info);
+            console.log('watch, src:', chalk.cyan.call(chalk, src));
+            // watch(src, watchs);
+            watch(src, () => {
+                runSequence(gulp, <string[]>watchs)
+                    .then(() => {
+                        callback && callback();
+                    });
+            });
+        });
+
+        return tk;
     }
 }
 
@@ -217,9 +298,10 @@ class DynamicPipeTask extends PipeTask {
  * @param {ITaskContext} ctx
  * @param {(IDynamicTaskOption | IDynamicTaskOption[])} tasks
  * @param {ITaskInfo} [match]
+ * @param {boolean} [isDynamic]
  * @returns {ITask[]}
  */
-export function generateTask(ctx: ITaskContext, tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[] {
+export function generateTask(ctx: ITaskContext, tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo, isDynamic?: boolean): ITask[] {
     let taskseq: ITask[] = [];
     _.each(_.isArray(tasks) ? tasks : [tasks], dt => {
         dt.oper = dt.oper ? ctx.to(dt.oper) : Operation.default;
@@ -234,7 +316,7 @@ export function generateTask(ctx: ITaskContext, tasks: IDynamicTaskOption | IDyn
         if (dt.watch && !(dt.oper & Operation.watch)) {
             dt.oper = dt.oper | Operation.autoWatch;
         }
-        taskseq.push(createTask(ctx, dt));
+        taskseq.push(createTask(ctx, dt, isDynamic));
 
     });
 
@@ -246,12 +328,13 @@ export function generateTask(ctx: ITaskContext, tasks: IDynamicTaskOption | IDyn
  *
  * @param {ITaskContext} ctx
  * @param {IDynamicTaskOption} dt
+ * @param {boolean} [isDynamic]
  * @returns {ITask}
  */
-function createTask(ctx: ITaskContext, dt: IDynamicTaskOption): ITask {
+function createTask(ctx: ITaskContext, dt: IDynamicTaskOption, isDynamic?: boolean): ITask {
     let task: ITask;
     if (ctx.to(dt.oper) & Operation.watch) {
-        task = createWatchTask(dt);
+        task = isDynamic ? createPipesTask(dt) : createWatchTask(dt);
     } else if (dt.shell) {
         task = new ShellTask(dt, dt.shell);
     } else if (dt.execFiles) {
@@ -274,17 +357,17 @@ function createTask(ctx: ITaskContext, dt: IDynamicTaskOption): ITask {
  * @returns {ITask}
  */
 function createCustomTask(dt: IDynamicTaskOption): ITask {
-    let factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => {
-        let tk = ctx.taskName(info);
-        console.log('register custom dynamic task:', chalk.cyan(tk));
-        gulp.task(tk, () => {
-            return dt.task(ctx, dt, gulp);
-        });
+    // let factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => {
+    //     let tk = ctx.taskName(info);
+    //     console.log('register custom dynamic task:', chalk.cyan(tk));
+    //     gulp.task(tk, () => {
+    //         return dt.task(ctx, dt, gulp);
+    //     });
 
-        return tk
-    };
+    //     return tk
+    // };
 
-    return new DynamicTask({ name: dt.name, order: dt.order, oper: dt.oper, group: dt.group, assert: dt }, factory);
+    return new DynamicTask({ name: dt.name, order: dt.order, oper: dt.oper, group: dt.group, assert: dt }, dt);
 }
 
 
@@ -296,46 +379,41 @@ function createCustomTask(dt: IDynamicTaskOption): ITask {
  * @returns {ITask}
  */
 function createWatchTask(dt: IDynamicTaskOption): ITask {
-    let factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => {
-        let watchs = _.isFunction(dt.watchTasks) ? dt.watchTasks(ctx, dt) : dt.watchTasks;
-        // if (!_.isFunction(_.last(watchs))) {
-        //     watchs.push(<WatchCallback>(event: WatchEvent) => {
-        //         dt.watchChanged && dt.watchChanged(event, ctx);
-        //     });
-        // }
-        let callback;
-        if (!_.isFunction(_.last(watchs))) {
-            callback = (event: WatchEvent) => {
-                dt.watchChanged && dt.watchChanged(event, ctx);
-            };
-        } else {
-            callback = watchs.pop();
-        }
+    // let factory = (ctx: ITaskContext, info: ITaskInfo, gulp: Gulp) => {
+    //     let watchs = _.isFunction(dt.watchTasks) ? dt.watchTasks(ctx, dt) : dt.watchTasks;
+    //     let callback;
+    //     if (!_.isFunction(_.last(watchs))) {
+    //         callback = (event: WatchEvent) => {
+    //             dt.watchChanged && dt.watchChanged(event, ctx);
+    //         };
+    //     } else {
+    //         callback = watchs.pop();
+    //     }
 
-        watchs = _.map(watchs, w => {
-            if (_.isString(w)) {
-                return ctx.taskName(w);
-            }
-            return w;
-        })
-        let tk = ctx.taskName(info);
-        console.log('register watch  dynamic task:', chalk.cyan(tk));
-        gulp.task(tk, () => {
-            let src = ctx.getSrc(info);
-            console.log('watch, src:', chalk.cyan.call(chalk, src));
-            // watch(src, watchs);
-            watch(src, () => {
-                runSequence(gulp, <string[]>watchs)
-                    .then(() => {
-                        callback && callback();
-                    });
-            });
-        });
+    //     watchs = _.map(watchs, w => {
+    //         if (_.isString(w)) {
+    //             return ctx.taskName(w);
+    //         }
+    //         return w;
+    //     })
+    //     let tk = ctx.taskName(info);
+    //     console.log('register watch  dynamic task:', chalk.cyan(tk));
+    //     gulp.task(tk, () => {
+    //         let src = ctx.getSrc(info);
+    //         console.log('watch, src:', chalk.cyan.call(chalk, src));
+    //         // watch(src, watchs);
+    //         watch(src, () => {
+    //             runSequence(gulp, <string[]>watchs)
+    //                 .then(() => {
+    //                     callback && callback();
+    //                 });
+    //         });
+    //     });
 
-        return tk;
-    };
+    //     return tk;
+    // };
 
-    return new DynamicTask({ name: dt.name, order: dt.order, oper: dt.oper, group: dt.group, assert: dt }, factory);
+    return new DynamicWatchTask({ name: dt.name, order: dt.order, oper: dt.oper, group: dt.group, assert: dt }, dt);
 }
 
 /**

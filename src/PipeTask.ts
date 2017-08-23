@@ -56,12 +56,12 @@ export interface IPipeTask extends ITask {
      * execute task works.
      *
      * @param {ITaskContext} context
-     * @param {Gulp} gulp
+     * @param {Gulp} [gulp]
      * @returns {Promise<any>}
      *
      * @memberOf IPipeTask
      */
-    execute(context: ITaskContext, gulp: Gulp): Promise<any>;
+    execute(context: ITaskContext, gulp?: Gulp): Promise<any>;
 }
 
 /**
@@ -499,12 +499,12 @@ export abstract class PipeTask implements IPipeTask {
      * execute task working
      *
      * @param {ITaskContext} context
-     * @param {Gulp} gulp
+     * @param {Gulp} [gulp]
      * @returns {Promise<any>}
      *
      * @memberOf PipeTask
      */
-    execute(context: ITaskContext, gulp: Gulp): Promise<any> {
+    execute(context: ITaskContext, gulp?: Gulp): Promise<any> {
         let option = this.getOption(context);
         return Promise.resolve(this.source(context, option, gulp))
             .then(stream => {

@@ -265,7 +265,17 @@ export interface ITask {
      */
     setInfo?(info: ITaskInfo): any;
     /**
-     * setup task.
+     * execute task works.
+     *
+     * @param {ITaskContext} context
+     * @param {Gulp} [gulp]
+     * @returns {Promise<any>}
+     *
+     * @memberOf ITask
+     */
+    execute?(context: ITaskContext, gulp?: Gulp): Promise<any>;
+    /**
+     * setup task, register to global, etc gulp.
      *
      * @param {ITaskContext} context
      * @param {Gulp} [gulp]
