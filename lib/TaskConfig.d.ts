@@ -639,7 +639,7 @@ export interface IAsserts extends IAssertDist, IPipeOption, ICustomPipe {
      */
     defaultTaskName?: TaskString;
     /**
-     * task runway  in this context.
+     * task runway  in this context.  default sequence.
      *
      * @type {RunWay}@memberof IAsserts
      */
