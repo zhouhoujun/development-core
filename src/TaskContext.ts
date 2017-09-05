@@ -5,7 +5,7 @@ import * as chalk from 'chalk';
 import { exec, execFile, ExecOptions, ExecFileOptions } from 'child_process';
 import * as minimist from 'minimist';
 import {
-    ITask, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, Builder
+    ITask, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, Builder, CtxType
     , ITaskDecorator, IAssertOption, NodeSequence, RunWay, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
 } from './TaskConfig';
 import { generateTask } from './generateTask';
@@ -464,6 +464,7 @@ export class TaskContext implements ITaskContext {
             name = this.toStr(task);
         } else if (task && task !== ctx.option) {
             // oper = task.oper || context.oper;
+            let tinf = task as ITaskInfo;
             if (task.name) {
                 name = taskStringVal(task.name, ctx)
             }
@@ -681,8 +682,8 @@ export class TaskContext implements ITaskContext {
         return absolutePath(this.getDist(task), pathstr);
     }
 
-    to<T>(setting: T | ((ctx: ITaskContext) => T)): T {
-        return _.isFunction(setting) ? setting(this) : setting;
+    to<T>(val: CtxType<T>): T {
+        return _.isFunction(val) ? val(this) : val;
     }
 
     toSrc(source: TaskSource): Src {

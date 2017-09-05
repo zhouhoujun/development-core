@@ -2,7 +2,7 @@
 /// <reference types="node" />
 import { Gulp } from 'gulp';
 import { ExecOptions, ExecFileOptions } from 'child_process';
-import { ITask, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, Builder, IAssertOption, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
+import { ITask, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, Builder, CtxType, IAssertOption, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
 /**
  *binding Config, create task context.
  *
@@ -241,7 +241,7 @@ export declare class TaskContext implements ITaskContext {
     toRootPath(pathstr: string): string;
     toDistSrc(src: Src, task?: ITaskInfo): Src;
     toDistPath(pathstr: string, task?: ITaskInfo): string;
-    to<T>(setting: T | ((ctx: ITaskContext) => T)): T;
+    to<T>(val: CtxType<T>): T;
     toSrc(source: TaskSource): Src;
     toStr(name: TaskString): string;
     toUrl(basePath: string, toPath?: string): string;

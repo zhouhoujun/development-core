@@ -285,15 +285,19 @@ export interface ITask {
      */
     setup(context: ITaskContext, gulp?: Gulp): TaskResult;
 }
+/**
+ * context type
+ */
+export declare type CtxType<T> = T | ((ctx?: ITaskContext) => T);
 export declare type TaskResult = Src | void;
 /**
  * task source
  */
-export declare type TaskSource = Src | ((ctx?: ITaskContext) => Src);
+export declare type TaskSource = CtxType<Src>;
 /**
  * task string
  */
-export declare type TaskString = string | ((ctx?: ITaskContext) => string);
+export declare type TaskString = CtxType<string>;
 /**
  * async task source.
  */
@@ -1385,12 +1389,12 @@ export interface ITaskContext {
      * parse to T type;
      *
      * @template T
-     * @param {(T | ((ctx: ITaskContext) => T))} setting
+     * @param {CtxType<T>} val
      * @returns {T}
      *
      * @memberof ITaskContext
      */
-    to<T>(setting: T | ((ctx: ITaskContext) => T)): T;
+    to<T>(val: CtxType<T>): T;
     /**
      * to src
      *

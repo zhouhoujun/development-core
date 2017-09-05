@@ -11,7 +11,7 @@ const sourcemaps = require('gulp-sourcemaps');
 let tsProject = ts.createProject('tsconfig.json');
 const uglify = require('gulp-uglify');
 
-gulp.task('build', () => {
+gulp.task('start', () => {
     let options: IEnvOption = minimist(process.argv.slice(2), {
         string: 'env',
         default: { env: process.env.NODE_ENV || 'development' }
