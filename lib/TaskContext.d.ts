@@ -2,7 +2,19 @@
 /// <reference types="node" />
 import { Gulp } from 'gulp';
 import { ExecOptions, ExecFileOptions } from 'child_process';
-import { ITask, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, Builder, CtxType, IAssertOption, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback } from './TaskConfig';
+import { ITaskConfig } from './TaskConfig';
+import { ITaskContext } from './ITaskContext';
+import { IAssertOption } from './IAssertOption';
+import { Builder } from './Builder';
+import { IAsserts } from './IAsserts';
+import { ITask, ITaskInfo } from './ITask';
+import { Src, TaskString, TaskSource, ZipTaskName, folderCallback, CtxType } from './types';
+import { Operation } from './Operation';
+import { IEnvOption } from './IEnvOption';
+import { Express } from './utils/Express';
+import { Mode } from './Mode';
+import { ITaskDefine } from './ITaskDefine';
+import { IDynamicTaskOption } from './IDynamicTaskOption';
 /**
  *binding Config, create task context.
  *

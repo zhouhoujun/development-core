@@ -1,7 +1,7 @@
 import 'mocha';
 import { expect, assert } from 'chai';
 
-import { IOrder, IDynamicTaskOption, IAsserts, Operation, ITask, Src, IEnvOption, RunWay } from '../src/TaskConfig';
+import { IOrder, IDynamicTaskOption, IAsserts, Operation, ITask, Src, IEnvOption, RunWay } from '../src';
 import { generateTask, } from '../src/generateTask';
 import { toSequence, addToSequence, flattenSequence, zipSequence } from '../src/taskSequence';
 import { createContext } from '../src/TaskContext';

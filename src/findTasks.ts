@@ -1,11 +1,16 @@
 import 'reflect-metadata';
 import * as _ from 'lodash';
 import * as chalk from 'chalk';
-import { ITask, ITaskDecorator, ITaskContext, ITaskDefine, Src, IDynamicTasks } from './TaskConfig';
 import { generateTask } from './generateTask';
 // import { bindingConfig } from './bindingConfig';
-import { matchCompare } from './utils';
+import { matchCompare } from './utils/match';
 import { existsSync } from 'fs';
+import { ITask } from './ITask';
+import { ITaskDecorator } from './ITaskDecorator';
+import { IDynamicTasks } from './IDynamicTasks';
+import { ITaskContext } from './ITaskContext';
+import { ITaskDefine } from './ITaskDefine';
+import { Src } from './types';
 const requireDir = require('require-dir');
 
 

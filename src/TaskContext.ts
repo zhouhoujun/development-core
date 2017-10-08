@@ -4,17 +4,32 @@ import *as gulp from 'gulp';
 import * as chalk from 'chalk';
 import { exec, execFile, ExecOptions, ExecFileOptions } from 'child_process';
 import * as minimist from 'minimist';
-import {
-    ITask, IAssertDist, IEnvOption, Operation, ITaskContext, ITaskDefine, IDynamicTaskOption, Builder, CtxType
-    , ITaskDecorator, IAssertOption, NodeSequence, RunWay, ZipTaskName, Express, Mode, ITaskConfig, ITaskInfo, Src, TaskSource, IAsserts, TaskString, folderCallback
-} from './TaskConfig';
 import { generateTask } from './generateTask';
 import { toSequence, runSequence, addToSequence, zipSequence, flattenSequence, runTaskSequence } from './taskSequence';
-import { sortOrder, matchCompare, absoluteSrc, absolutePath } from './utils';
+import { sortOrder } from './utils/sortOrder';
+import { matchCompare } from './utils/match';
+import { absoluteSrc, absolutePath } from './utils/absolute';
 import { findTasksInModule, findTaskDefineInModule, findTasksInDir, findTaskDefineInDir } from './findTasks';
 import { IPipeTask } from './PipeTask';
 import *as path from 'path';
 import *as fs from 'fs';
+import { ITaskConfig } from './TaskConfig';
+import { ITaskContext } from './ITaskContext';
+import { IAssertOption } from './IAssertOption';
+import { Builder } from './Builder';
+import { IAsserts } from './IAsserts';
+import { ITask, ITaskInfo } from './ITask';
+import { Src, TaskString, TaskSource, ZipTaskName, folderCallback, CtxType } from './types';
+import { Operation } from './Operation';
+import { IEnvOption } from './IEnvOption';
+import { Express } from './utils/Express';
+import { Mode } from './Mode';
+import { ITaskDecorator } from './ITaskDecorator';
+import { ITaskDefine } from './ITaskDefine';
+import { IDynamicTaskOption } from './IDynamicTaskOption';
+import { RunWay } from './RunWay';
+import { NodeSequence } from './NodeSequence';
+import { IAssertDist } from './IAssertDist';
 const globby = require('globby');
 
 /**

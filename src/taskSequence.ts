@@ -1,9 +1,13 @@
 import * as _ from 'lodash';
 import { Gulp } from 'gulp';
 import * as chalk from 'chalk';
-import { Src, RunWay, ITaskInfo, ITaskContext, ITask, Operation, ZipTaskName } from './TaskConfig';
-import { sortOrder } from './utils';
+import { sortOrder } from './utils/sortOrder';
 import * as watch from 'gulp-watch';
+import { ITask, ITaskInfo } from './ITask';
+import { Src, ZipTaskName } from './types';
+import { ITaskContext } from './ITaskContext';
+import { Operation } from './Operation';
+import { RunWay } from './RunWay';
 
 
 /**

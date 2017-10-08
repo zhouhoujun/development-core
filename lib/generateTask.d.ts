@@ -1,4 +1,6 @@
-import { ITaskInfo, IDynamicTaskOption, ITaskContext, ITask } from './TaskConfig';
+import { ITaskContext } from './ITaskContext';
+import { IDynamicTaskOption } from './IDynamicTaskOption';
+import { ITask, ITaskInfo } from './ITask';
 /**
  * dynamic build tasks.
  *

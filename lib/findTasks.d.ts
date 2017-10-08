@@ -1,5 +1,9 @@
 import 'reflect-metadata';
-import { ITask, ITaskDecorator, ITaskContext, ITaskDefine, Src } from './TaskConfig';
+import { ITask } from './ITask';
+import { ITaskDecorator } from './ITaskDecorator';
+import { ITaskContext } from './ITaskContext';
+import { ITaskDefine } from './ITaskDefine';
+import { Src } from './types';
 /**
  * find tasks in Object module.
  *

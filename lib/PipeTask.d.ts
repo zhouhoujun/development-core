@@ -1,6 +1,13 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { TransformSource, RunWay, IAssertDist, ITaskInfo, TaskResult, ITaskContext, IPipe, ICustomPipe, Pipe, OutputPipe, ITask, ITransform } from './TaskConfig';
+import { ITask, ITaskInfo } from './ITask';
+import { ITaskContext } from './ITaskContext';
+import { IAssertDist } from './IAssertDist';
+import { TransformSource, Pipe, OutputPipe, TaskResult } from './types';
+import { RunWay } from './RunWay';
+import { ITransform } from './ITransform';
+import { IPipe } from './IPipe';
+import { ICustomPipe } from './ICustomPipe';
 /**
  * pipe task.
  *

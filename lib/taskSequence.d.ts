@@ -1,6 +1,8 @@
 /// <reference types="gulp" />
 import { Gulp } from 'gulp';
-import { Src, ITaskInfo, ITaskContext, ITask, ZipTaskName } from './TaskConfig';
+import { ITask, ITaskInfo } from './ITask';
+import { Src, ZipTaskName } from './types';
+import { ITaskContext } from './ITaskContext';
 /**
  * convert setup task result to run sequence src.
  *

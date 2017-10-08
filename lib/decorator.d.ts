@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { ITaskDecorator } from './TaskConfig';
+import { ITaskDecorator } from './ITaskDecorator';
 /**
  * task decorator.
  *

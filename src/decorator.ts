@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import * as _ from 'lodash';
-import { ITaskDecorator } from './TaskConfig';
+import { ITaskDecorator } from './ITaskDecorator';
 
 
 /**
