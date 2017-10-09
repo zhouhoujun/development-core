@@ -32,7 +32,7 @@ export * from './TaskContext';
 export * from './taskSequence';
 export * from './types';
 
-
+export * from './utils/IMap';
 export * from './utils/Express';
 export * from './utils/sortOrder';
 export * from './decorator';
