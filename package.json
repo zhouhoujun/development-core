@@ -1,9 +1,9 @@
 {
     "name": "development-core",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "description": "development tools, generate gulp tasks, gulp task manager, run tasks in sequence via Promise. useful gulp task util: zipSequence, runSequence, runTaskSequence, toSequence, flattenSequence.",
     "main": "./lib/index.js",
-    "typings": "./lib/index",
+    "typings": "./lib/index.d.ts",
     "scripts": {
         "gulp": "gulp",
         "reinstall": "npm cache clean && npm install",
