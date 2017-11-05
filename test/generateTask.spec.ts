@@ -39,7 +39,7 @@ describe('generateTask', () => {
                 name: 'test-tscompile', src: 'src/**/*.ts', dist: 'lib',
                 pipes: [() => cache('typescript'), sourcemaps.init, tsProject],
                 output: [
-                    (tsmap, config, dt) => tsmap.dts.pipe(gulp.dest(config.getDist(dt))),
+                    (tsmap, config, dt) => tsmap['dts'].pipe(gulp.dest(config.getDist(dt))),
                     (tsmap, config, dt) => {
                         if (config.oper === Operation.release || config.oper === Operation.deploy) {
                             return tsmap.js.pipe(uglify()).pipe(sourcemaps.write('./sourcemaps'))

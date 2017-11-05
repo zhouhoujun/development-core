@@ -21,7 +21,7 @@ function findTaskset(tasks: Map<any, Taskitem>, target: any, match?: ITaskDecora
     if (!target) {
         return;
     }
-    if (_.isFunction(target)) {
+    if (typeof(target) === 'function') { // _.isFunction(target)) {
         if (target['__task']) {
             let tinfo: ITaskDecorator = target['__task'];
             tinfo = _.isBoolean(tinfo) ? {} : tinfo;
@@ -115,7 +115,7 @@ export function findTaskDefines(target): ITaskDefine[] {
     if (!target) {
         return defs;
     }
-    if (_.isFunction(target)) {
+    if (typeof(target) === 'function') {
         if (target['__task_context']) {
             let dc = new target();
             // if (!dc['getContext']) {
@@ -153,7 +153,7 @@ export function findTaskDefine(target): ITaskDefine {
     if (!target) {
         return null;
     }
-    if (_.isFunction(target)) {
+    if (typeof(target) === 'function') {
         if (target['__task_context']) {
             def = new target();
             // if (dc['getContext']) {

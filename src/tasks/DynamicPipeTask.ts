@@ -7,7 +7,7 @@ import { IAssertOption } from '../IAssertOption';
 import { RunWay } from '../RunWay';
 import { ExecOptions } from 'child_process';
 import { ITask, ITaskInfo } from '../ITask';
-import { AsyncTaskSource, AsyncSrc } from '../types';
+import { AsyncTaskSource, AsyncSrc, Pipe, OutputPipe } from '../types';
 import { ITaskContext } from '../ITaskContext';
 import { IDynamicTaskOption } from '../IDynamicTaskOption';
 import { IAssertDist } from '../IAssertDist';
@@ -42,13 +42,13 @@ export class DynamicPipeTask extends PipeTask {
         }
     }
 
-    pipes(ctx: ITaskContext, dist: IAssertDist, gulp?: Gulp): IPipe[] {
+    pipes(ctx: ITaskContext, dist: IAssertDist, gulp?: Gulp): Pipe[] {
         let pipes = _.isFunction(this.dt.pipes) ? this.dt.pipes(ctx, dist, gulp) : this.dt.pipes;
         pipes = pipes || [];
         return pipes.concat(super.pipes(ctx, dist, gulp));
     }
 
-    output(ctx: ITaskContext, dist: IAssertDist, gulp?: Gulp): IOutputPipe[] {
+    output(ctx: ITaskContext, dist: IAssertDist, gulp?: Gulp): OutputPipe[] {
         if (this.dt.output === null) {
             return [stream => stream];
         }

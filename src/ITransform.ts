@@ -37,4 +37,13 @@ export interface ITransform extends IOperate, NodeJS.ReadWriteStream {
     //  * @memberof ITransform
     //  */
     // pipe(stream: NodeJS.ReadWriteStream): ITransform;
+
+    /**
+     * only typescript have this field
+     */
+    dts?: ITransform;
+    /**
+     * only typescript have this field
+     */
+    js?: ITransform;
 }

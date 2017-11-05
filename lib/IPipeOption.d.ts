@@ -1,10 +1,9 @@
 /// <reference types="gulp" />
 import { ICustomPipe } from './ICustomPipe';
-import { TransformSource, Pipe } from './types';
+import { TransformSource, Pipe, OutputPipe } from './types';
 import { ITaskContext } from './ITaskContext';
 import { IAssertDist } from './IAssertDist';
 import { Gulp } from 'gulp';
-import { IOutputPipe } from './IOutputPipe';
 /**
  * pipe works.
  *
@@ -28,7 +27,7 @@ export interface IPipeOption extends ICustomPipe {
     /**
      * output pipe task
      *
-     * @memberof IPipeOption
+     * @memberof OutputPipe
      */
-    output?: IOutputPipe[] | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => IOutputPipe[]);
+    output?: OutputPipe[] | ((ctx?: ITaskContext, dist?: IAssertDist, gulp?: Gulp) => OutputPipe[]);
 }
