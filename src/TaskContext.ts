@@ -81,6 +81,7 @@ const NULLBuilder = <Builder>{
  *global data.
  */
 let globals = {};
+let packages = {};
 
 /**
  *TaskContext
@@ -713,14 +714,33 @@ export class TaskContext implements ITaskContext {
         return (toPath ? path.relative(basePath, toPath) : basePath).replace(/\\/g, '/'); // .replace(/^\//g, '');
     }
 
-    private packages = {};
     getPackage(filename?: TaskString): any {
         filename = filename || this.cfg.packageFile;
         let name = this.toRootPath(this.toStr(filename) || 'package.json');
-        if (!this.packages[name]) {
-            this.packages[name] = require(name);
+        if (!packages[name]) {
+            packages[name] = require(name);
         }
-        return this.packages[name]
+        return packages[name]
+    }
+
+    getNpmModuleVersion(name: string, packageFile?: string): string {
+        let packageCfg = this.getPackage(packageFile);
+        if (!packageCfg) {
+            return '';
+        }
+        let version = '';
+        if (packageCfg.dependencies) {
+            version = packageCfg.dependencies[name]
+        }
+        if (!version && packageCfg.devDependencies) {
+            version = packageCfg.devDependencies[name]
+        }
+
+        return version || '';
+
+    }
+    hasNpmModule(name: string, packageFile?: string): boolean {
+        return this.getNpmModuleVersion(name, packageFile) !== '';
     }
 
     protected setupChildren(): Promise<ITaskContext[]> {

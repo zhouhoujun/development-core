@@ -590,6 +590,25 @@ export interface ITaskContext {
      */
     getPackage(filename?: TaskString): any;
 
+    /**
+     * get package module version in npm node module.
+     *
+     * @param {string} name
+     * @param {string} [packageFile]
+     * @returns {string}
+     * @memberof ITaskContext
+     */
+    getNpmModuleVersion(name: string, packageFile?: string): string;
+    /**
+     * has package module installed.
+     *
+     * @param {string} name
+     * @param {string} [packageFile]
+     * @returns {boolean}
+     * @memberof ITaskContext
+     */
+    hasNpmModule(name: string, packageFile?: string): boolean;
+
 
     /**
      * find and filter tasks in this context.

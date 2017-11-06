@@ -257,8 +257,9 @@ export declare class TaskContext implements ITaskContext {
     toSrc(source: TaskSource): Src;
     toStr(name: TaskString): string;
     toUrl(basePath: string, toPath?: string): string;
-    private packages;
     getPackage(filename?: TaskString): any;
+    getNpmModuleVersion(name: string, packageFile?: string): string;
+    hasNpmModule(name: string, packageFile?: string): boolean;
     protected setupChildren(): Promise<ITaskContext[]>;
     setup(): Promise<Src[]>;
     getRunSequence(): Src[];
