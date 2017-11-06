@@ -87,7 +87,7 @@ function setupTask(gulp: Gulp, t: ITask, ctx: ITaskContext, callback: (name: Src
                 gulp.task(wname, () => {
                     let src = ctx.getSrc(info);
                     console.log('watch, src:', chalk.cyan.call(chalk, src));
-                    watch(src, (cb) => {
+                    watch(src, null, (cb) => {
                         runSequence(gulp, _.isArray(tname) ? tname : [<string>tname]);
                     });
                 });
@@ -151,7 +151,7 @@ export function taskSequenceWatch(gulp: Gulp, tasks: Src[], ctx: ITaskContext, e
             gulp.task(name, () => {
                 let src = ctx.getSrc();
                 console.log('watch, src:', chalk.cyan.call(chalk, src));
-                watch(src, () => {
+                watch(src, null, () => {
                     runSequence(gulp, wats)
                 })
             });
@@ -403,7 +403,8 @@ function startTask(gulp: Gulp, task: Src): Promise<any> {
                 gulp['removeListener']('task_err', taskErr);
             }
             // console.log(err);
-            process.exit(_.isNumber(err) ? err : 1);
+            // if has error exit with code 1.
+            process.exit(1); // process.exit(_.isNumber(err) ? err : 1);
         });
 }
 
