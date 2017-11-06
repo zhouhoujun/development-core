@@ -60,7 +60,7 @@ export class DynamicWatchTask implements ITask {
             let src = ctx.getSrc(info);
             console.log('watch, src:', chalk.cyan.call(chalk, src));
             // watch(src, watchs);
-            watch(src, () => {
+            watch(src, null, () => {
                 runSequence(gulp, <string[]>watchs)
                     .then(() => {
                         callback && callback();
