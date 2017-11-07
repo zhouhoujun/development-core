@@ -23,20 +23,20 @@ import { Operation } from './Operation';
  */
 export function generateTask(ctx: ITaskContext, tasks: IDynamicTaskOption | IDynamicTaskOption[], match?: ITaskInfo): ITask[] {
     let taskseq: ITask[] = [];
-    _.each(_.isArray(tasks) ? tasks : [tasks], dt => {
-        dt.oper = dt.oper ? ctx.to(dt.oper) : Operation.default;
-        if (dt.watchTasks) {
-            dt.oper = dt.oper | Operation.watch;
+    _.each(_.isArray(tasks) ? tasks : [tasks], dtp => {
+        dtp.oper = dtp.oper ? ctx.to(dtp.oper) : Operation.default;
+        if (dtp.watchTasks) {
+            dtp.oper = dtp.oper | Operation.watch;
         }
 
-        if (!matchCompare(ctx, dt, match)) {
+        if (!matchCompare(ctx, dtp, match)) {
             return;
         }
 
-        if (dt.watch && !(dt.oper & Operation.watch)) {
-            dt.oper = dt.oper | Operation.autoWatch;
+        if (dtp.watch && !(dtp.oper & Operation.watch)) {
+            dtp.oper = dtp.oper | Operation.autoWatch;
         }
-        taskseq.push(createTask(ctx, dt));
+        taskseq.push(createTask(ctx, dtp));
 
     });
 
@@ -47,23 +47,23 @@ export function generateTask(ctx: ITaskContext, tasks: IDynamicTaskOption | IDyn
  * create task by dynamic option.
  *
  * @param {ITaskContext} ctx
- * @param {IDynamicTaskOption} dt
+ * @param {IDynamicTaskOption} dtp
  * @returns {ITask}
  */
-function createTask(ctx: ITaskContext, dt: IDynamicTaskOption): ITask {
+function createTask(ctx: ITaskContext, dtp: IDynamicTaskOption): ITask {
     let task: ITask;
-    if (ctx.to(dt.oper) & Operation.watch) {
-        task = createWatchTask(dt);
-    } else if (dt.shell) {
-        task = new ShellTask(dt, dt.shell);
-    } else if (dt.execFiles) {
-        task = new ExecFileTask(dt, dt.execFiles);
-    } else if (_.isFunction(dt.task)) {
+    if (ctx.to(dtp.oper) & Operation.watch) {
+        task = createWatchTask(dtp);
+    } else if (dtp.shell) {
+        task = new ShellTask(dtp, dtp.shell);
+    } else if (dtp.execFiles) {
+        task = new ExecFileTask(dtp, dtp.execFiles);
+    } else if (_.isFunction(dtp.task)) {
         // custom task
-        task = createCustomTask(dt);
+        task = createCustomTask(dtp);
     } else {
         // pipe stream task.
-        task = createPipesTask(dt);
+        task = createPipesTask(dtp);
     }
     return task;
 }
@@ -72,11 +72,11 @@ function createTask(ctx: ITaskContext, dt: IDynamicTaskOption): ITask {
 /**
  * create custom task.
  *
- * @param {IDynamicTaskOption} dt
+ * @param {IDynamicTaskOption} dtp
  * @returns {ITask}
  */
-function createCustomTask(dt: IDynamicTaskOption): ITask {
-    return new DynamicTask({ name: dt.name, order: dt.order, oper: dt.oper, group: dt.group, assert: dt }, dt);
+function createCustomTask(dtp: IDynamicTaskOption): ITask {
+    return new DynamicTask({ name: dtp.name, order: dtp.order, oper: dtp.oper, group: dtp.group, assert: dtp }, dtp);
 }
 
 
@@ -84,20 +84,20 @@ function createCustomTask(dt: IDynamicTaskOption): ITask {
  * create dynamic watch task.
  *
  * @export
- * @param {IDynamicTaskOption} dt
+ * @param {IDynamicTaskOption} dtp
  * @returns {ITask}
  */
-function createWatchTask(dt: IDynamicTaskOption): ITask {
-    return new DynamicWatchTask({ name: dt.name, order: dt.order, oper: dt.oper, group: dt.group, assert: dt }, dt);
+function createWatchTask(dtp: IDynamicTaskOption): ITask {
+    return new DynamicWatchTask({ name: dtp.name, order: dtp.order, oper: dtp.oper, group: dtp.group, assert: dtp }, dtp);
 }
 
 /**
  * create pipe task.
  *
  * @export
- * @param {IDynamicTaskOption} dt
+ * @param {IDynamicTaskOption} dtp
  * @returns {ITask}
  */
-function createPipesTask(dt: IDynamicTaskOption): ITask {
-    return new DynamicPipeTask(dt);
+function createPipesTask(dtp: IDynamicTaskOption): ITask {
+    return new DynamicPipeTask(dtp);
 }

@@ -44,13 +44,13 @@ export interface IDynamicTaskOption extends IAssertDist, IPipeOption, ICustomPip
      * custom task.
      *
      * @param {ITaskContext} context
-     * @param {IDynamicTaskOption} [dt]
+     * @param {IDynamicTaskOption} [dtp]
      * @param {Gulp} [gulp]
      * @returns {(void | ITransform | Promise<any>)}
      *
      * @memberof IDynamicTaskOption
      */
-    task?(context: ITaskContext, dt?: IDynamicTaskOption, gulp?: Gulp): void | ITransform | Promise<any>;
+    task?(context: ITaskContext, dtp?: IDynamicTaskOption, gulp?: Gulp): void | ITransform | Promise<any>;
 
     /**
      *  shell command task.

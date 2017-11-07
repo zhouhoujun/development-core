@@ -17,7 +17,7 @@ import { IDynamicTaskOption } from '../IDynamicTaskOption';
  * @implements {ITask}
  */
 export class DynamicTask implements ITask {
-    constructor(protected info: ITaskInfo, protected dt: IDynamicTaskOption) {
+    constructor(protected info: ITaskInfo, protected dtp: IDynamicTaskOption) {
     }
 
     /**
@@ -31,7 +31,7 @@ export class DynamicTask implements ITask {
     }
 
     execute(ctx: ITaskContext, gulp?: Gulp): Promise<any> {
-        let rt = this.dt.task(ctx, this.dt, gulp);
+        let rt = this.dtp.task(ctx, this.dtp, gulp);
         if (rt && rt['then']) {
             return rt as Promise<any>;
         } else {
