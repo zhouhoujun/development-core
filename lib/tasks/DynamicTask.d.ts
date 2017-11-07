@@ -11,8 +11,8 @@ import { IDynamicTaskOption } from '../IDynamicTaskOption';
  */
 export declare class DynamicTask implements ITask {
     protected info: ITaskInfo;
-    protected dt: IDynamicTaskOption;
-    constructor(info: ITaskInfo, dt: IDynamicTaskOption);
+    protected dtp: IDynamicTaskOption;
+    constructor(info: ITaskInfo, dtp: IDynamicTaskOption);
     /**
      * get task info.
      *
