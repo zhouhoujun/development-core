@@ -5,11 +5,8 @@ This repo is for distribution on `npm`. The source for this module is in the
 Please file issues and pull requests against that repo.
 This package use to develop kit for project development via gulp tasks.
 
-
 `development-core`, generate gulp tasks, gulp task manager, run tasks in sequence via Promise. useful gulp task util: zipSequence, runSequence, runTaskSequence, toSequence, flattenSequence.
 core of [`development-tool`](https://www.npmjs.com/package/development-tool).
-
-
 
 ## Install
 
@@ -97,6 +94,7 @@ import  { generateTask, runTaskSequence, runSequence } from 'development-core';
 ```
 
 ## define shell task with dynamic task
+
 ```ts
 @dynamicTask()
 export class TestDynamicTask implements IDynamicTasks {
@@ -176,7 +174,6 @@ export class TestPipeTask implements PipeTask {
     //    return outputs;
     //}
 }
-
 
 @task()
 export class TestTaskA implements ITask {
@@ -296,8 +293,6 @@ export class NodeContextDefine implements IContextDefine {
     }
 }
 
-
-
 ```
 
 ## create task with order
@@ -319,8 +314,6 @@ export class TestTaskB implements ITask {
         return ctx.taskName('TestTaskB');
     }
 }
-
-
 
 @task({
     order: 1, // last order.
@@ -351,7 +344,6 @@ export class TestTaskD implements ITask {
         return ctx.taskName('TestTaskD');
     }
 }
-
 
 @task({
     order: (total, ctx) => (ctx.oper & Operation.release)?  1 / total : 4 / total,
@@ -403,7 +395,6 @@ export class TestTaskB implements ITask {
 ## define task by group
 
 ```ts
-
 
 @task({
     group: ['test', 'node']
@@ -643,10 +634,7 @@ let createTask = (env) => {
 ```
 
 
-https://github.com/zhouhoujun/development-core.git
-The mocks are then available at `jspm_components/development-core/development-core.js`.
-
-## Documentation
+## Documentation [github](https://github.com/zhouhoujun/development-core.git)
 
 Documentation is available on the
 [development-core docs site](https://github.com/zhouhoujun/development-core).
